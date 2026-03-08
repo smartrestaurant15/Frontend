@@ -4,6 +4,3 @@ dist/
 .vscode/
 .idea/
 *.log
-Dockerfile
-nginx.conf
-.dockerignore
