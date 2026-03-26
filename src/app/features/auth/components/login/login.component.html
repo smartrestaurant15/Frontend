@@ -1,80 +1,92 @@
-<div class="auth-container">
-  <div class="auth-card animate-fade-in">
-    <!-- Login Normal -->
-    <div *ngIf="!requires2FA">
-      <div class="auth-header">
-        <div class="logo-placeholder">SR</div>
-        <h2>Iniciar Sesión</h2>
-        <p class="subtitle">Bienvenido a SmartRestaurante</p>
-      </div>
-
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <app-form-field label="Correo Electrónico" [required]="true"
-          [error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched ? 'Correo inválido' : ''">
-          <input type="email" formControlName="email" placeholder="correo@ejemplo.com" autocomplete="email">
-        </app-form-field>
-
-        <app-form-field label="Contraseña" [required]="true"
-          [error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'Contraseña requerida' : ''">
-          <div class="password-input-wrapper">
-            <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********"
-              autocomplete="current-password">
-            <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
-              <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
-            </button>
-          </div>
-        </app-form-field>
-
-        <div class="form-actions">
-          <app-button type="submit" variant="primary" [disabled]="loginForm.invalid" [loading]="loading"
-            class="full-width">
-            Iniciar Sesión
-          </app-button>
-        </div>
-      </form>
-
-      <div class="divider">
-        <span>O continuar con</span>
-      </div>
-
-      <div class="social-login-buttons">
-        <div class="google-signin-wrapper">
-          <asl-google-signin-button type="standard" shape="rectangular" size="large"
-            width="340"></asl-google-signin-button>
-        </div>
-      </div>
-
-      <div class="auth-footer">
-        <a routerLink="/auth/forgot-password" class="forgot-password">¿Olvidaste tu contraseña?</a>
-        <p>¿No tienes cuenta? <a routerLink="/auth/register">Regístrate</a></p>
-      </div>
+<div class="auth-wrapper">
+  <!-- Left Side: Hero -->
+  <div class="auth-hero">
+    <div class="hero-content">
+      <h1>Bienvenido a<br>SmartRestaurante</h1>
+      <p>La plataforma definitiva para la gestión gastronómica inteligente. Optimiza tus procesos y mejora la
+        experiencia de tus clientes.</p>
     </div>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
 
-    <!-- Verificación 2FA -->
-    <div *ngIf="requires2FA">
-      <div class="auth-header">
-        <div class="logo-placeholder">SR</div>
-        <h2>Verificación 2FA</h2>
-        <p class="subtitle">Ingresa el código enviado a {{ pendingEmail }}</p>
+  <!-- Right Side: Form -->
+  <div class="auth-panel">
+    <div class="auth-form-container">
+      <!-- Login Normal -->
+      <div *ngIf="!requires2FA">
+        <div class="auth-header">
+          <h2>Iniciar Sesión</h2>
+          <p class="subtitle">Ingresa tus credenciales para continuar</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <app-form-field label="Correo Electrónico" [required]="true"
+            [error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched ? 'Correo inválido' : ''">
+            <input type="email" formControlName="email" placeholder="nombre@ejemplo.com" autocomplete="email">
+          </app-form-field>
+
+          <app-form-field label="Contraseña" [required]="true"
+            [error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'Contraseña requerida' : ''">
+            <div class="password-input-wrapper">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********"
+                autocomplete="current-password">
+              <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+                <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+              </button>
+            </div>
+          </app-form-field>
+
+          <div class="form-actions">
+            <app-button type="submit" variant="primary" [disabled]="loginForm.invalid" [loading]="loading"
+              class="full-width">
+              Entrar
+            </app-button>
+          </div>
+        </form>
+
+        <div class="divider">
+          <span>O continuar con</span>
+        </div>
+
+        <div class="social-login-buttons">
+          <div class="google-signin-wrapper">
+            <asl-google-signin-button type="standard" shape="pill" size="large" width="340"></asl-google-signin-button>
+          </div>
+        </div>
+
+        <div class="auth-footer">
+          <a routerLink="/auth/forgot-password" class="forgot-password">¿Olvidaste tu contraseña?</a>
+          <p>¿No tienes cuenta? <a routerLink="/auth/register">Regístrate ahora</a></p>
+        </div>
       </div>
 
-      <form [formGroup]="twoFAForm" (ngSubmit)="onSubmit2FA()">
-        <app-form-field label="Código de Verificación" [required]="true"
-          [error]="twoFAForm.get('code')?.invalid && twoFAForm.get('code')?.touched ? 'Código inválido' : ''">
-          <input type="text" formControlName="code" placeholder="123456" maxlength="6" autocomplete="one-time-code">
-        </app-form-field>
-
-        <div class="button-group">
-          <app-button type="button" variant="secondary" (clicked)="cancel2FA()" class="half-width">
-            Cancelar
-          </app-button>
-
-          <app-button type="submit" variant="primary" [disabled]="twoFAForm.invalid" [loading]="loading"
-            class="half-width">
-            Verificar
-          </app-button>
+      <!-- Verificación 2FA -->
+      <div *ngIf="requires2FA">
+        <div class="auth-header">
+          <h2>Verificación</h2>
+          <p class="subtitle">Ingresa el código enviado a {{ pendingEmail }}</p>
         </div>
-      </form>
+
+        <form [formGroup]="twoFAForm" (ngSubmit)="onSubmit2FA()">
+          <app-form-field label="Código de seguridad" [required]="true"
+            [error]="twoFAForm.get('code')?.invalid && twoFAForm.get('code')?.touched ? 'Código inválido' : ''">
+            <input type="text" formControlName="code" placeholder="123456" maxlength="6" autocomplete="one-time-code">
+          </app-form-field>
+
+          <div class="button-group">
+            <app-button type="button" variant="secondary" (clicked)="cancel2FA()" class="half-width">
+              Regresar
+            </app-button>
+
+            <app-button type="submit" variant="primary" [disabled]="twoFAForm.invalid" [loading]="loading"
+              class="half-width">
+              Verificar
+            </app-button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>

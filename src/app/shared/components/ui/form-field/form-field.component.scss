@@ -1,11 +1,11 @@
 @import 'styles/variables';
 
 .form-field {
-  margin-bottom: $spacing-md;
+  margin-bottom: 20px;
 
   label {
     display: block;
-    margin-bottom: $spacing-sm;
+    margin-bottom: 8px;
     font-size: 16px;
     font-weight: 600;
     color: $primary-color;
@@ -18,7 +18,7 @@
 
   .error-message {
     display: block;
-    margin-top: $spacing-xs;
+    margin-top: 6px;
     color: $danger-color;
     font-size: 12px;
   }
