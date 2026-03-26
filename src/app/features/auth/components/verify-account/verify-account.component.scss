@@ -1,7 +1,66 @@
-@import '../login/login.component.scss';
+@import '../../../../../styles/auth-shared';
 
-.info-text {
-  text-align: center;
-  color: #666;
-  margin-bottom: 20px;
+.split-layout {
+  .image-section {
+    background-image: url('../../../../../assets/images/auth/verify-account-bg.png');
+  }
+}
+
+.auth-card {
+  max-width: 450px;
+
+  .auth-header {
+    margin-bottom: 32px;
+    text-align: center;
+
+    h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 16px;
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .form-actions {
+      margin-top: 12px;
+
+      app-button {
+        width: 100%;
+      }
+    }
+  }
+
+  .auth-footer {
+    margin-top: 32px;
+    text-align: center;
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 14px;
+      }
+
+      &:hover {
+        color: #3b82f6;
+        transform: translateX(-4px);
+      }
+    }
+  }
 }

@@ -11,7 +11,7 @@
 }
 
 html {
-  font-size: var(--app-font-size);
+  font-size: var(--app-font-size, 16px);
   line-height: var(--app-line-height);
   transition: font-size 0.2s ease;
 }
@@ -39,12 +39,18 @@ body {
   .auth-card,
   .modal-content,
   .modal-header,
-  .modal-footer {
+  .modal-footer,
+  .navbar,
+  .dashboard-wrapper,
+  .hero-section,
+  .glass-card {
     background-color: $contrast-bg !important;
     background: $contrast-bg !important;
     color: $contrast-text !important;
     border-color: $contrast-text !important;
     box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   h1,

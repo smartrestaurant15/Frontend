@@ -1,28 +1,42 @@
-<div class="auth-container">
-  <div class="auth-card">
-    <h2>Verificar Cuenta</h2>
-    <p class="info-text">Ingresa el código de verificación enviado a tu correo</p>
-    
-    <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()">
-      <app-form-field label="Correo Electrónico" [required]="true">
-        <input type="email" formControlName="email" placeholder="correo@ejemplo.com">
-      </app-form-field>
+<div class="split-layout">
+  <!-- Section Left: Image (Visible on desktop) -->
+  <div class="image-section">
+    <div class="overlay"></div>
+    <div class="content-overlay">
+      <h1>SmartRestaurant</h1>
+      <p>Asegura tu cuenta y comienza a gestionar tu restaurante de forma inteligente.</p>
+    </div>
+  </div>
 
-      <app-form-field label="Código de Verificación" [required]="true">
-        <input type="text" formControlName="otp" placeholder="123456" maxlength="6">
-      </app-form-field>
+  <!-- Section Right: Form -->
+  <div class="form-section">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h2>Verificar Cuenta</h2>
+        <p class="subtitle">Ingresa el codigo de verificacion enviado a tu correo</p>
+      </div>
 
-      <app-button 
-        type="submit" 
-        variant="primary" 
-        [disabled]="verifyForm.invalid"
-        [loading]="loading">
-        Verificar
-      </app-button>
-    </form>
+      <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()">
+        <app-form-field label="Correo Electronico" [required]="true">
+          <input type="email" formControlName="email" placeholder="correo@ejemplo.com">
+        </app-form-field>
 
-    <div class="auth-links">
-      <a routerLink="/auth/login">Volver al inicio de sesión</a>
+        <app-form-field label="Codigo de Verificacion" [required]="true">
+          <input type="text" formControlName="otp" placeholder="123456" maxlength="6">
+        </app-form-field>
+
+        <div class="form-actions">
+          <app-button type="submit" variant="primary" [disabled]="verifyForm.invalid" [loading]="loading">
+            Verificar
+          </app-button>
+        </div>
+      </form>
+
+      <div class="auth-footer">
+        <a routerLink="/auth/login" class="back-link">
+          <i class="fas fa-arrow-left"></i> Volver al inicio de sesion
+        </a>
+      </div>
     </div>
   </div>
 </div>

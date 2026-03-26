@@ -40,7 +40,7 @@
     border-radius: $border-radius-sm;
 
     .hint-text {
-        font-size: 12px;
+        font-size: 0.75rem; // 12px
         color: $text-light;
         margin: 2px 0;
         transition: $transition-fast;
@@ -59,7 +59,7 @@
         display: flex;
         align-items: flex-start;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 0.8125rem; // 13px
         color: $text-color;
         line-height: 1.4;
 
@@ -116,7 +116,7 @@
 
     .error-message {
         color: $danger-color;
-        font-size: 11px;
+        font-size: 0.6875rem; // 11px
         margin-top: $spacing-xs;
         margin-left: 26px;
     }
@@ -157,7 +157,7 @@
         h3 {
             margin: 0;
             color: $primary-color;
-            font-size: 20px;
+            font-size: 1.25rem; // 20px
         }
 
         .close-btn {
@@ -207,7 +207,7 @@
 
             p {
                 margin: 0;
-                font-size: 13px;
+                font-size: 0.8125rem; // 13px
                 color: #2c3e50;
             }
         }

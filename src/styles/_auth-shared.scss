@@ -29,7 +29,7 @@
         animation: fadeInLeft 0.8s ease-out;
 
         h1 {
-            font-size: 42px;
+            font-size: 2.625rem; // 42px
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: $spacing-md;
@@ -37,7 +37,7 @@
         }
 
         p {
-            font-size: 16px;
+            font-size: 1rem; // 16px
             line-height: 1.6;
             opacity: 0.9;
         }
@@ -98,7 +98,7 @@
             margin-bottom: $spacing-lg;
 
             h2 {
-                font-size: 26px;
+                font-size: 1.625rem; // 26px
                 font-weight: 800;
                 color: $primary-color;
                 text-transform: uppercase;
@@ -108,7 +108,7 @@
 
             .subtitle {
                 color: $text-light;
-                font-size: 14px;
+                font-size: 0.875rem; // 14px
             }
         }
     }
@@ -125,7 +125,7 @@
         button {
             width: 100% !important;
             height: 50px !important; // Reduced from 60px
-            font-size: 16px !important;
+            font-size: 1rem !important; // 16px
             font-weight: 700 !important;
             border-radius: 50px !important;
             background: linear-gradient(90deg, $secondary-color 0%, $accent-color 100%) !important;
@@ -149,7 +149,7 @@
         border: 2px solid #e2e8f0 !important;
         padding: 0 20px !important;
         width: 100% !important;
-        font-size: 15px !important;
+        font-size: 0.9375rem !important; // 15px
         color: $text-color !important;
         transition: all 0.3s ease !important;
         box-sizing: border-box !important;
@@ -168,7 +168,7 @@
     }
 
     label {
-        font-size: 14px !important; // Reduced from 16px
+        font-size: 0.875rem !important; // 14px
         font-weight: 700 !important;
         color: $primary-color !important;
         margin-left: 16px !important;
@@ -205,7 +205,7 @@
             background: #fff;
             padding: 0 12px;
             color: $text-light;
-            font-size: 13px;
+            font-size: 0.8125rem; // 13px
             position: relative;
             z-index: 2;
         }
@@ -222,7 +222,7 @@
         margin-top: 16px;
 
         p {
-            font-size: 14px;
+            font-size: 0.875rem; // 14px
             color: $text-light;
         }
 
@@ -250,7 +250,7 @@
     margin: -10px 0 15px 16px;
 
     .hint-text {
-        font-size: 11px !important;
+        font-size: 0.6875rem !important; // 11px
         margin: 1px 0;
     }
 }

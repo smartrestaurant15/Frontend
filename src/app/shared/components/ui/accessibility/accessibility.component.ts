@@ -11,7 +11,7 @@ export class AccessibilityComponent implements OnInit {
     invertColors = false;
     underlineLinks = false;
     readableFont = false;
-    fontSize = 14;
+    fontSize = 16;
 
     constructor() { }
 

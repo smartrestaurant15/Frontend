@@ -29,7 +29,7 @@
   align-items: center;
   margin: $spacing-lg 0;
   color: $text-light;
-  font-size: 14px;
+  font-size: 0.875rem; // 14px
 
   &::before,
   &::after {
@@ -75,7 +75,7 @@
   .forgot-password {
     display: block;
     margin-bottom: $spacing-md;
-    font-size: 13px;
+    font-size: 0.8125rem; // 13px
     color: $text-light;
     text-decoration: none;
 
