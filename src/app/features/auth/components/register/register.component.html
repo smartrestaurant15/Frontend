@@ -34,7 +34,7 @@
           <input type="email" formControlName="email" placeholder="nombre@ejemplo.com">
         </app-form-field>
 
-        <app-form-field label="Contraseña" [required]="true">
+        <app-form-field label="Clave" [required]="true">
           <div class="password-input-wrapper">
             <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********">
             <button type="button" class="toggle-password" (click)="togglePasswordVisibility('password')">
@@ -45,14 +45,14 @@
 
         <div class="password-strength-info" *ngIf="registerForm.get('password')?.touched">
           <p class="hint-text" [class.valid]="!registerForm.get('password')?.hasError('minlength')">
-            ✓ Mínimo 8 caracteres
+            ✓ Minimo 8 caracteres
           </p>
           <p class="hint-text" [class.valid]="!registerForm.get('password')?.hasError('passwordStrength')">
-            ✓ Seguridad: Mayúsculas, números y símbolos
+            ✓ Seguridad: Mayusculas, numeros y simbolos
           </p>
         </div>
 
-        <app-form-field label="Confirmar Contraseña" [required]="true">
+        <app-form-field label="Confirmar Clave" [required]="true">
           <div class="password-input-wrapper">
             <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
               placeholder="********">

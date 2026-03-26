@@ -27,8 +27,8 @@
             <input type="email" formControlName="email" placeholder="nombre@ejemplo.com" autocomplete="email">
           </app-form-field>
 
-          <app-form-field label="Contraseña" [required]="true"
-            [error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'Contraseña requerida' : ''">
+          <app-form-field label="Clave" [required]="true"
+            [error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'Clave requerida' : ''">
             <div class="password-input-wrapper">
               <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********"
                 autocomplete="current-password">
@@ -57,8 +57,8 @@
         </div>
 
         <div class="auth-footer">
-          <a routerLink="/auth/forgot-password" class="forgot-password">¿Olvidaste tu contraseña?</a>
-          <p>¿No tienes cuenta? <a routerLink="/auth/register">Regístrate ahora</a></p>
+          <a routerLink="/auth/forgot-password" class="forgot-password">¿Olvidaste tu clave?</a>
+          <p>¿No tienes cuenta? <a routerLink="/auth/register">Registrate ahora</a></p>
         </div>
       </div>
 

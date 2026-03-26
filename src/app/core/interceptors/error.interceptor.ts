@@ -34,12 +34,12 @@ export class ErrorInterceptor implements HttpInterceptor {
   private extractErrorMessage(error: HttpErrorResponse): string {
     // Error de red o del cliente
     if (error.error instanceof ErrorEvent) {
-      return `Error de conexión: ${error.error.message}`;
+      return `Error de conexion: ${error.error.message}`;
     }
 
-    // Sin respuesta del servidor (timeout, red caída, etc.)
+    // Sin respuesta del servidor (timeout, red caida, etc.)
     if (error.status === 0) {
-      return 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+      return 'No se pudo conectar con el servidor. Verifique su conexion a internet.';
     }
 
     // Intentar extraer el mensaje del backend
@@ -58,7 +58,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     else if (typeof error.error === 'string') {
       message = error.error;
     }
-    // Prioridad 3: mensaje genérico según código HTTP
+    // Prioridad 3: mensaje generico segun codigo HTTP
     else {
       message = this.getDefaultErrorMessage(error.status);
     }
@@ -96,31 +96,32 @@ export class ErrorInterceptor implements HttpInterceptor {
   private getDefaultErrorMessage(status: number): string {
     switch (status) {
       case 400:
-        return 'Solicitud inválida. Verifique los datos enviados.';
+        return 'Solicitud invalida. Por favor, revise que los datos ingresados sean correctos.';
       case 401:
-        return 'No autorizado. Por favor inicie sesión nuevamente.';
+        return 'Sesion expirada o credenciales incorrectas. Intente ingresar sus datos de nuevo.';
       case 403:
-        return 'No tiene permisos para realizar esta acción.';
+        return 'Lo sentimos, no tiene los permisos necesarios para realizar esta tarea.';
       case 404:
-        return 'Recurso no encontrado.';
+        return 'El recurso que busca no esta disponible actualmente.';
       case 409:
-        return 'Conflicto con el estado actual del recurso.';
+        return 'Existe un conflicto con los datos. Es posible que el registro ya exista.';
       case 422:
-        return 'Los datos proporcionados no son válidos.';
+        return 'Los datos proporcionados no cumplen con el formato requerido.';
       case 429:
-        return 'Demasiadas solicitudes. Por favor intente más tarde.';
+        return 'Ha realizado demasiadas solicitudes en poco tiempo. Espere un momento e intente de nuevo.';
       case 500:
-        return 'Error interno del servidor.';
+        return 'Estamos experimentando problemas tecnicos en nuestro servidor. Trabajamos para solucionarlo.';
       case 502:
-        return 'Error de comunicación con el servidor.';
+        return 'Error de comunicacion. El servidor tardo demasiado en responder.';
       case 503:
-        return 'Servicio no disponible temporalmente.';
+        return 'El servicio de SmartRestaurant se encuentra en mantenimiento. Vuelva pronto.';
       case 504:
-        return 'Tiempo de espera agotado.';
+        return 'Se agoto el tiempo de espera. Revise su conexion.';
       default:
-        return 'Ha ocurrido un error inesperado. Por favor intente nuevamente.';
+        return 'Algo no salio como esperabamos. Por favor, intente la operacion nuevamente.';
     }
   }
+
 
   private handleErrorByStatus(status: number, message: string): void {
     // Mostrar notificación
