@@ -20,20 +20,34 @@
     border-radius: $border-radius-lg;
     box-shadow: $shadow-lg;
 
+    // Fix: Labels were too small
+    ::ng-deep label {
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        margin-bottom: 8px !important;
+        color: $primary-color !important;
+        display: block;
+
+        .required {
+            color: $danger-color;
+            margin-left: 2px;
+        }
+    }
+
     .auth-header {
         text-align: center;
         margin-bottom: $spacing-xl;
 
         .logo-placeholder {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             background: $primary-color;
             color: white;
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             margin: 0 auto $spacing-md;
             box-shadow: $shadow-md;
@@ -42,14 +56,14 @@
         h2 {
             margin: 0;
             color: $primary-color;
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 700;
         }
 
         .subtitle {
             color: $text-light;
             margin-top: $spacing-xs;
-            font-size: 14px;
+            font-size: 15px;
         }
     }
 }
@@ -64,7 +78,7 @@
 
     p {
         color: $text-light;
-        font-size: 14px;
+        font-size: 15px;
     }
 
     a {
@@ -85,33 +99,38 @@
 
         button {
             width: 100%;
-            height: 48px;
-            font-size: 16px;
+            height: 52px; // Increased
+            font-size: 17px; // Increased
             font-weight: 600;
             border-radius: $border-radius-md;
             transition: all 0.3s ease;
 
             &:hover:not(:disabled) {
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             }
         }
     }
 
     input {
-        height: 44px;
-        border-radius: $border-radius-sm;
-        border: 1.5px solid #eee;
-        padding: 0 12px;
+        height: 52px; // Increased height significantly
+        border-radius: $border-radius-md;
+        border: 2px solid #e2e8f0;
+        padding: 0 16px;
         width: 100%;
         transition: $transition-fast;
-        font-size: 14px;
+        font-size: 16px; // Increased font size
         color: $text-color;
 
         &:focus {
             border-color: $secondary-color;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        &::placeholder {
+            font-size: 15px;
+            color: #94a3b8;
         }
     }
 }
