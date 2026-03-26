@@ -15,13 +15,14 @@ export class RegisterComponent implements OnInit {
   loading = false;
   showPassword = false;
   showConfirmPassword = false;
+  showPrivacyPolicy = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -33,7 +34,8 @@ export class RegisterComponent implements OnInit {
       lastName: ['', [Validators.required, CustomValidators.noWhitespace()]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength()]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
+      dataAuthorization: [false, [Validators.requiredTrue]]
     });
 
     // Validador para confirmar contraseña
@@ -47,7 +49,7 @@ export class RegisterComponent implements OnInit {
     if (this.registerForm.valid) {
       this.loading = true;
       const { confirmPassword, ...registerData } = this.registerForm.value;
-      
+
       this.authService.register(registerData).subscribe({
         next: (message) => {
           this.loading = false;
@@ -78,10 +80,14 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  togglePrivacyPolicy(): void {
+    this.showPrivacyPolicy = !this.showPrivacyPolicy;
+  }
+
   getPasswordErrors(): string[] {
     const errors: string[] = [];
     const passwordControl = this.registerForm.get('password');
-    
+
     if (passwordControl?.hasError('required')) {
       errors.push('La contraseña es requerida');
     }
@@ -91,20 +97,20 @@ export class RegisterComponent implements OnInit {
     if (passwordControl?.hasError('passwordStrength')) {
       errors.push('Debe contener mayúsculas, minúsculas, números y caracteres especiales');
     }
-    
+
     return errors;
   }
 
   getConfirmPasswordError(): string {
     const confirmControl = this.registerForm.get('confirmPassword');
-    
+
     if (confirmControl?.hasError('required')) {
       return 'Confirme su contraseña';
     }
     if (confirmControl?.hasError('passwordMismatch')) {
       return 'Las contraseñas no coinciden';
     }
-    
+
     return '';
   }
 }

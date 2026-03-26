@@ -1,36 +1,113 @@
 <div class="auth-container">
-  <div class="auth-card">
-    <h2>Crear Cuenta</h2>
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <app-form-field label="Nombre" [required]="true">
-        <input type="text" formControlName="firstName" placeholder="Juan">
-      </app-form-field>
+  <div class="auth-card animate-fade-in">
+    <div class="auth-header">
+      <div class="logo-placeholder">SR</div>
+      <h2>Crear Cuenta</h2>
+      <p class="subtitle">Únete a la mejor gestión gastronómica</p>
+    </div>
 
-      <app-form-field label="Apellido" [required]="true">
-        <input type="text" formControlName="lastName" placeholder="Pérez">
-      </app-form-field>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <app-form-field label="Nombre" [required]="true" class="half-width">
+          <input type="text" formControlName="firstName" placeholder="Ej. Juan">
+        </app-form-field>
+
+        <app-form-field label="Apellido" [required]="true" class="half-width">
+          <input type="text" formControlName="lastName" placeholder="Ej. Pérez">
+        </app-form-field>
+      </div>
 
       <app-form-field label="Correo Electrónico" [required]="true">
         <input type="email" formControlName="email" placeholder="correo@ejemplo.com">
       </app-form-field>
 
       <app-form-field label="Contraseña" [required]="true">
-        <input type="password" formControlName="password" placeholder="********">
+        <div class="password-input-wrapper">
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility('password')">
+            <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+          </button>
+        </div>
       </app-form-field>
-      <p class="password-hint">La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un
-        número y un carácter especial.</p>
+
+      <div class="password-strength-info" *ngIf="registerForm.get('password')?.touched">
+        <p class="hint-text" [class.valid]="!registerForm.get('password')?.hasError('minlength')">
+          ✓ Mínimo 8 caracteres
+        </p>
+        <p class="hint-text" [class.valid]="!registerForm.get('password')?.hasError('passwordStrength')">
+          ✓ Mayúsculas, minúsculas, números y símbolos
+        </p>
+      </div>
 
       <app-form-field label="Confirmar Contraseña" [required]="true">
-        <input type="password" formControlName="confirmPassword" placeholder="********">
+        <div class="password-input-wrapper">
+          <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
+            placeholder="********">
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility('confirmPassword')">
+            <span class="icon">{{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}</span>
+          </button>
+        </div>
+        <span class="error-text" *ngIf="getConfirmPasswordError()">{{ getConfirmPasswordError() }}</span>
       </app-form-field>
 
-      <app-button type="submit" variant="primary" [disabled]="registerForm.invalid" [loading]="loading">
-        Registrarse
-      </app-button>
+      <div class="checkbox-field">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="dataAuthorization">
+          <span class="checkbox-custom"></span>
+          <span class="checkbox-text">
+            Acepto el tratamiento de mis datos personales conforme a la
+            <a href="javascript:void(0)" (click)="togglePrivacyPolicy()">Política de Privacidad</a>
+          </span>
+        </label>
+        <p *ngIf="registerForm.get('dataAuthorization')?.touched && registerForm.get('dataAuthorization')?.invalid"
+          class="error-message">
+          Debe aceptar la autorización de datos para continuar
+        </p>
+      </div>
+
+      <div class="form-actions">
+        <app-button type="submit" variant="primary" [disabled]="registerForm.invalid" [loading]="loading"
+          class="full-width">
+          Registrarse Gratis
+        </app-button>
+      </div>
     </form>
 
-    <div class="auth-links">
-      <a routerLink="/auth/login">¿Ya tienes cuenta? Inicia sesión</a>
+    <div class="auth-footer">
+      <p>¿Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesión</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div class="modal-overlay" *ngIf="showPrivacyPolicy" (click)="togglePrivacyPolicy()">
+  <div class="modal-content animate-zoom-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Política de Privacidad</h3>
+      <button class="close-btn" (click)="togglePrivacyPolicy()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>En <strong>SmartRestaurant</strong>, nos tomamos muy en serio la protección de tus datos personales. Al
+        registrarte, autorizas el tratamiento de tu información exclusivamente para los siguientes fines:</p>
+
+      <ul>
+        <li><strong>Gestión de Cuenta:</strong> Procesar tu registro y permitir el acceso seguro a las funcionalidades
+          de la plataforma.</li>
+        <li><strong>Personalización:</strong> Adaptar la interfaz y herramientas según tu perfil de usuario
+          (Administrador, Empleado o Cliente).</li>
+        <li><strong>Comunicación Crítica:</strong> Enviarte notificaciones de seguridad, recuperación de contraseña y
+          actualizaciones importantes del servicio.</li>
+        <li><strong>Mejora del Servicio:</strong> Análisis estadísticos anónimos para optimizar el rendimiento y
+          usabilidad de la aplicación.</li>
+      </ul>
+
+      <div class="privacy-note">
+        <p><strong>Nota importante:</strong> Tus datos están cifrados y nunca serán compartidos con terceros con fines
+          publicitarios sin tu consentimiento explícito.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <app-button (click)="togglePrivacyPolicy()" variant="primary">Entendido</app-button>
     </div>
   </div>
 </div>
