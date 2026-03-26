@@ -12,21 +12,22 @@
 
 // Common Auth Card (Glassmorphism)
 .auth-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.98); // Slightly more opaque
+    backdrop-filter: blur(15px);
     width: 100%;
     max-width: 480px;
     padding: $spacing-xl;
     border-radius: $border-radius-lg;
     box-shadow: $shadow-lg;
 
-    // Fix: Labels were too small
+    // Explicitly target labels to ensure they are visible and large
     ::ng-deep label {
         font-size: 16px !important;
         font-weight: 600 !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 10px !important; // More space
         color: $primary-color !important;
-        display: block;
+        display: block !important;
+        text-align: left !important;
 
         .required {
             color: $danger-color;
@@ -39,15 +40,15 @@
         margin-bottom: $spacing-xl;
 
         .logo-placeholder {
-            width: 64px;
-            height: 64px;
+            width: 70px;
+            height: 70px;
             background: $primary-color;
             color: white;
-            border-radius: 14px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: bold;
             margin: 0 auto $spacing-md;
             box-shadow: $shadow-md;
@@ -56,14 +57,14 @@
         h2 {
             margin: 0;
             color: $primary-color;
-            font-size: 30px;
+            font-size: 32px;
             font-weight: 700;
         }
 
         .subtitle {
             color: $text-light;
             margin-top: $spacing-xs;
-            font-size: 15px;
+            font-size: 16px;
         }
     }
 }
@@ -78,7 +79,7 @@
 
     p {
         color: $text-light;
-        font-size: 15px;
+        font-size: 16px;
     }
 
     a {
@@ -96,41 +97,61 @@
 :host ::ng-deep {
     .full-width {
         width: 100%;
+        display: block;
 
         button {
-            width: 100%;
-            height: 52px; // Increased
-            font-size: 17px; // Increased
-            font-weight: 600;
-            border-radius: $border-radius-md;
-            transition: all 0.3s ease;
+            width: 100% !important;
+            height: 56px !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            border-radius: $border-radius-md !important;
+            transition: all 0.3s ease !important;
+            margin-top: $spacing-md !important;
 
             &:hover:not(:disabled) {
                 transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
             }
         }
     }
 
+    // Substantial Inputs
     input {
-        height: 52px; // Increased height significantly
-        border-radius: $border-radius-md;
-        border: 2px solid #e2e8f0;
-        padding: 0 16px;
-        width: 100%;
+        background: #ffffff !important;
+        height: 54px !important;
+        border-radius: $border-radius-md !important;
+        border: 2px solid #cbd5e1 !important; // Solid border
+        padding: 0 16px !important;
+        width: 100% !important;
         transition: $transition-fast;
-        font-size: 16px; // Increased font size
-        color: $text-color;
+        font-size: 16px !important;
+        color: $text-color !important;
+        box-sizing: border-box !important;
+        display: block !important;
 
         &:focus {
-            border-color: $secondary-color;
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            border-color: $secondary-color !important;
+            outline: none !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
         }
 
         &::placeholder {
-            font-size: 15px;
-            color: #94a3b8;
+            font-size: 15px !important;
+            color: #94a3b8 !important;
+        }
+    }
+
+    // Fix for password toggle position
+    .password-input-wrapper {
+        position: relative;
+        width: 100%;
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
         }
     }
 }
