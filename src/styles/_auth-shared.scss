@@ -1,0 +1,117 @@
+@import 'variables';
+
+// Common Auth Container (Gradient Background)
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+    padding: $spacing-lg;
+}
+
+// Common Auth Card (Glassmorphism)
+.auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 480px;
+    padding: $spacing-xl;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: $spacing-xl;
+
+        .logo-placeholder {
+            width: 60px;
+            height: 60px;
+            background: $primary-color;
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 auto $spacing-md;
+            box-shadow: $shadow-md;
+        }
+
+        h2 {
+            margin: 0;
+            color: $primary-color;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: $text-light;
+            margin-top: $spacing-xs;
+            font-size: 14px;
+        }
+    }
+}
+
+// Common Footers and Links
+.auth-footer,
+.auth-links {
+    margin-top: $spacing-xl;
+    text-align: center;
+    border-top: 1px solid #eee;
+    padding-top: $spacing-lg;
+
+    p {
+        color: $text-light;
+        font-size: 14px;
+    }
+
+    a {
+        color: $secondary-color;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+// Shared Inputs and Overrides
+:host ::ng-deep {
+    .full-width {
+        width: 100%;
+
+        button {
+            width: 100%;
+            height: 48px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: $border-radius-md;
+            transition: all 0.3s ease;
+
+            &:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+            }
+        }
+    }
+
+    input {
+        height: 44px;
+        border-radius: $border-radius-sm;
+        border: 1.5px solid #eee;
+        padding: 0 12px;
+        width: 100%;
+        transition: $transition-fast;
+        font-size: 14px;
+        color: $text-color;
+
+        &:focus {
+            border-color: $secondary-color;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+    }
+}

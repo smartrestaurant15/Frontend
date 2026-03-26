@@ -1,8 +1,9 @@
 <div class="auth-container">
-  <div class="auth-card">
+  <div class="auth-card animate-fade-in">
     <!-- Login Normal -->
     <div *ngIf="!requires2FA">
       <div class="auth-header">
+        <div class="logo-placeholder">SR</div>
         <h2>Iniciar Sesión</h2>
         <p class="subtitle">Bienvenido a SmartRestaurante</p>
       </div>
@@ -19,14 +20,17 @@
             <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********"
               autocomplete="current-password">
             <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
-              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+              <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
             </button>
           </div>
         </app-form-field>
 
-        <app-button type="submit" variant="primary" [disabled]="loginForm.invalid" [loading]="loading">
-          Iniciar Sesión
-        </app-button>
+        <div class="form-actions">
+          <app-button type="submit" variant="primary" [disabled]="loginForm.invalid" [loading]="loading"
+            class="full-width">
+            Iniciar Sesión
+          </app-button>
+        </div>
       </form>
 
       <div class="divider">
@@ -40,16 +44,17 @@
         </div>
       </div>
 
-      <div class="auth-links">
-        <a routerLink="/auth/forgot-password">¿Olvidaste tu contraseña?</a>
-        <a routerLink="/auth/register">Crear cuenta</a>
+      <div class="auth-footer">
+        <a routerLink="/auth/forgot-password" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        <p>¿No tienes cuenta? <a routerLink="/auth/register">Regístrate</a></p>
       </div>
     </div>
 
     <!-- Verificación 2FA -->
     <div *ngIf="requires2FA">
       <div class="auth-header">
-        <h2>Verificación en Dos Pasos</h2>
+        <div class="logo-placeholder">SR</div>
+        <h2>Verificación 2FA</h2>
         <p class="subtitle">Ingresa el código enviado a {{ pendingEmail }}</p>
       </div>
 
@@ -60,11 +65,12 @@
         </app-form-field>
 
         <div class="button-group">
-          <app-button type="button" variant="secondary" (clicked)="cancel2FA()">
+          <app-button type="button" variant="secondary" (clicked)="cancel2FA()" class="half-width">
             Cancelar
           </app-button>
 
-          <app-button type="submit" variant="primary" [disabled]="twoFAForm.invalid" [loading]="loading">
+          <app-button type="submit" variant="primary" [disabled]="twoFAForm.invalid" [loading]="loading"
+            class="half-width">
             Verificar
           </app-button>
         </div>

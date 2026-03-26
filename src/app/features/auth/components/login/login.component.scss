@@ -1,231 +1,87 @@
 @import 'styles/variables';
 
-.auth-container {
+// login.component.scss
+// Base styles (auth-container, auth-card, inputs) are inherited from styles/_auth-shared.scss
+
+.password-input-wrapper {
+  position: relative;
+
+  .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: $transition-fast;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.divider {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: $spacing-md;
+  margin: $spacing-lg 0;
+  color: $text-light;
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #eee;
+  }
+
+  span {
+    padding: 0 $spacing-md;
+  }
 }
 
-.auth-card {
-  background: white;
-  padding: $spacing-xl;
-  border-radius: $border-radius-lg;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  max-width: 450px;
+.social-login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
 
-  .auth-header {
-    text-align: center;
-    margin-bottom: $spacing-lg;
-
-    h2 {
-      margin: 0 0 $spacing-sm 0;
-      color: $primary-color;
-      font-size: 28px;
-    }
-
-    .subtitle {
-      color: $text-light;
-      font-size: 14px;
-      margin: 0;
-    }
-  }
-
-  form {
-    input {
-      width: 100%;
-      padding: $spacing-sm $spacing-md;
-      border: 1px solid $border-color;
-      border-radius: $border-radius-sm;
-      font-size: 14px;
-      transition: $transition-fast;
-
-      &:focus {
-        outline: none;
-        border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-      }
-    }
-
-    .password-input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-
-      input {
-        padding-right: 40px;
-      }
-
-      .toggle-password {
-        position: absolute;
-        right: 10px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 18px;
-        padding: 5px;
-
-        &:hover {
-          opacity: 0.7;
-        }
-      }
-    }
-
-    app-button {
-      width: 100%;
-      margin-top: $spacing-md;
-    }
-
-    .password-hint {
-      font-size: 12px;
-      color: $text-light;
-      margin-top: -$spacing-xs;
-      margin-bottom: $spacing-md;
-      padding: 0 $spacing-xs;
-    }
-
-    .button-group {
-      display: flex;
-      gap: $spacing-sm;
-      margin-top: $spacing-md;
-
-      app-button {
-        flex: 1;
-        margin-top: 0;
-      }
-    }
-  }
-
-  .divider {
+  .google-signin-wrapper {
     display: flex;
-    align-items: center;
-    margin: $spacing-lg 0;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.form-actions {
+  margin-top: $spacing-lg;
+}
+
+.button-group {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
+
+  .half-width {
+    flex: 1;
+  }
+}
+
+.auth-footer {
+  .forgot-password {
+    display: block;
+    margin-bottom: $spacing-md;
+    font-size: 13px;
     color: $text-light;
-    font-size: 14px;
+    text-decoration: none;
 
-    &::before,
-    &::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: $border-color;
-    }
-
-    span {
-      padding: 0 $spacing-md;
-    }
-  }
-
-  .social-login-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
-
-    .google-signin-wrapper {
-      display: flex;
-      justify-content: center;
-      margin-bottom: $spacing-xs;
-      width: 100%;
-    }
-
-    .social-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: $spacing-sm;
-      padding: $spacing-sm $spacing-md;
-      border: 1px solid $border-color;
-      border-radius: $border-radius-sm;
-      background: white;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: $transition-fast;
-
-      &:hover:not(:disabled) {
-        background: $background-color;
-        transform: translateY(-1px);
-        box-shadow: $shadow-sm;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .social-icon {
-        font-size: 18px;
-        font-weight: bold;
-      }
-
-      &.google-btn {
-        .social-icon {
-          color: #4285f4;
-        }
-
-        &:hover:not(:disabled) {
-          border-color: #4285f4;
-        }
-      }
-
-      &.facebook-btn {
-        .social-icon {
-          color: #1877f2;
-        }
-
-        &:hover:not(:disabled) {
-          border-color: #1877f2;
-        }
-      }
-
-      &.github-btn {
-        .social-icon {
-          color: #333;
-        }
-
-        &:hover:not(:disabled) {
-          border-color: #333;
-        }
-      }
-    }
-  }
-
-  .auth-links {
-    display: flex;
-    justify-content: space-between;
-    margin-top: $spacing-lg;
-    padding-top: $spacing-md;
-    border-top: 1px solid $border-color;
-
-    a {
+    &:hover {
       color: $secondary-color;
-      text-decoration: none;
-      font-size: 14px;
-      transition: $transition-fast;
-      cursor: pointer;
-      display: inline-block;
-
-      &:hover {
-        text-decoration: underline;
-        color: darken($secondary-color, 10%);
-      }
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .auth-container {
-    padding: $spacing-sm;
-  }
-
-  .auth-card {
-    padding: $spacing-lg;
-
-    .auth-header h2 {
-      font-size: 24px;
+      text-decoration: underline;
     }
   }
 }
