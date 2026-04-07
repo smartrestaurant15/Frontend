@@ -40,32 +40,24 @@ export class DailyMenuComponent implements OnInit {
     this.loading = true;
     this.dailyMenuService.getDailyMenuDishes(this.currentPage - 1).subscribe({
       next: (response: any) => {
-        console.log('📦 [DAILY MENU] Respuesta completa:', response);
-        console.log('📦 [DAILY MENU] Claves del objeto:', Object.keys(response));
-        console.log('📦 [DAILY MENU] response.data:', response.data);
-        console.log('📦 [DAILY MENU] response.message:', response.message);
-        
-        // Intentar con ambos formatos: data o message
         const dishes = response.data || response.message;
-        console.log('📦 [DAILY MENU] dishes:', dishes);
-        console.log('📦 [DAILY MENU] Es array?:', Array.isArray(dishes));
-        
         if (!response.error && Array.isArray(dishes)) {
           this.dailyMenuDishes = dishes;
           this.hasMorePages = dishes.length >= this.pageSize;
-          console.log('✅ [DAILY MENU] Platos cargados:', this.dailyMenuDishes.length);
         } else {
           this.dailyMenuDishes = [];
           this.hasMorePages = false;
-          console.log('⚠️ [DAILY MENU] No hay platos o formato incorrecto');
         }
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ [DAILY MENU] Error:', err);
         this.loading = false;
         this.dailyMenuDishes = [];
         this.hasMorePages = false;
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar el menú del día');
+        }
       }
     });
   }
@@ -74,22 +66,21 @@ export class DailyMenuComponent implements OnInit {
     this.loadingAvailable = true;
     this.dishService.getDishes(0).subscribe({
       next: (response) => {
-        console.log('📦 [AVAILABLE DISHES] Respuesta completa:', response);
-        console.log('📦 [AVAILABLE DISHES] response.message:', response.message);
-        
-        if (!response.error && Array.isArray(response.message)) {
-          this.availableDishes = response.message;
-          console.log('✅ [AVAILABLE DISHES] Platos disponibles:', this.availableDishes.length);
+        if (!response.error) {
+          const data = response.message as any;
+          this.availableDishes = Array.isArray(data) ? data : [];
         } else {
           this.availableDishes = [];
-          console.log('⚠️ [AVAILABLE DISHES] No hay platos disponibles');
         }
         this.loadingAvailable = false;
       },
       error: (err) => {
-        console.error('❌ [AVAILABLE DISHES] Error:', err);
         this.loadingAvailable = false;
         this.availableDishes = [];
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar los platos disponibles');
+        }
       }
     });
   }
@@ -104,10 +95,8 @@ export class DailyMenuComponent implements OnInit {
   }
 
   addDishToMenu(dishId: string): void {
-    console.log('➕ [ADD DISH] Agregando plato con ID:', dishId);
     this.dailyMenuService.addDishToMenu(dishId).subscribe({
       next: (response) => {
-        console.log('✅ [ADD DISH] Respuesta:', response);
         if (!response.error) {
           this.notificationService.showSuccess('Plato agregado al menú diario');
           this.loadDailyMenu();
@@ -116,8 +105,7 @@ export class DailyMenuComponent implements OnInit {
           this.notificationService.showError(response.data as string);
         }
       },
-      error: (err) => {
-        console.error('❌ [ADD DISH] Error:', err);
+      error: () => {
         this.notificationService.showError('Error al agregar plato al menú');
       }
     });

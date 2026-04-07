@@ -23,10 +23,16 @@
         <div class="form-row">
           <app-form-field label="Nombre" [required]="true" class="half-width">
             <input type="text" formControlName="firstName" placeholder="Ej. Juan">
+            <span class="error-text" *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('onlyLetters')">
+              Solo se permiten letras
+            </span>
           </app-form-field>
 
           <app-form-field label="Apellido" [required]="true" class="half-width">
             <input type="text" formControlName="lastName" placeholder="Ej. Pérez">
+            <span class="error-text" *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('onlyLetters')">
+              Solo se permiten letras
+            </span>
           </app-form-field>
         </div>
 

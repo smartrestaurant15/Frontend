@@ -49,9 +49,14 @@ export class AdditionManagementComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ [ADDITIONS] Error:', err);
         this.loading = false;
-        this.notificationService.showError('Error al cargar las adiciones');
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar las adiciones');
+        } else {
+          this.additions = [];
+          this.hasMorePages = false;
+        }
       }
     });
   }

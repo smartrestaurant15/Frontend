@@ -34,13 +34,21 @@ export class CategoryManagementComponent implements OnInit {
     this.categoryService.getAllCategories().subscribe({
       next: (response) => {
         if (!response.error) {
-          this.categories = response.message as CategoryResponse[];
+          const data = response.message as any;
+          this.categories = Array.isArray(data) ? data : [];
+        } else {
+          this.categories = [];
         }
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.notificationService.showError('Error al cargar las categorías');
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar las categorías');
+        } else {
+          this.categories = [];
+        }
       }
     });
   }

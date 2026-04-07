@@ -85,9 +85,14 @@ export class DishManagementComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ [DISHES] Error:', err);
         this.loading = false;
-        this.notificationService.showError('Error al cargar los platos');
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar los platos');
+        } else {
+          this.dishes = [];
+          this.hasMorePages = false;
+        }
       }
     });
   }

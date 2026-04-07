@@ -38,7 +38,9 @@ export class ForgotPasswordComponent implements OnInit {
       this.authService.forgotPassword(email).subscribe({
         next: () => {
           this.notificationService.showSuccess('Código de recuperación enviado a tu correo');
-          this.router.navigate(['/auth/reset-password']);
+          this.router.navigate(['/auth/reset-password'], {
+            queryParams: { email }
+          });
         },
         error: () => {
           this.loading = false;

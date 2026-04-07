@@ -30,8 +30,8 @@ export class RegisterComponent implements OnInit {
 
   initForm(): void {
     this.registerForm = this.fb.group({
-      firstName: ['', [Validators.required, CustomValidators.noWhitespace()]],
-      lastName: ['', [Validators.required, CustomValidators.noWhitespace()]],
+      firstName: ['', [Validators.required, CustomValidators.noWhitespace(), CustomValidators.onlyLetters()]],
+      lastName: ['', [Validators.required, CustomValidators.noWhitespace(), CustomValidators.onlyLetters()]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength()]],
       confirmPassword: ['', [Validators.required]],

@@ -28,16 +28,24 @@ export class InventoryMovementsComponent implements OnInit {
     this.loading = true;
     this.movementService.getAllMovements().subscribe({
       next: (response) => {
-        if (!response.error && Array.isArray(response.message)) {
-          this.movements = response.message;
-          this.applyFilters();
+        if (!response.error) {
+          const data = response.message as any;
+          this.movements = Array.isArray(data) ? data : [];
+        } else {
+          this.movements = [];
         }
+        this.filteredMovements = [...this.movements];
+        this.applyFilters();
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error al cargar movimientos:', err);
-        this.notificationService.showError('Error al cargar movimientos de inventario');
         this.loading = false;
+        this.movements = [];
+        this.filteredMovements = [];
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar movimientos de inventario');
+        }
       }
     });
   }

@@ -41,4 +41,14 @@ export class CustomValidators {
       return isWhitespace ? { whitespace: true } : null;
     };
   }
+
+  /** Solo letras (incluyendo acentos y ñ) y espacios. Rechaza números y caracteres especiales. */
+  static onlyLetters(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+      const valid = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/.test(value);
+      return valid ? null : { onlyLetters: true };
+    };
+  }
 }
