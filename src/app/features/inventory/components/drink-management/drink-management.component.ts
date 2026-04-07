@@ -66,9 +66,15 @@ export class DrinkManagementComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ [DRINKS] Error:', err);
         this.loading = false;
-        this.notificationService.showError('Error al cargar las bebidas');
+        // Solo mostrar error si no es un 404 por lista vacía
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar las bebidas');
+        } else {
+          this.drinks = [];
+          this.hasMorePages = false;
+        }
       }
     });
   }

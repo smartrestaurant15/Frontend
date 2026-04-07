@@ -63,9 +63,14 @@ export class InventoryListComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ [PRODUCTS] Error:', err);
         this.loading = false;
-        this.notificationService.showError('Error al cargar los productos');
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar los productos');
+        } else {
+          this.products = [];
+          this.hasMorePages = false;
+        }
       }
     });
   }

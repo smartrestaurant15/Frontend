@@ -48,14 +48,18 @@ export class AuthService {
    * Registro público (solo para CUSTOMER)
    */
   register(data: RegisterRequest): Observable<string> {
-    return this.httpClient.post<string>('/auth/register', data, { responseType: 'text' as 'json' });
+    return this.httpClient.post<string>('/auth/register', data, { responseType: 'text' as 'json' }).pipe(
+      map(res => this.extractMessage(res))
+    );
   }
 
   /**
    * Verificación de email después del registro
    */
   verifyEmail(request: VerifyRequest): Observable<string> {
-    return this.httpClient.post<string>('/auth/verify-email', request, { responseType: 'text' as 'json' });
+    return this.httpClient.post<string>('/auth/verify-email', request, { responseType: 'text' as 'json' }).pipe(
+      map(res => this.extractMessage(res))
+    );
   }
 
   /**
@@ -214,6 +218,19 @@ export class AuthService {
     // Guardar flags importantes
     if (response.requiresPasswordChange) {
       this.storageService.setItem('requiresPasswordChange', 'true');
+    }
+  }
+
+  /**
+   * Extrae el campo 'message' si la respuesta es un JSON, o devuelve el string tal cual.
+   */
+  private extractMessage(raw: string): string {
+    if (!raw) return raw;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed?.message ?? raw;
+    } catch {
+      return raw;
     }
   }
 }

@@ -17,7 +17,9 @@ import { TableComponent } from './components/ui/table/table.component';
 import { FormFieldComponent } from './components/ui/form-field/form-field.component';
 import { LoadingSpinnerComponent } from './components/ui/loading-spinner/loading-spinner.component';
 import { ToastComponent } from './components/ui/toast/toast.component';
+import { AccessibilityComponent } from './components/ui/accessibility/accessibility.component';
 import { AccessDeniedComponent } from './components/access-denied/access-denied.component';
+import { ChatbotComponent } from './components/ui/chatbot/chatbot.component';
 
 // Directives
 import { HasRoleDirective } from './directives/has-role.directive';
@@ -42,7 +44,10 @@ import { CurrencyFormatPipe } from './pipes/currency-format.pipe';
     FormFieldComponent,
     LoadingSpinnerComponent,
     ToastComponent,
+    AccessibilityComponent,
     AccessDeniedComponent,
+    ChatbotComponent,
+
     // Directives
     HasRoleDirective,
     HasPermissionDirective,
@@ -74,7 +79,10 @@ import { CurrencyFormatPipe } from './pipes/currency-format.pipe';
     FormFieldComponent,
     LoadingSpinnerComponent,
     ToastComponent,
+    AccessibilityComponent,
     AccessDeniedComponent,
+    ChatbotComponent,
+
     // Directives
     HasRoleDirective,
     HasPermissionDirective,

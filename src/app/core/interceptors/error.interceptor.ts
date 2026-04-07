@@ -34,44 +34,71 @@ export class ErrorInterceptor implements HttpInterceptor {
   private extractErrorMessage(error: HttpErrorResponse): string {
     // Error de red o del cliente
     if (error.error instanceof ErrorEvent) {
-      return `Error de conexión: ${error.error.message}`;
+      return 'Error de conexión. Verifique su conexión a internet.';
     }
 
-    // Sin respuesta del servidor (timeout, red caída, etc.)
+    // Sin respuesta del servidor
     if (error.status === 0) {
       return 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
     }
 
-    // Intentar extraer el mensaje del backend
-    const errorResponse = error.error as ErrorResponse;
-    let message = '';
-
-    // Prioridad 1: mensaje del backend
-    if (errorResponse?.message) {
-      message = errorResponse.message;
-      // Si hay detalles adicionales, agregarlos
-      if (errorResponse.details && errorResponse.details.length > 0) {
-        message = `${message}: ${errorResponse.details.join(', ')}`;
+    // Intentar parsear el body si viene como string (responseType: 'text')
+    let errorResponse: ErrorResponse | null = null;
+    if (typeof error.error === 'string') {
+      try {
+        errorResponse = JSON.parse(error.error);
+      } catch {
+        // no es JSON, usar el string directamente si es legible
+        if (!this.isTechnicalMessage(error.error)) {
+          return error.error;
+        }
+        return this.getDefaultErrorMessage(error.status);
       }
-    }
-    // Prioridad 2: error como string directo
-    else if (typeof error.error === 'string') {
-      message = error.error;
-    }
-    // Prioridad 3: mensaje genérico según código HTTP
-    else {
-      message = this.getDefaultErrorMessage(error.status);
+    } else {
+      errorResponse = error.error as ErrorResponse;
     }
 
-    return this.sanitizeErrorMessage(message);
+    // Prioridad 1: mensaje amigable por errorCode del backend
+    if (errorResponse?.errorCode) {
+      const friendly = this.getFriendlyMessageByCode(errorResponse.errorCode, errorResponse.message);
+      if (friendly) return friendly;
+    }
+
+    // Prioridad 2: mensaje del backend (solo si no es técnico)
+    if (errorResponse?.message && !this.isTechnicalMessage(errorResponse.message)) {
+      return errorResponse.message;
+    }
+
+    // Prioridad 3: mensaje genérico por código HTTP
+    return this.getDefaultErrorMessage(error.status);
   }
 
-  private sanitizeErrorMessage(message: string): string {
-    if (!message) return message;
+  private getFriendlyMessageByCode(errorCode: string, backendMessage?: string): string | null {
+    // Para EMAIL_ALREADY_EXISTS, si el backend envió un mensaje personalizado (caso social login),
+    // usarlo directamente porque contiene información útil para el usuario.
+    if (errorCode === 'EMAIL_ALREADY_EXISTS') {
+      return backendMessage || 'Este correo electrónico ya está registrado.';
+    }
 
+    const messages: Record<string, string> = {
+      'INVALID_CREDENTIALS':       'Correo o contraseña incorrectos.',
+      'ACCOUNT_INACTIVE':          'Tu cuenta está inactiva. Contacta al administrador.',
+      'ACCOUNT_PENDING':           'Tu cuenta aún no ha sido verificada. Revisa tu correo.',
+      'ACCOUNT_LOCKED':            'Tu cuenta ha sido bloqueada por múltiples intentos fallidos.',
+      'INVALID_OTP':               'El código ingresado es inválido o ha expirado.',
+      'USER_NOT_FOUND':            'No encontramos una cuenta con ese correo electrónico.',
+      'PASSWORD_POLICY_VIOLATION': 'La contraseña no cumple con los requisitos de seguridad.',
+      'PASSWORD_REUSE':            'No puedes reutilizar una contraseña anterior.',
+      'VALIDATION_ERROR':          backendMessage || 'Algunos campos tienen errores. Revisa el formulario.',
+      'RUNTIME_ERROR':             backendMessage || 'Ha ocurrido un error al procesar la solicitud.',
+      'INTERNAL_ERROR':            'Error interno del servidor. Intenta nuevamente más tarde.',
+    };
+    return messages[errorCode] ?? null;
+  }
+
+  private isTechnicalMessage(message: string): boolean {
     const technicalKeywords = [
       'could not execute statement',
-      'ERROR:',
       'duplicate key',
       'SQL',
       'Hibernate',
@@ -79,48 +106,45 @@ export class ErrorInterceptor implements HttpInterceptor {
       'violates unique',
       'insert into',
       'update ',
-      'delete from'
+      'delete from',
+      'NullPointerException',
+      'StackTrace',
+      'at com.',
+      'at org.',
+      'at java.',
     ];
-
-    const isTechnical = technicalKeywords.some(keyword =>
-      message.toLowerCase().includes(keyword.toLowerCase())
-    );
-
-    if (isTechnical) {
-      return 'Ha ocurrido un error al procesar la solicitud. Por favor, intente nuevamente.';
-    }
-
-    return message;
+    return technicalKeywords.some(k => message.toLowerCase().includes(k.toLowerCase()));
   }
 
   private getDefaultErrorMessage(status: number): string {
     switch (status) {
       case 400:
-        return 'Solicitud inválida. Verifique los datos enviados.';
+        return 'Solicitud invalida. Por favor, revise que los datos ingresados sean correctos.';
       case 401:
-        return 'No autorizado. Por favor inicie sesión nuevamente.';
+        return 'Sesion expirada o credenciales incorrectas. Intente ingresar sus datos de nuevo.';
       case 403:
-        return 'No tiene permisos para realizar esta acción.';
+        return 'Lo sentimos, no tiene los permisos necesarios para realizar esta tarea.';
       case 404:
-        return 'Recurso no encontrado.';
+        return 'El recurso que busca no esta disponible actualmente.';
       case 409:
-        return 'Conflicto con el estado actual del recurso.';
+        return 'Existe un conflicto con los datos. Es posible que el registro ya exista.';
       case 422:
-        return 'Los datos proporcionados no son válidos.';
+        return 'Los datos proporcionados no cumplen con el formato requerido.';
       case 429:
-        return 'Demasiadas solicitudes. Por favor intente más tarde.';
+        return 'Ha realizado demasiadas solicitudes en poco tiempo. Espere un momento e intente de nuevo.';
       case 500:
-        return 'Error interno del servidor.';
+        return 'Estamos experimentando problemas tecnicos en nuestro servidor. Trabajamos para solucionarlo.';
       case 502:
-        return 'Error de comunicación con el servidor.';
+        return 'Error de comunicacion. El servidor tardo demasiado en responder.';
       case 503:
-        return 'Servicio no disponible temporalmente.';
+        return 'El servicio de SmartRestaurant se encuentra en mantenimiento. Vuelva pronto.';
       case 504:
-        return 'Tiempo de espera agotado.';
+        return 'Se agoto el tiempo de espera. Revise su conexion.';
       default:
-        return 'Ha ocurrido un error inesperado. Por favor intente nuevamente.';
+        return 'Algo no salio como esperabamos. Por favor, intente la operacion nuevamente.';
     }
   }
+
 
   private handleErrorByStatus(status: number, message: string): void {
     // Mostrar notificación

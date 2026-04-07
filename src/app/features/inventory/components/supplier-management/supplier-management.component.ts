@@ -34,13 +34,21 @@ export class SupplierManagementComponent implements OnInit {
     this.suplierService.getAllSupliers().subscribe({
       next: (response) => {
         if (!response.error) {
-          this.suppliers = response.message as SuplierResponse[];
+          const data = response.message as any;
+          this.suppliers = Array.isArray(data) ? data : [];
+        } else {
+          this.suppliers = [];
         }
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.notificationService.showError('Error al cargar los proveedores');
+        const status = err?.status;
+        if (status !== 404 && status !== 204) {
+          this.notificationService.showError('Error al cargar los proveedores');
+        } else {
+          this.suppliers = [];
+        }
       }
     });
   }

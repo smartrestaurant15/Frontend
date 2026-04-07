@@ -1,9 +1,8 @@
 export interface ErrorResponse {
   timestamp: string;
   status: number;
-  error: string;
+  errorCode: string;
   message: string;
   path: string;
-  details?: string[];
-  code?: string;
+  details?: string | string[] | null;
 }
