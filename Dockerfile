@@ -1,16 +1,25 @@
-# Build stage
+# ── Build stage ──────────────────────────────────────────────────────────────
 FROM node:20-alpine AS build
 WORKDIR /app
+
+# Copy dependency manifests first for layer caching
 COPY package*.json ./
-RUN npm install
+RUN npm ci --legacy-peer-deps
+
+# Copy source and build
 COPY . .
 RUN npm run build -- --configuration production
 
-# Run stage
-FROM nginx:alpine
-# Copy the build output to replace the default nginx contents.
-# Note: Check angular.json for the correct output path. It's dist/smart-restaurante
-COPY --from=build /app/dist/smart-restaurante /usr/share/nginx/html
+# ── Run stage ─────────────────────────────────────────────────────────────────
+FROM nginx:1.25-alpine
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx static assets
+RUN rm -rf ./*
+
+# Copy Angular build output (path must match angular.json outputPath)
+COPY --from=build /app/dist/smart-restaurante .
+
 # Copy custom nginx config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
