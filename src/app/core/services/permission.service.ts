@@ -13,6 +13,8 @@ export class PermissionService {
   // Mapeo de roles a permisos
   private readonly ROLE_PERMISSIONS: Record<UserRole, Set<string>> = {
     [UserRole.ADMIN]: new Set([
+      // Órdenes
+      'order:read', 'order:write', 'order:delete',
       // Administración
       'admin:read', 'admin:write',
       'user:read', 'user:write', 'user:delete',
@@ -39,6 +41,8 @@ export class PermissionService {
     ]),
     
     [UserRole.KITCHEN]: new Set([
+      // Órdenes
+      'order:read', 'order:write',
       // Inventario (productos)
       'inventory:read', 'inventory:write', 'inventory:delete',
       'product:read', 'product:write', 'product:delete', // Alias para inventario
@@ -61,6 +65,8 @@ export class PermissionService {
     ]),
     
     [UserRole.WAITER]: new Set([
+      // Órdenes
+      'order:read', 'order:write',
       // Solo lectura
       'dish:read',
       'drink:read',
@@ -69,7 +75,9 @@ export class PermissionService {
       'stock_alert:read'
     ]),
     
-    [UserRole.CUSTOMER]: new Set([])
+    [UserRole.CUSTOMER]: new Set([
+      'order:read'
+    ])
   };
 
   constructor(private storageService: StorageService) {}

@@ -1,0 +1,84 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>Nueva Orden</h2>
+      <button class="close-btn" (click)="close()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Número de mesa -->
+      <form [formGroup]="form">
+        <div class="table-row">
+          <label>Mesa (opcional)</label>
+          <input
+            type="text"
+            formControlName="tableNumber"
+            placeholder="Ej: 5"
+            class="table-input" />
+        </div>
+      </form>
+
+      <!-- Tabs de tipo de producto -->
+      <div class="product-tabs">
+        <button
+          [class.active]="activeTab === 'DISH'"
+          (click)="activeTab = 'DISH'">🍽 Platos</button>
+        <button
+          [class.active]="activeTab === 'DRINK'"
+          (click)="activeTab = 'DRINK'">🥤 Bebidas</button>
+        <button
+          [class.active]="activeTab === 'ADDITION'"
+          (click)="activeTab = 'ADDITION'">➕ Adiciones</button>
+      </div>
+
+      <app-loading-spinner *ngIf="loading" size="small"></app-loading-spinner>
+
+      <!-- Lista de productos -->
+      <div class="products-grid" *ngIf="!loading">
+        <div *ngIf="currentProducts.length === 0" class="no-products">
+          Sin productos disponibles
+        </div>
+        <div
+          *ngFor="let product of currentProducts"
+          class="product-card"
+          (click)="addToCart(product)">
+          <span class="product-name">{{ product.name }}</span>
+          <span class="product-price">${{ product.price }}</span>
+          <span class="add-icon">+</span>
+        </div>
+      </div>
+
+      <!-- Carrito -->
+      <div class="cart-section" *ngIf="cart.length > 0">
+        <h3>Carrito <span class="cart-count">{{ cart.length }}</span></h3>
+        <div class="cart-item" *ngFor="let item of cart; let i = index">
+          <span class="item-name">{{ item.productName }}</span>
+          <div class="item-qty">
+            <button (click)="decreaseQty(item)">−</button>
+            <span>{{ item.quantity }}</span>
+            <button (click)="item.quantity = item.quantity + 1">+</button>
+          </div>
+          <span class="item-total">${{ item.unitPrice * item.quantity | number:'1.0-0' }}</span>
+          <button class="remove-btn" (click)="removeFromCart(i)">✕</button>
+        </div>
+        <div class="cart-total">
+          <strong>Total: ${{ cartTotal | number:'1.0-0' }}</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <app-button variant="secondary" (clicked)="close()">Cancelar</app-button>
+      <app-button
+        variant="primary"
+        [disabled]="cart.length === 0 || submitting"
+        (clicked)="submit()">
+        {{ submitting ? 'Creando...' : 'Crear Orden' }}
+      </app-button>
+    </div>
+
+  </div>
+</div>

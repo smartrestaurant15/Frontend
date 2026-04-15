@@ -1,0 +1,186 @@
+.kitchen-board {
+  padding: 24px;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+/* ── Header ── */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-info h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-info p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sse-badge {
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* ── Tablero Kanban ── */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Columna ── */
+.column {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.column-header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.column-pending  .column-header { border-color: #fbbf24; }
+.column-progress .column-header { border-color: #60a5fa; }
+.column-completed .column-header { border-color: #34d399; }
+
+.count-badge {
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-column {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 24px 0;
+}
+
+/* ── Tarjeta de orden ── */
+.order-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  border-left: 4px solid #fbbf24;
+  background: #fffbeb;
+  transition: box-shadow .15s;
+}
+
+.order-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+.order-card--progress {
+  border-left-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.order-card--completed {
+  border-left-color: #34d399;
+  background: #f0fdf4;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.order-id {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.order-time {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.order-card-body {
+  margin-bottom: 12px;
+}
+
+.order-card-body p {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.customer {
+  font-weight: 600;
+}
+
+.items {
+  color: #6b7280 !important;
+}
+
+.channel {
+  display: inline-block;
+  font-size: 0.72rem !important;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.channel-presencial {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.channel-online {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.order-card-actions {
+  display: flex;
+  gap: 8px;
+}

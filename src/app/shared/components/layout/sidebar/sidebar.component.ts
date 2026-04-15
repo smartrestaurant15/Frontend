@@ -54,6 +54,14 @@ export class SidebarComponent implements OnInit {
       items: [
         { label: 'Stock Bajo', icon: '⚠️', route: '/inventory/alerts', roles: [UserRole.ADMIN, UserRole.KITCHEN, UserRole.WAITER] }
       ]
+    },
+    {
+      title: 'Órdenes',
+      items: [
+        { label: 'Tablero Cocina', icon: '🍳', route: '/orders/kitchen', roles: [UserRole.KITCHEN, UserRole.ADMIN] },
+        { label: 'Órdenes',       icon: '📋', route: '/orders/waiter',  roles: [UserRole.WAITER,  UserRole.ADMIN] },
+        { label: 'Mis Pedidos',   icon: '🛍',  route: '/orders/my-orders', roles: [UserRole.CUSTOMER] }
+      ]
     }
   ];
 

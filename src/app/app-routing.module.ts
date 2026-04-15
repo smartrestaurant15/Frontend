@@ -31,12 +31,18 @@ const routes: Routes = [
     loadChildren: () => import('./features/customer/customer.module').then(m => m.CustomerModule)
   },
   {
+    path: 'orders',
+    loadChildren: () => import('./features/orders/orders.module').then(m => m.OrdersModule)
+  },
+  {
     path: 'kitchen',
-    redirectTo: '/inventory'
+    redirectTo: '/orders/kitchen',
+    pathMatch: 'full'
   },
   {
     path: 'waiter',
-    redirectTo: '/inventory'
+    redirectTo: '/orders/waiter',
+    pathMatch: 'full'
   },
   {
     path: 'access-denied',

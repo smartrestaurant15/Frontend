@@ -1,0 +1,109 @@
+<div class="kitchen-board">
+  <header class="page-header">
+    <div class="header-main">
+      <div class="header-info">
+        <h1>🍳 Tablero de Cocina</h1>
+        <p>Gestiona los pedidos en tiempo real</p>
+      </div>
+      <div class="header-actions">
+        <span class="sse-badge">● En vivo</span>
+        <app-button variant="secondary" size="small" (clicked)="loadOrders()">
+          Actualizar
+        </app-button>
+      </div>
+    </div>
+  </header>
+
+  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
+
+  <div class="board" *ngIf="!loading">
+
+    <!-- COLUMNA: PENDIENTES -->
+    <div class="column column-pending">
+      <div class="column-header">
+        <h2>Pendientes</h2>
+        <span class="count-badge">{{ pendingOrders.length }}</span>
+      </div>
+      <div class="orders-list">
+        <div *ngIf="pendingOrders.length === 0" class="empty-column">
+          Sin órdenes pendientes
+        </div>
+        <div
+          *ngFor="let order of pendingOrders; trackBy: trackById"
+          class="order-card">
+          <div class="order-card-header">
+            <span class="order-id">#{{ order.id.slice(-6) }}</span>
+            <span class="order-time">{{ order.createdAt | date:'HH:mm' }}</span>
+          </div>
+          <div class="order-card-body">
+            <p class="customer">{{ order.customerName }}</p>
+            <p class="items">{{ order.itemCount }} item(s) · ${{ order.totalAmount | number:'1.0-0' }}</p>
+            <p *ngIf="order.channel === 'PRESENTIAL'" class="channel channel-presencial">Mesa</p>
+            <p *ngIf="order.channel === 'ONLINE'" class="channel channel-online">Online</p>
+          </div>
+          <div class="order-card-actions">
+            <app-button variant="primary" size="small" (clicked)="startOrder(order)">
+              Iniciar preparación
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA: EN PREPARACIÓN -->
+    <div class="column column-progress">
+      <div class="column-header">
+        <h2>En preparación</h2>
+        <span class="count-badge">{{ inProgressOrders.length }}</span>
+      </div>
+      <div class="orders-list">
+        <div *ngIf="inProgressOrders.length === 0" class="empty-column">
+          Sin órdenes en preparación
+        </div>
+        <div
+          *ngFor="let order of inProgressOrders; trackBy: trackById"
+          class="order-card order-card--progress">
+          <div class="order-card-header">
+            <span class="order-id">#{{ order.id.slice(-6) }}</span>
+            <span class="order-time">{{ order.createdAt | date:'HH:mm' }}</span>
+          </div>
+          <div class="order-card-body">
+            <p class="customer">{{ order.customerName }}</p>
+            <p class="items">{{ order.itemCount }} item(s) · ${{ order.totalAmount | number:'1.0-0' }}</p>
+          </div>
+          <div class="order-card-actions">
+            <app-button variant="primary" size="small" (clicked)="completeOrder(order)">
+              Marcar como listo
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA: LISTOS PARA ENTREGAR -->
+    <div class="column column-completed">
+      <div class="column-header">
+        <h2>Listos para entregar</h2>
+        <span class="count-badge">{{ completedOrders.length }}</span>
+      </div>
+      <div class="orders-list">
+        <div *ngIf="completedOrders.length === 0" class="empty-column">
+          Sin órdenes listas
+        </div>
+        <div
+          *ngFor="let order of completedOrders; trackBy: trackById"
+          class="order-card order-card--completed">
+          <div class="order-card-header">
+            <span class="order-id">#{{ order.id.slice(-6) }}</span>
+            <span class="order-time">{{ order.createdAt | date:'HH:mm' }}</span>
+          </div>
+          <div class="order-card-body">
+            <p class="customer">{{ order.customerName }}</p>
+            <p class="items">{{ order.itemCount }} item(s) · ${{ order.totalAmount | number:'1.0-0' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

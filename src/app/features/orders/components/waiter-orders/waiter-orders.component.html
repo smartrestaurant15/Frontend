@@ -1,0 +1,112 @@
+<div class="waiter-orders">
+  <header class="page-header">
+    <div class="header-main">
+      <div class="header-info">
+        <h1>📋 Órdenes</h1>
+        <p>Gestiona y crea órdenes de mesa</p>
+      </div>
+      <div class="header-actions">
+        <span class="sse-badge">● En vivo</span>
+        <app-button variant="primary" (clicked)="openCreateModal()">
+          + Nueva Orden
+        </app-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filtros de estado -->
+  <div class="filters">
+    <button
+      *ngFor="let opt of STATUS_OPTIONS"
+      class="filter-btn"
+      [class.active]="selectedStatus === opt.value"
+      (click)="filterByStatus(opt.value)">
+      {{ opt.label }}
+    </button>
+  </div>
+
+  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
+
+  <main class="page-content" *ngIf="!loading">
+
+    <div *ngIf="orders.length === 0" class="empty-state">
+      <p>No hay órdenes{{ selectedStatus ? ' con este estado' : '' }}</p>
+    </div>
+
+    <div class="orders-table" *ngIf="orders.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Canal</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Hora</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of orders; trackBy: trackById">
+            <td class="order-id">#{{ order.id.slice(-6) }}</td>
+            <td>{{ order.customerName }}</td>
+            <td>
+              <span class="channel-badge" [class.online]="order.channel === 'ONLINE'">
+                {{ order.channel }}
+              </span>
+            </td>
+            <td>{{ order.itemCount }}</td>
+            <td>${{ order.totalAmount | number:'1.0-0' }}</td>
+            <td>{{ order.createdAt | date:'HH:mm' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="STATUS_CLASS[order.status]">
+                {{ STATUS_LABEL[order.status] }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="action-btn detail" title="Ver detalle" (click)="viewDetail(order.id)">
+                👁
+              </button>
+              <button
+                *ngIf="canDeliver(order)"
+                class="action-btn deliver"
+                title="Marcar entregada"
+                (click)="deliverOrder(order)">
+                ✅
+              </button>
+              <button
+                *ngIf="canCancel(order)"
+                class="action-btn cancel"
+                title="Cancelar"
+                (click)="cancelOrder(order)">
+                ✕
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <footer class="page-footer" *ngIf="orders.length > 0">
+      <div class="pagination">
+        <app-button variant="secondary" size="small" [disabled]="currentPage === 1" (clicked)="previousPage()">
+          ← Anterior
+        </app-button>
+        <span class="page-info">Página <strong>{{ currentPage }}</strong></span>
+        <app-button variant="secondary" size="small" [disabled]="!hasMorePages" (clicked)="nextPage()">
+          Siguiente →
+        </app-button>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Modal crear orden -->
+  <app-order-create
+    [isOpen]="isCreateModalOpen"
+    (closeModal)="isCreateModalOpen = false"
+    (orderSaved)="onOrderCreated()">
+  </app-order-create>
+</div>
