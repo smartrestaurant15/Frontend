@@ -2,4 +2,9 @@
 .app-content {
   min-height: calc(100vh - 70px);
   background: #f5f5f5;
+
+  &.no-bg {
+    background: transparent;
+    min-height: 0;
+  }
 }

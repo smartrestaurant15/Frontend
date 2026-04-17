@@ -1,0 +1,315 @@
+<!-- ============================================================
+     SmartRestaurant — Landing Page
+     ============================================================ -->
+
+<!-- TOP NAV -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 py-5 transition-all duration-300 backdrop-blur-xl"
+     [ngClass]="navScrolled ? 'bg-[#0a0a0a] border-b border-outline-variant/10' : 'bg-[#0a0a0a]/60'">
+
+  <div class="font-headline text-xl tracking-widest text-primary uppercase cursor-pointer"
+       (click)="scrollTo('home')">
+    {{ restaurantInfo?.name || 'SmartRestaurant' }}
+  </div>
+
+  <div class="hidden md:flex items-center space-x-8">
+    <a class="font-body text-sm text-[#e5e2e1]/70 hover:text-[#e5e2e1] transition-colors cursor-pointer"
+       (click)="scrollTo('menu')">Menú del Día</a>
+    <a class="font-body text-sm text-[#e5e2e1]/70 hover:text-[#e5e2e1] transition-colors cursor-pointer"
+       (click)="scrollTo('about')">Nosotros</a>
+    <a class="font-body text-sm text-[#e5e2e1]/70 hover:text-[#e5e2e1] transition-colors cursor-pointer"
+       (click)="scrollTo('contact')">Contacto</a>
+  </div>
+
+  <div class="hidden md:flex items-center gap-3">
+    <button class="font-label text-xs uppercase tracking-widest text-[#e5e2e1]/60 hover:text-primary transition-colors px-4 py-2"
+            (click)="goToLogin()">
+      Ingresar
+    </button>
+    <button class="btn-metallic text-on-primary font-label text-xs font-semibold uppercase tracking-widest px-6 py-2.5 rounded-md hover:scale-95 transition-all duration-200"
+            (click)="goToRegister()">
+      Registrarse
+    </button>
+  </div>
+
+  <button class="md:hidden text-[#e5e2e1] p-2" (click)="toggleMobileMenu()" aria-label="Menú">
+    <span class="material-symbols-outlined">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
+  </button>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="fixed inset-0 z-40 bg-[#0a0a0a]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 transition-all duration-300"
+     [class.opacity-100]="mobileMenuOpen"
+     [class.pointer-events-auto]="mobileMenuOpen"
+     [class.opacity-0]="!mobileMenuOpen"
+     [class.pointer-events-none]="!mobileMenuOpen">
+  <a class="font-headline text-2xl text-[#e5e2e1] cursor-pointer" (click)="scrollTo('menu')">Menú del Día</a>
+  <a class="font-headline text-2xl text-[#e5e2e1] cursor-pointer" (click)="scrollTo('about')">Nosotros</a>
+  <a class="font-headline text-2xl text-[#e5e2e1] cursor-pointer" (click)="scrollTo('contact')">Contacto</a>
+  <button class="btn-metallic text-on-primary font-label text-sm uppercase tracking-widest px-8 py-3 rounded-md mt-4"
+          (click)="goToLogin()">
+    Ingresar al Portal
+  </button>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────────────────── -->
+<section class="relative h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]" id="home">
+  <div class="absolute inset-0 z-0">
+    <img
+      src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&q=80"
+      alt="Restaurante de lujo"
+      class="w-full h-full object-cover opacity-50 scale-105">
+    <div class="hero-gradient absolute inset-0"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent"></div>
+  </div>
+
+  <div class="fixed inset-0 grainy-overlay z-10 pointer-events-none"></div>
+
+  <div class="relative z-20 text-center max-w-4xl px-6">
+    <span class="font-label text-xs uppercase tracking-[0.4em] text-primary mb-6 block">
+      Gastronomía de Autor
+    </span>
+    <h1 class="font-headline text-5xl md:text-7xl lg:text-8xl mb-8 leading-tight font-light text-[#e5e2e1]">
+      La Excelencia <br>
+      <em class="italic text-[#e5e2e1]">Elevada</em>
+    </h1>
+    <p class="font-body text-[#d0c5b5] text-lg font-light max-w-xl mx-auto mb-12 leading-relaxed">
+      Ingredientes de origen, técnica clásica y vanguardia gastronómica en cada plato.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <button
+        class="btn-metallic text-on-primary px-10 py-4 rounded-md font-label text-xs font-semibold uppercase tracking-widest hover:scale-105 transition-transform"
+        (click)="scrollTo('menu')">
+        Explorar Menú
+      </button>
+      <button
+        class="border border-[#4d463a]/50 text-primary px-10 py-4 rounded-md font-label text-xs font-semibold uppercase tracking-widest hover:bg-[#201f1f] transition-colors backdrop-blur-sm"
+        (click)="scrollTo('about')">
+        Nuestra Historia
+      </button>
+    </div>
+  </div>
+
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
+    <span class="font-label text-[10px] uppercase tracking-[0.3em] text-[#e5e2e1]/30">Descubrir</span>
+    <div class="w-px h-12 bg-gradient-to-b from-primary/40 to-transparent"></div>
+  </div>
+</section>
+
+<!-- ─── FILOSOFÍA ─────────────────────────────────────────────── -->
+<section class="py-32 px-6 md:px-12 bg-[#131313]" id="about">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+    <div class="relative">
+      <div class="aspect-[4/5] bg-[#201f1f] overflow-hidden rounded-lg">
+        <img
+          src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=800&q=80"
+          alt="Chef preparando un plato"
+          class="w-full h-full object-cover opacity-90">
+      </div>
+      <div class="hidden lg:block absolute -bottom-10 -right-10 w-64 bg-[#2a2a2a] p-8 border border-[#4d463a]/20">
+        <p class="font-headline italic text-primary text-lg mb-3 leading-snug">
+          "La cocina es un lenguaje mediante el cual se puede expresar armonía."
+        </p>
+        <span class="font-label text-[10px] uppercase tracking-widest text-[#e5e2e1]/40">— Chef Ejecutivo</span>
+      </div>
+    </div>
+
+    <div class="space-y-8">
+      <div>
+        <span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary mb-4 block">Nuestra Filosofía</span>
+        <h2 class="font-headline text-4xl md:text-5xl font-light leading-tight text-[#e5e2e1]">
+          Filosofía <br>del Producto
+        </h2>
+      </div>
+      <div class="w-20 h-px bg-primary"></div>
+      <p class="font-body text-[#d0c5b5] text-lg leading-relaxed font-light">
+        En SmartRestaurant, cada ingrediente cuenta una historia de origen y respeto.
+        Trabajamos directamente con productores locales para asegurar que la frescura sea
+        el alma de cada creación.
+      </p>
+      <p class="font-body text-[#d0c5b5] text-lg leading-relaxed font-light">
+        Creemos en el lujo silencioso: aquel que se percibe en el detalle mínimo,
+        en la temperatura perfecta y en la atmósfera que envuelve el paladar.
+      </p>
+      <button
+        class="btn-metallic text-on-primary font-label text-xs uppercase tracking-widest px-8 py-3.5 rounded-md hover:scale-95 transition-all duration-200"
+        (click)="goToLogin()">
+        Acceder al Portal
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ESPECIALIDADES ────────────────────────────────────────── -->
+<section class="py-32 px-6 md:px-12 bg-[#0e0e0e]" id="menu">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="text-center mb-20">
+      <span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary mb-4 block">Selección de Autor</span>
+      <h2 class="font-headline text-4xl md:text-5xl font-light text-[#e5e2e1]">Especialidades del Día</h2>
+    </div>
+
+    <div *ngIf="loadingMenu" class="flex justify-center py-16">
+      <div class="w-8 h-8 border border-primary/30 border-t-primary rounded-full animate-spin"></div>
+    </div>
+
+    <div *ngIf="!loadingMenu && dailyMenuDishes.length === 0"
+         class="text-center py-16 text-[#d0c5b5]/50">
+      <span class="material-symbols-outlined text-4xl mb-4 block">restaurant_menu</span>
+      <p class="font-body text-sm">No hay especialidades disponibles hoy.</p>
+    </div>
+
+    <div *ngIf="!loadingMenu && dailyMenuDishes.length > 0" class="space-y-14">
+      <div *ngFor="let dish of dailyMenuDishes"
+           class="flex flex-col md:flex-row items-center gap-8 group cursor-default">
+
+        <div class="w-28 h-28 flex-shrink-0 overflow-hidden rounded-full border border-[#4d463a]/30">
+          <img
+            [src]="dish.photo || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'"
+            [alt]="dish.name"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        </div>
+
+        <div class="flex-grow flex flex-col w-full">
+          <div class="flex items-end w-full mb-2">
+            <h3 class="font-headline text-2xl text-[#e5e2e1] group-hover:text-primary transition-colors">
+              {{ dish.name }}
+            </h3>
+            <div class="flex-grow border-b border-dotted border-[#4d463a]/40 mx-3 mb-1.5"></div>
+            <span class="font-headline text-xl text-primary tracking-tight">
+              ${{ dish.price | number:'1.0-0' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-16">
+      <button
+        class="border border-[#4d463a]/40 text-primary px-10 py-4 rounded-md font-label text-xs uppercase tracking-widest hover:bg-[#201f1f] transition-colors"
+        (click)="goToLogin()">
+        Ver Menú Completo
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ACCESO RÁPIDO ─────────────────────────────────────────── -->
+<section class="py-24 px-6 md:px-12 bg-[#131313] border-y border-[#4d463a]/15">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary mb-4 block">Portal</span>
+      <h2 class="font-headline text-4xl font-light text-[#e5e2e1]">Acceso Rápido</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+
+      <a class="group p-10 bg-[#201f1f] border border-transparent hover:border-primary/20 transition-all duration-500 rounded-md cursor-pointer"
+         (click)="goToLogin()">
+        <div class="mb-6 inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#353534] text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <h3 class="font-headline text-xl mb-3 text-[#e5e2e1]">Mi Cuenta</h3>
+        <p class="font-body text-[#d0c5b5]/60 text-sm leading-relaxed">
+          Accede a tu perfil para gestionar tus pedidos y preferencias gastronómicas.
+        </p>
+      </a>
+
+      <a class="group p-10 bg-[#201f1f] border border-transparent hover:border-primary/20 transition-all duration-500 rounded-md cursor-pointer"
+         (click)="goToLogin()">
+        <div class="mb-6 inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#353534] text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+          <span class="material-symbols-outlined">shopping_bag</span>
+        </div>
+        <h3 class="font-headline text-xl mb-3 text-[#e5e2e1]">Realizar Pedido</h3>
+        <p class="font-body text-[#d0c5b5]/60 text-sm leading-relaxed">
+          Disfruta de la experiencia SmartRestaurant en la comodidad de tu hogar.
+        </p>
+      </a>
+
+      <a class="group p-10 bg-[#201f1f] border border-transparent hover:border-primary/20 transition-all duration-500 rounded-md cursor-pointer"
+         (click)="scrollTo('contact')">
+        <div class="mb-6 inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#353534] text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+          <span class="material-symbols-outlined">mail</span>
+        </div>
+        <h3 class="font-headline text-xl mb-3 text-[#e5e2e1]">Atención al Cliente</h3>
+        <p class="font-body text-[#d0c5b5]/60 text-sm leading-relaxed">
+          ¿Tienes alguna duda o petición especial? Estamos a tu entera disposición.
+        </p>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── CONTACTO ──────────────────────────────────────────────── -->
+<section class="py-32 px-6 md:px-12 bg-[#131313]" id="contact">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 lg:gap-24">
+
+    <div class="space-y-12">
+      <div>
+        <span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary mb-4 block">Ubicación</span>
+        <h2 class="font-headline text-4xl font-light text-[#e5e2e1]">Encuéntranos</h2>
+        <p class="font-body text-[#d0c5b5]/70 mt-6 leading-relaxed">
+          {{ restaurantInfo?.address }}<br>
+          {{ restaurantInfo?.city }}
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-8 border-t border-[#4d463a]/20 pt-12">
+        <div>
+          <h4 class="font-label text-[10px] uppercase tracking-widest text-primary mb-4">Horario</h4>
+          <p class="font-body text-sm text-[#d0c5b5]">
+            {{ restaurantInfo?.openDays }}<br>
+            {{ formatTime(restaurantInfo?.openingTime ?? '') }} — {{ formatTime(restaurantInfo?.closingTime ?? '') }}
+          </p>
+        </div>
+        <div>
+          <h4 class="font-label text-[10px] uppercase tracking-widest text-primary mb-4">Contacto</h4>
+          <p class="font-body text-sm text-[#d0c5b5]">
+            {{ restaurantInfo?.phone }}<br>
+            {{ restaurantInfo?.email }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="h-96 bg-[#2a2a2a] relative rounded-lg overflow-hidden border border-[#4d463a]/10">
+      <iframe
+        [src]="mapUrl"
+        width="100%"
+        height="100%"
+        style="border:0; filter: grayscale(80%) invert(90%) contrast(90%);"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Ubicación SmartRestaurant - Universidad del Quindío">
+      </iframe>
+      <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a]/60 to-transparent pointer-events-none"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────── -->
+<footer class="bg-[#0e0e0e] border-t border-[#4d463a]/15">
+  <div class="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 py-14 gap-8">
+
+    <div class="font-headline text-lg text-primary uppercase tracking-widest">
+      {{ restaurantInfo?.name || 'SmartRestaurant' }}
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-8 font-label text-xs uppercase tracking-widest">
+      <a class="text-[#e5e2e1]/50 hover:text-primary transition-colors cursor-pointer"
+         (click)="scrollTo('menu')">Menú</a>
+      <a class="text-[#e5e2e1]/50 hover:text-primary transition-colors cursor-pointer"
+         (click)="scrollTo('about')">Nosotros</a>
+      <a class="text-[#e5e2e1]/50 hover:text-primary transition-colors cursor-pointer"
+         (click)="goToLogin()">Portal</a>
+      <a class="text-[#e5e2e1]/50 hover:text-primary transition-colors cursor-pointer"
+         (click)="goToRegister()">Registrarse</a>
+    </div>
+
+    <div class="font-label text-[10px] uppercase tracking-[0.2em] text-[#e5e2e1]/30">
+      © 2026 SmartRestaurant. Todos los derechos reservados.
+    </div>
+
+  </div>
+</footer>

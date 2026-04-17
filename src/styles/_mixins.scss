@@ -30,27 +30,43 @@
   }
 }
 
-// Button mixin
+// Button mixin — actualizado para usar cubic-bezier consistente y border
 @mixin button-variant($bg-color, $text-color: white) {
   background-color: $bg-color;
+  border: 1.5px solid $bg-color;
   color: $text-color;
-  border: none;
-  padding: $spacing-sm $spacing-md;
-  border-radius: $border-radius-sm;
+  padding: 0 $spacing-md;
+  height: 40px;
+  border-radius: $border-radius-md; // 8px — más moderno que 4px
   cursor: pointer;
-  transition: all $transition-fast;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-family-base;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-base;
+  transition:
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color     0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow       0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform        0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover {
-    opacity: 0.9;
+  &:hover:not(:disabled) {
+    filter: brightness(0.9);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($bg-color, 0.3);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(0);
+    box-shadow: none;
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
   }
 }

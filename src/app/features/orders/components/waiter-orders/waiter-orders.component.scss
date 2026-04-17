@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Forzar que el bg-[#e6c487]/8 de Tailwind funcione (clase arbitraria con opacidad)
+.bg-\[\#e6c487\]\/8 {
+  background-color: rgba(230, 196, 135, 0.08);
+}

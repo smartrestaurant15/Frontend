@@ -1,57 +1,60 @@
-<div class="accessibility-wrapper">
-    <!-- Floating Button -->
-    <button class="accessibility-trigger" (click)="toggleMenu()" aria-label="Opciones de accesibilidad">
-        <img src="assets/images/accessibility.png" alt="Accesibilidad">
+<!-- Floating trigger -->
+<button class="accessibility-trigger" (click)="toggleMenu()" aria-label="Opciones de accesibilidad">
+  <span class="material-symbols-outlined">accessibility_new</span>
+</button>
+
+<!-- Panel -->
+<div class="accessibility-panel" [class.show]="showMenu">
+  <div class="acc-header">
+    <span class="font-label text-[10px] uppercase tracking-widest text-[#c9a96e]">Accesibilidad</span>
+    <button (click)="toggleMenu()" class="acc-close">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="acc-body">
+    <!-- Font size -->
+    <div class="acc-section">
+      <p class="acc-label">Tamaño de fuente</p>
+      <div class="acc-font-controls">
+        <button (click)="changeFontSize(-2)" class="acc-font-btn">A−</button>
+        <button (click)="resetAccessibility()" class="acc-font-btn acc-font-reset">Reset</button>
+        <button (click)="changeFontSize(2)" class="acc-font-btn">A+</button>
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <button class="acc-toggle" [class.active]="highContrast" (click)="toggleHighContrast()">
+      <span class="material-symbols-outlined">contrast</span>
+      <span class="acc-toggle-label">Alto Contraste</span>
+      <span class="acc-toggle-status">{{ highContrast ? 'ON' : 'OFF' }}</span>
     </button>
 
-    <!-- Accessibility Menu -->
-    <div class="accessibility-menu" [class.show]="showMenu">
-        <div class="menu-header">
-            <h3>Opciones de Accesibilidad</h3>
-            <button class="close-menu" (click)="toggleMenu()">&times;</button>
-        </div>
+    <button class="acc-toggle" [class.active]="invertColors" (click)="toggleInvertColors()">
+      <span class="material-symbols-outlined">invert_colors</span>
+      <span class="acc-toggle-label">Invertir Colores</span>
+      <span class="acc-toggle-status">{{ invertColors ? 'ON' : 'OFF' }}</span>
+    </button>
 
-        <div class="menu-body">
-            <!-- Font Size Controls -->
-            <div class="option-group">
-                <label>Tamaño de Fuente</label>
-                <div class="font-controls">
-                    <button (click)="changeFontSize(-2)" title="Disminuir fuente">A-</button>
-                    <button (click)="resetAccessibility()" title="Reiniciar">Reestablecer</button>
-                    <button (click)="changeFontSize(2)" title="Aumentar fuente">A+</button>
-                </div>
-            </div>
+    <button class="acc-toggle" [class.active]="underlineLinks" (click)="toggleUnderlineLinks()">
+      <span class="material-symbols-outlined">format_underlined</span>
+      <span class="acc-toggle-label">Subrayar Enlaces</span>
+      <span class="acc-toggle-status">{{ underlineLinks ? 'ON' : 'OFF' }}</span>
+    </button>
 
-            <!-- Toggles -->
-            <div class="option-item" (click)="toggleHighContrast()" [class.active]="highContrast">
-                <span class="icon">🌓</span>
-                <span class="label">Alto Contraste</span>
-                <span class="status">{{ highContrast ? 'Activado' : 'Desactivado' }}</span>
-            </div>
+    <button class="acc-toggle" [class.active]="readableFont" (click)="toggleReadableFont()">
+      <span class="material-symbols-outlined">text_fields</span>
+      <span class="acc-toggle-label">Fuente Legible</span>
+      <span class="acc-toggle-status">{{ readableFont ? 'ON' : 'OFF' }}</span>
+    </button>
+  </div>
 
-            <div class="option-item" (click)="toggleInvertColors()" [class.active]="invertColors">
-                <span class="icon">🔄</span>
-                <span class="label">Invertir Colores</span>
-                <span class="status">{{ invertColors ? 'Activado' : 'Desactivado' }}</span>
-            </div>
-
-            <div class="option-item" (click)="toggleUnderlineLinks()" [class.active]="underlineLinks">
-                <span class="icon"><u>A</u></span>
-                <span class="label">Subrayar Enlaces</span>
-                <span class="status">{{ underlineLinks ? 'Activado' : 'Desactivado' }}</span>
-            </div>
-
-            <div class="option-item" (click)="toggleReadableFont()" [class.active]="readableFont">
-                <span class="icon">🔡</span>
-                <span class="label">Fuente Legible</span>
-                <span class="status">{{ readableFont ? 'Activado' : 'Desactivado' }}</span>
-            </div>
-        </div>
-
-        <div class="menu-footer">
-            <button class="reset-all" (click)="resetAccessibility()">Restaurar todo</button>
-        </div>
-    </div>
+  <div class="acc-footer">
+    <button (click)="resetAccessibility()" class="acc-reset-all">
+      <span class="material-symbols-outlined text-sm">restart_alt</span>
+      Restaurar todo
+    </button>
+  </div>
 </div>
 
-<div class="menu-overlay" *ngIf="showMenu" (click)="toggleMenu()"></div>
+<div class="acc-overlay" *ngIf="showMenu" (click)="toggleMenu()"></div>

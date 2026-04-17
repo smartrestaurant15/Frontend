@@ -1,137 +1,147 @@
-<div class="profile-container">
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1] font-body px-8 py-10">
+
   <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <button class="btn-back" (click)="navigateToDashboard()">
-        <i class="fas fa-arrow-left"></i>
+  <div class="flex items-center justify-between mb-10">
+    <div class="flex items-center gap-4">
+      <button (click)="navigateToDashboard()"
+              class="flex items-center gap-2 text-[#998f81] hover:text-primary transition-colors font-label text-xs uppercase tracking-widest">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Volver
       </button>
-      <h1>Mi Perfil</h1>
+      <div class="h-4 w-px bg-[#4d463a]/40"></div>
+      <h1 class="font-headline text-2xl italic text-primary">Mi Perfil</h1>
     </div>
-    <button class="btn-change-password" (click)="navigateToChangePassword()">
-      <i class="fas fa-key"></i>
+    <button (click)="navigateToChangePassword()"
+            class="flex items-center gap-2 border border-[#4d463a]/40 text-[#d0c5b5] hover:border-primary/40 hover:text-primary transition-colors font-label text-xs uppercase tracking-widest px-5 py-2.5 rounded-sm">
+      <span class="material-symbols-outlined text-sm">key</span>
       Cambiar Contraseña
     </button>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Cargando perfil...</p>
+  <div *ngIf="loading" class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
   </div>
 
-  <!-- Profile Card -->
-  <div *ngIf="!loading && user" class="profile-card">
-    <div class="profile-header">
-      <div class="avatar">
-        <i class="fas fa-user"></i>
+  <ng-container *ngIf="!loading && user">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- LEFT: Avatar + account info -->
+      <div class="space-y-6">
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-8 flex flex-col items-center text-center">
+          <div class="w-20 h-20 rounded-full bg-[#201f1f] border-2 border-primary/30 flex items-center justify-center mb-4">
+            <span class="font-headline text-2xl text-primary font-bold uppercase">
+              {{ user.firstName?.charAt(0) }}{{ user.lastName?.charAt(0) }}
+            </span>
+          </div>
+          <h2 class="font-headline text-xl font-light text-[#e5e2e1] mb-1">{{ user.firstName }} {{ user.lastName }}</h2>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">{{ user.roleDisplayName }}</p>
+          <span class="inline-flex items-center px-3 py-1 rounded-full font-label text-[9px] font-bold uppercase tracking-wider"
+                [class.bg-primary]="user.status === 'ACTIVE'" [class.text-on-primary]="user.status === 'ACTIVE'"
+                [class.bg-red-900]="user.status !== 'ACTIVE'" [class.text-red-300]="user.status !== 'ACTIVE'">
+            {{ user.statusDisplayName }}
+          </span>
+        </div>
+
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-6 space-y-4">
+          <h3 class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-4">Información de Cuenta</h3>
+
+          <div class="flex justify-between items-center py-3 border-b border-[#4d463a]/10">
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Email verificado</span>
+            <span class="material-symbols-outlined text-base"
+                  [class.text-primary]="user.isEmailVerified"
+                  [class.text-[#4d463a]]="!user.isEmailVerified">
+              {{ user.isEmailVerified ? 'verified' : 'cancel' }}
+            </span>
+          </div>
+
+          <div class="flex justify-between items-center py-3 border-b border-[#4d463a]/10">
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Cambio de clave</span>
+            <span class="font-label text-[9px] uppercase tracking-wider"
+                  [class.text-amber-400]="user.requiresPasswordChange"
+                  [class.text-primary]="!user.requiresPasswordChange">
+              {{ user.requiresPasswordChange ? 'Requerido' : 'No requerido' }}
+            </span>
+          </div>
+
+          <div class="flex justify-between items-center py-3 border-b border-[#4d463a]/10">
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Registro</span>
+            <span class="font-body text-xs text-[#d0c5b5]">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="flex justify-between items-center py-3">
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Actualización</span>
+            <span class="font-body text-xs text-[#d0c5b5]">{{ user.updatedAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
       </div>
-      <div class="user-info">
-        <h2>{{ user.firstName }} {{ user.lastName }}</h2>
-        <p class="user-role">{{ user.roleDisplayName }}</p>
-        <span class="badge" [ngClass]="'badge-' + user.status.toLowerCase()">
-          {{ user.statusDisplayName }}
-        </span>
+
+      <!-- RIGHT: Edit form -->
+      <div class="lg:col-span-2">
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-8">
+          <div class="flex items-center justify-between mb-8">
+            <h3 class="font-headline text-xl italic text-primary">Información Personal</h3>
+            <button *ngIf="!isEditing" (click)="toggleEdit()"
+                    class="btn-metallic text-on-primary font-label text-[10px] uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              Editar
+            </button>
+          </div>
+
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-7">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-7">
+              <div class="group">
+                <label class="block font-label text-[10px] uppercase tracking-widest text-[#c9a96e] mb-2">
+                  Nombre
+                </label>
+                <input id="firstName" type="text" formControlName="firstName"
+                       class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 text-[#e5e2e1] font-light text-sm focus:outline-none focus:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                <p *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched"
+                   class="mt-1 font-label text-[10px] text-red-400 uppercase tracking-widest">
+                  El nombre es requerido
+                </p>
+              </div>
+
+              <div class="group">
+                <label class="block font-label text-[10px] uppercase tracking-widest text-[#c9a96e] mb-2">
+                  Apellido
+                </label>
+                <input id="lastName" type="text" formControlName="lastName"
+                       class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 text-[#e5e2e1] font-light text-sm focus:outline-none focus:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                <p *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched"
+                   class="mt-1 font-label text-[10px] text-red-400 uppercase tracking-widest">
+                  El apellido es requerido
+                </p>
+              </div>
+            </div>
+
+            <div class="group">
+              <label class="block font-label text-[10px] uppercase tracking-widest text-[#c9a96e] mb-2">
+                Correo Electrónico
+              </label>
+              <input id="email" type="email" formControlName="email"
+                     class="w-full bg-transparent border-0 border-b border-[#4d463a]/20 py-3 px-0 text-[#998f81] font-light text-sm cursor-not-allowed opacity-60">
+              <p class="font-label text-[9px] text-[#998f81]/50 mt-1">El correo no puede ser modificado</p>
+            </div>
+
+            <div *ngIf="isEditing" class="flex items-center justify-end gap-3 pt-4 border-t border-[#4d463a]/15">
+              <button type="button" (click)="toggleEdit()"
+                      class="px-5 py-2.5 border border-[#4d463a]/40 text-[#d0c5b5] hover:border-primary/40 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm">
+                Cancelar
+              </button>
+              <button type="submit" [disabled]="profileForm.invalid"
+                      class="btn-metallic text-on-primary font-label text-[10px] uppercase tracking-widest px-6 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all disabled:opacity-40">
+                <span class="material-symbols-outlined text-sm">save</span>
+                Guardar Cambios
+              </button>
+            </div>
+
+          </form>
+        </div>
       </div>
+
     </div>
+  </ng-container>
 
-    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-      <div class="form-section">
-        <h3>Información Personal</h3>
-        
-        <div class="form-group">
-          <label for="firstName">Nombre</label>
-          <input
-            id="firstName"
-            type="text"
-            formControlName="firstName"
-            class="form-control"
-            [class.error]="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched"
-          />
-          <span class="error-message" *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched">
-            El nombre es requerido
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label for="lastName">Apellido</label>
-          <input
-            id="lastName"
-            type="text"
-            formControlName="lastName"
-            class="form-control"
-            [class.error]="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched"
-          />
-          <span class="error-message" *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched">
-            El apellido es requerido
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            class="form-control"
-            readonly
-          />
-          <small class="form-hint">El email no puede ser modificado</small>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <h3>Información de Cuenta</h3>
-        
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Email Verificado:</label>
-            <span>
-              <i *ngIf="user.isEmailVerified" class="fas fa-check-circle text-success"></i>
-              <i *ngIf="!user.isEmailVerified" class="fas fa-times-circle text-danger"></i>
-              {{ user.isEmailVerified ? 'Sí' : 'No' }}
-            </span>
-          </div>
-
-          <div class="info-item">
-            <label>Requiere Cambio de Contraseña:</label>
-            <span>
-              <span *ngIf="user.requiresPasswordChange" class="badge badge-warning">Sí</span>
-              <span *ngIf="!user.requiresPasswordChange" class="badge badge-success">No</span>
-            </span>
-          </div>
-
-          <div class="info-item">
-            <label>Fecha de Registro:</label>
-            <span>{{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
-
-          <div class="info-item">
-            <label>Última Actualización:</label>
-            <span>{{ user.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button 
-          *ngIf="!isEditing" 
-          type="button" 
-          class="btn-primary" 
-          (click)="toggleEdit()">
-          <i class="fas fa-edit"></i>
-          Editar Perfil
-        </button>
-        
-        <ng-container *ngIf="isEditing">
-          <button type="button" class="btn-secondary" (click)="toggleEdit()">
-            Cancelar
-          </button>
-          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid">
-            <i class="fas fa-save"></i>
-            Guardar Cambios
-          </button>
-        </ng-container>
-      </div>
-    </form>
-  </div>
 </div>

@@ -1,145 +1,40 @@
-@import 'styles/variables';
+:host { display: block; }
 
 .inventory-form-container {
-  padding: $spacing-lg;
-  max-width: 800px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: #0a0a0a;
+  padding: 2rem;
 
   .form-card {
-    background: white;
-    border-radius: $border-radius-md;
-    box-shadow: $shadow-md;
-    padding: $spacing-lg;
+    background: #111111;
+    border: 1px solid rgba(77, 70, 58, 0.2);
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2.5rem;
 
     h2 {
-      margin-bottom: $spacing-lg;
-      color: $primary-color;
+      font-family: 'Noto Serif', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      font-style: italic;
+      color: #e6c487;
+      margin-bottom: 2rem;
     }
 
     form {
       .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: $spacing-md;
-      }
-
-      input, select, textarea {
-        width: 100%;
-        padding: $spacing-sm;
-        border: 1px solid $border-color;
-        border-radius: $border-radius-sm;
-        font-size: 14px;
-
-        &:focus {
-          outline: none;
-          border-color: $primary-color;
-        }
-      }
-
-      textarea {
-        resize: vertical;
+        gap: 1.5rem;
       }
 
       .form-actions {
         display: flex;
         justify-content: flex-end;
-        gap: $spacing-sm;
-        margin-top: $spacing-lg;
-      }
-
-      // Estilos para la sección de fotos
-      .photos-section {
-        .upload-area {
-          display: flex;
-          flex-direction: column;
-          gap: $spacing-xs;
-          margin-bottom: $spacing-md;
-
-          input[type="file"] {
-            display: none;
-          }
-
-          .upload-label {
-            display: inline-block;
-            padding: $spacing-sm $spacing-md;
-            background-color: $primary-color;
-            color: white;
-            border-radius: $border-radius-sm;
-            cursor: pointer;
-            text-align: center;
-            transition: background-color 0.2s;
-
-            &:hover:not(.disabled) {
-              background-color: darken($primary-color, 10%);
-            }
-
-            &.disabled {
-              background-color: $border-color;
-              cursor: not-allowed;
-            }
-          }
-
-          .help-text {
-            color: $text-light;
-            font-size: 12px;
-          }
-        }
-
-        .photos-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-          gap: $spacing-sm;
-
-          .photo-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: $border-radius-sm;
-            overflow: hidden;
-            border: 1px solid $border-color;
-
-            .photo-preview {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-
-            .remove-photo {
-              position: absolute;
-              top: 2px;
-              right: 2px;
-              width: 20px;
-              height: 20px;
-              border: none;
-              border-radius: 50%;
-              background-color: rgba(255, 0, 0, 0.8);
-              color: white;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 14px;
-              line-height: 1;
-              padding: 0;
-
-              &:hover {
-                background-color: red;
-              }
-            }
-          }
-        }
-
-        .no-photos {
-          padding: $spacing-md;
-          text-align: center;
-          color: $text-light;
-          background-color: $background-color;
-          border-radius: $border-radius-sm;
-
-          p {
-            margin: 0;
-          }
-        }
+        gap: 0.75rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(77, 70, 58, 0.2);
       }
     }
   }

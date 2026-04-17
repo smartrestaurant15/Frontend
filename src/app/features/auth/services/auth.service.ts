@@ -54,6 +54,20 @@ export class AuthService {
   }
 
   /**
+   * Reenviar código de verificación de email
+   */
+  resendVerification(email: string): Observable<string> {
+    return this.httpClient.post<string>('/auth/resend-verification', { email }, { responseType: 'text' as 'json' });
+  }
+
+  /**
+   * Reenviar código 2FA para login
+   */
+  resend2FA(email: string): Observable<string> {
+    return this.httpClient.post<string>('/auth/resend-2fa', { email }, { responseType: 'text' as 'json' });
+  }
+
+  /**
    * Verificación de email después del registro
    */
   verifyEmail(request: VerifyRequest): Observable<string> {
@@ -99,6 +113,13 @@ export class AuthService {
    */
   resetPassword(request: ResetPasswordRequest): Observable<string> {
     return this.httpClient.post<string>('/auth/reset-password', request, { responseType: 'text' as 'json' });
+  }
+
+  /**
+   * Cambiar contraseña cuando el usuario está autenticado (sin OTP)
+   */
+  changePasswordAuthenticated(request: { currentPassword: string; newPassword: string }): Observable<string> {
+    return this.httpClient.post<string>('/auth/change-password-authenticated', request, { responseType: 'text' as 'json' });
   }
 
   /**
@@ -182,6 +203,13 @@ export class AuthService {
   // ═══════════════════════════════════════════════════════════════════════════
   // OBTENER INFORMACIÓN DEL USUARIO ACTUAL
   // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Actualiza el perfil del usuario autenticado
+   */
+  updateProfile(data: { firstName: string; lastName: string }): Observable<any> {
+    return this.httpClient.put<any>('/auth/profile', data);
+  }
 
   /**
    * Obtener información del usuario actual

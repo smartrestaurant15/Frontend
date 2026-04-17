@@ -1,0 +1,77 @@
+:host {
+  display: block;
+}
+
+.kitchen-col {
+  display: flex;
+  flex-direction: column;
+}
+
+// ─── Order card ────────────────────────────────────────────────────────────
+.order-card {
+  background-color: #1a1a1a;
+  border: 1px solid;
+  border-left-width: 3px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: background-color 0.15s;
+
+  &:hover {
+    background-color: #1f1f1f;
+  }
+
+  // Urgency variants
+  &--warning {
+    background-color: #1c1a13;
+    &:hover { background-color: #201e16; }
+  }
+
+  &--urgent {
+    background-color: #1c1313;
+    &:hover { background-color: #201616; }
+    animation: pulse-border 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-left-color: rgba(239, 68, 68, 0.3); }
+  50%       { border-left-color: rgba(239, 68, 68, 0.8); }
+}
+
+// ─── Timer badge ───────────────────────────────────────────────────────────
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.timer-normal {
+  color: #6ee7b7;
+  border-color: rgba(110, 231, 183, 0.2);
+  background: rgba(110, 231, 183, 0.05);
+}
+
+.timer-warning {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.06);
+}
+
+.timer-urgent {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.07);
+}
+
+// ─── Empty state ───────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  border: 1px dashed rgba(77, 70, 58, 0.25);
+  color: #4d463a;
+}

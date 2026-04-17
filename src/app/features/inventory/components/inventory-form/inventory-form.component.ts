@@ -120,7 +120,7 @@ export class InventoryFormComponent implements OnInit {
             this.loading = false;
             if (!response.error) {
               this.notificationService.showSuccess('Producto actualizado exitosamente');
-              this.router.navigate(['/inventory/list']);
+              this.router.navigate(['/admin/inventory/list']);
             } else {
               this.notificationService.showError(response.message as string);
             }
@@ -144,7 +144,7 @@ export class InventoryFormComponent implements OnInit {
             this.loading = false;
             if (!response.error) {
               this.notificationService.showSuccess('Producto creado exitosamente');
-              this.router.navigate(['/inventory/list']);
+              this.router.navigate(['/admin/inventory/list']);
             } else {
               this.notificationService.showError(response.message as string);
             }
@@ -201,6 +201,6 @@ export class InventoryFormComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/inventory/list']);
+    this.router.navigate(['/admin/inventory/list']);
   }
 }

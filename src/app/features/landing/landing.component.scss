@@ -1,0 +1,11 @@
+// Landing uses Tailwind utility classes.
+// Only component-scoped overrides go here.
+
+:host {
+  display: block;
+}
+
+// Smooth scroll for anchor navigation
+html {
+  scroll-behavior: smooth;
+}

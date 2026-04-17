@@ -1,68 +1,62 @@
-<div class="supplier-management-container">
-  <!-- Header con navegación -->
-  <header class="page-header">
-    <div class="header-top">
-      <app-button variant="secondary" size="small" (clicked)="navigateToDashboard()">
-        ← Volver al Dashboard
-      </app-button>
-    </div>
-    <div class="header-main">
-      <div class="header-info">
-        <h1>Gestión de Proveedores</h1>
-        <p>Administra los proveedores del inventario</p>
-      </div>
-      <div class="header-actions">
-        <app-button variant="primary" (clicked)="openCreateModal()">
-          Agregar Proveedor
-        </app-button>
-      </div>
-    </div>
-  </header>
+<div class="min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body px-8 py-8">
 
-  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Abastecimiento</p>
+      <h1 class="font-headline text-2xl italic text-[#e5e2e1]">Proveedores</h1>
+    </div>
+    <button (click)="openCreateModal()" class="btn-metallic text-on-primary font-label text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
+      <span class="material-symbols-outlined text-sm">add</span>Nuevo Proveedor
+    </button>
+  </div>
 
-  <!-- Contenido principal -->
-  <main class="page-content" *ngIf="!loading">
-    <div *ngIf="suppliers.length > 0" class="suppliers-grid">
-      <div *ngFor="let supplier of suppliers" class="supplier-card">
-        <h3>{{ supplier.name }}</h3>
-        <div class="supplier-info">
-          <p><strong>Dirección:</strong> {{ supplier.address }}</p>
-          <p><strong>Teléfono:</strong> {{ supplier.phone }}</p>
-          <p><strong>Email:</strong> {{ supplier.email }}</p>
+  <div *ngIf="loading" class="flex items-center justify-center h-32">
+    <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <div *ngIf="!loading && suppliers.length === 0" class="flex flex-col items-center justify-center h-48 text-[#998f81]/50">
+    <span class="material-symbols-outlined text-4xl mb-3">local_shipping</span>
+    <p class="font-body text-sm">No hay proveedores registrados</p>
+  </div>
+
+  <div *ngIf="!loading && suppliers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div *ngFor="let supplier of suppliers"
+         class="bg-[#111111] border border-[#4d463a]/15 p-6 hover:bg-[#1a1a1a] transition-colors group">
+      <div class="flex items-start justify-between mb-5">
+        <div class="w-10 h-10 bg-[#2a2a2a] rounded-sm flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary text-base">local_shipping</span>
         </div>
-        <div class="card-actions">
-          <app-button variant="secondary" size="small" (clicked)="openEditModal(supplier.id)">
-            Editar
-          </app-button>
-          <app-button variant="danger" size="small" (clicked)="deleteSupplier(supplier.id)">
-            Eliminar
-          </app-button>
+        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button (click)="openEditModal(supplier.id)" class="p-1.5 text-[#998f81] hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-base">edit</span>
+          </button>
+          <button (click)="deleteSupplier(supplier.id)" class="p-1.5 text-[#998f81] hover:text-red-400 transition-colors">
+            <span class="material-symbols-outlined text-base">delete</span>
+          </button>
         </div>
       </div>
-    </div>
-
-    <div *ngIf="suppliers.length === 0" class="empty-state">
-      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-        <circle cx="8.5" cy="7" r="4"></circle>
-        <polyline points="17 11 19 13 23 9"></polyline>
-      </svg>
-      <h3>No hay proveedores</h3>
-      <p>Comienza agregando tu primer proveedor</p>
-      <div class="empty-actions">
-        <app-button variant="primary" (clicked)="openCreateModal()">
-          Agregar proveedor
-        </app-button>
+      <h3 class="font-headline text-base font-semibold text-[#e5e2e1] mb-4">{{ supplier.name }}</h3>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#998f81] text-sm">location_on</span>
+          <span class="font-body text-xs text-[#d0c5b5]">{{ supplier.address }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#998f81] text-sm">phone</span>
+          <span class="font-body text-xs text-[#d0c5b5]">{{ supplier.phone }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#998f81] text-sm">mail</span>
+          <span class="font-body text-xs text-[#d0c5b5]">{{ supplier.email }}</span>
+        </div>
       </div>
     </div>
-  </main>
-
-  <!-- Modal de formulario -->
-  <app-supplier-form-modal
-    [isOpen]="isModalOpen"
-    [supplierId]="selectedSupplierId"
-    (closeModal)="closeModal()"
-    (supplierSaved)="onSupplierSaved()">
-  </app-supplier-form-modal>
+  </div>
 </div>
+
+<app-supplier-form-modal
+  [isOpen]="isModalOpen"
+  [supplierId]="selectedSupplierId"
+  (closeModal)="closeModal()"
+  (supplierSaved)="onSupplierSaved()">
+</app-supplier-form-modal>

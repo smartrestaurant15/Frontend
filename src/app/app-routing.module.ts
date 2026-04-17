@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AccessDeniedComponent } from '@shared/components/access-denied/access-denied.component';
+import { AuthGuard } from '@core/guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: '/auth/login',
-    pathMatch: 'full'
+    loadChildren: () => import('./features/landing/landing.module').then(m => m.LandingModule)
   },
   {
     path: 'auth',
@@ -14,29 +14,33 @@ const routes: Routes = [
   },
   {
     path: 'inventory',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./features/inventory/inventory.module').then(m => m.InventoryModule)
-  },
-  // Ruta de dashboard por defecto para usuarios autenticados
-  {
-    path: 'dashboard',
-    redirectTo: '/inventory',
-    pathMatch: 'full'
   },
   {
     path: 'admin',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminModule)
   },
   {
     path: 'customer',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./features/customer/customer.module').then(m => m.CustomerModule)
   },
   {
+    path: 'orders',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./features/orders/orders.module').then(m => m.OrdersModule)
+  },
+  {
     path: 'kitchen',
-    redirectTo: '/inventory'
+    redirectTo: '/orders/kitchen',
+    pathMatch: 'full'
   },
   {
     path: 'waiter',
-    redirectTo: '/inventory'
+    redirectTo: '/orders/waiter',
+    pathMatch: 'full'
   },
   {
     path: 'access-denied',

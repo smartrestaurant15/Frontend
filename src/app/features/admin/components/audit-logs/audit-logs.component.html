@@ -1,131 +1,189 @@
-<div class="audit-logs-container">
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1] font-body px-8 py-10">
+
   <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <button class="btn-back" (click)="navigateToDashboard()">
-        <i class="fas fa-arrow-left"></i>
-      </button>
-      <h1>Auditoría de Seguridad</h1>
-    </div>
+  <div class="mb-10">
+    <h2 class="font-headline text-4xl text-primary tracking-tight mb-2">Auditoría de Seguridad</h2>
+    <p class="text-[#d0c5b5] font-light max-w-2xl text-sm leading-relaxed">
+      Registro detallado de accesos y acciones críticas del sistema para asegurar la integridad operativa.
+    </p>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-section">
-    <div class="filter-group">
-      <label>Tipo de Vista:</label>
-      <select [(ngModel)]="viewType" (change)="onViewTypeChange()" class="filter-select">
-        <option value="all">Todos los logs</option>
-        <option value="failed">Eventos fallidos</option>
-        <option value="critical">Eventos críticos</option>
-        <option value="byEventType">Por tipo de evento</option>
-        <option value="byDateRange">Por rango de fechas</option>
-      </select>
+  <!-- Filters -->
+  <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-8 pb-8 border-b border-[#4d463a]/10">
+    <div class="flex flex-wrap gap-6">
+
+      <!-- View type -->
+      <div class="flex flex-col gap-2">
+        <label class="font-label text-[10px] uppercase tracking-[0.2em] text-[#998f81]">Tipo de vista</label>
+        <select [(ngModel)]="viewType" (change)="onViewTypeChange()"
+                class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-2 px-0 min-w-[200px]">
+          <option value="all">Todos los logs</option>
+          <option value="failed">Eventos fallidos</option>
+          <option value="critical">Eventos críticos</option>
+          <option value="byEventType">Por tipo de evento</option>
+          <option value="byDateRange">Por rango de fechas</option>
+        </select>
+      </div>
+
+      <!-- Event type filter -->
+      <div *ngIf="viewType === 'byEventType'" class="flex flex-col gap-2">
+        <label class="font-label text-[10px] uppercase tracking-[0.2em] text-[#998f81]">Tipo de Evento</label>
+        <select [(ngModel)]="selectedEventType" (change)="loadLogs()"
+                class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-2 px-0 min-w-[200px]">
+          <option [ngValue]="null">Seleccione un tipo</option>
+          <option *ngFor="let event of eventTypes" [ngValue]="event.value">{{ event.label }}</option>
+        </select>
+      </div>
+
+      <!-- Date range filters -->
+      <div *ngIf="viewType === 'byDateRange'" class="flex gap-4">
+        <div class="flex flex-col gap-2">
+          <label class="font-label text-[10px] uppercase tracking-[0.2em] text-[#998f81]">Fecha Inicio</label>
+          <input type="date" [(ngModel)]="startDate" (change)="loadLogs()"
+                 class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-2 px-0">
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-label text-[10px] uppercase tracking-[0.2em] text-[#998f81]">Fecha Fin</label>
+          <input type="date" [(ngModel)]="endDate" (change)="loadLogs()"
+                 class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-2 px-0">
+        </div>
+      </div>
     </div>
 
-    <!-- Filtro por tipo de evento -->
-    <div class="filter-group" *ngIf="viewType === 'byEventType'">
-      <label>Tipo de Evento:</label>
-      <select [(ngModel)]="selectedEventType" (change)="loadLogs()" class="filter-select">
-        <option [ngValue]="null">Seleccione un tipo</option>
-        <option *ngFor="let event of eventTypes" [ngValue]="event.value">{{ event.label }}</option>
-      </select>
-    </div>
-
-    <!-- Filtro por rango de fechas -->
-    <div class="filter-group" *ngIf="viewType === 'byDateRange'">
-      <label>Fecha Inicio:</label>
-      <input type="date" [(ngModel)]="startDate" (change)="loadLogs()" class="filter-input" />
-    </div>
-
-    <div class="filter-group" *ngIf="viewType === 'byDateRange'">
-      <label>Fecha Fin:</label>
-      <input type="date" [(ngModel)]="endDate" (change)="loadLogs()" class="filter-input" />
-    </div>
-
-    <button class="btn-refresh" (click)="loadLogs()" title="Refrescar">
-      <i class="fas fa-sync-alt"></i>
+    <button (click)="loadLogs()"
+            class="flex items-center gap-2 btn-metallic text-on-primary px-5 py-2.5 rounded-sm font-label text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+      <span class="material-symbols-outlined text-sm">refresh</span>
       Refrescar
     </button>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Cargando logs de auditoría...</p>
+  <div *ngIf="loading" class="flex items-center justify-center h-32">
+    <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
   </div>
 
-  <!-- Tabla de logs -->
-  <div *ngIf="!loading" class="table-container">
-    <table class="logs-table">
+  <!-- Table -->
+  <div *ngIf="!loading" class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden">
+    <table class="w-full text-left border-collapse">
       <thead>
-        <tr>
-          <th>ID</th>
-          <th>Fecha/Hora</th>
-          <th>Usuario</th>
-          <th>Evento</th>
-          <th>Estado</th>
-          <th>IP</th>
-          <th>Detalles</th>
-          <th>Crítico</th>
+        <tr class="bg-[#0a0a0a] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+          <th class="px-5 py-4 font-medium">ID</th>
+          <th class="px-5 py-4 font-medium">Fecha / Hora</th>
+          <th class="px-5 py-4 font-medium">Usuario</th>
+          <th class="px-5 py-4 font-medium">Evento</th>
+          <th class="px-5 py-4 font-medium">Estado</th>
+          <th class="px-5 py-4 font-medium">IP</th>
+          <th class="px-5 py-4 font-medium">Crítico</th>
+          <th class="px-5 py-4 font-medium">Detalles</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let log of logs" [class.critical-row]="log.critical" [class.failed-row]="!log.success">
-          <td>{{ log.id }}</td>
-          <td>{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-          <td>
-            <div class="user-info">
-              <span class="user-email">{{ log.userEmail || 'N/A' }}</span>
-              <span class="user-id" *ngIf="log.userId">(ID: {{ log.userId }})</span>
+      <tbody class="divide-y divide-[#4d463a]/5">
+        <tr *ngFor="let log of logs"
+            class="hover:bg-[#1a1a1a] transition-colors"
+            [class.border-l-2]="log.critical"
+            [class.border-red-500]="log.critical">
+
+          <td class="px-5 py-4">
+            <span class="font-label text-[10px] text-[#998f81]">#{{ log.id }}</span>
+          </td>
+
+          <td class="px-5 py-4">
+            <span class="font-body text-sm text-[#e5e2e1]">{{ log.timestamp | date:'dd MMM, yyyy · HH:mm:ss' }}</span>
+          </td>
+
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full flex-shrink-0"
+                   [class.bg-primary]="log.success"
+                   [class.bg-red-500]="!log.success"></div>
+              <div>
+                <p class="font-body text-sm text-[#e5e2e1]">{{ log.userEmail || 'N/A' }}</p>
+                <p *ngIf="log.userId" class="font-label text-[10px] text-[#998f81]">ID: {{ log.userId }}</p>
+              </div>
             </div>
           </td>
-          <td>
-            <span class="badge" [ngClass]="getEventBadgeClass(log.eventType)">
+
+          <td class="px-5 py-4">
+            <span class="px-2.5 py-1 bg-[#2a2a2a] text-[#e5e2e1] font-label text-[10px] rounded-full">
               {{ log.eventTypeName }}
             </span>
           </td>
-          <td>
-            <span class="status-badge" [class.status-success]="log.success" [class.status-failed]="!log.success">
-              <i [class.fa-check-circle]="log.success" [class.fa-times-circle]="!log.success" class="fas"></i>
+
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-1.5 font-label text-xs font-medium"
+                 [class.text-primary]="log.success"
+                 [class.text-red-400]="!log.success">
+              <span class="w-1.5 h-1.5 rounded-full"
+                    [class.bg-primary]="log.success"
+                    [class.bg-red-400]="!log.success"></span>
               {{ log.success ? 'Exitoso' : 'Fallido' }}
-            </span>
-          </td>
-          <td>{{ log.ipAddress || 'N/A' }}</td>
-          <td>
-            <div class="details-cell">
-              <span class="details-text" [title]="log.details || ''">
-                {{ log.details || 'Sin detalles' }}
-              </span>
-              <span class="error-message" *ngIf="log.errorMessage">
-                <i class="fas fa-exclamation-triangle"></i>
-                {{ log.errorMessage }}
-              </span>
             </div>
           </td>
-          <td>
-            <i *ngIf="log.critical" class="fas fa-exclamation-circle critical-icon" title="Evento crítico"></i>
-            <span *ngIf="!log.critical">-</span>
+
+          <td class="px-5 py-4">
+            <span class="font-mono text-xs text-[#998f81]">{{ log.ipAddress || 'N/A' }}</span>
+          </td>
+
+          <td class="px-5 py-4 text-center">
+            <span *ngIf="log.critical" class="material-symbols-outlined text-red-400 text-base">priority_high</span>
+            <span *ngIf="!log.critical" class="material-symbols-outlined text-[#4d463a] text-base">priority_high</span>
+          </td>
+
+          <td class="px-5 py-4 max-w-xs">
+            <p class="font-body text-xs text-[#d0c5b5] truncate" [title]="log.details || ''">
+              {{ log.details || 'Sin detalles' }}
+            </p>
+            <p *ngIf="log.errorMessage" class="font-body text-[10px] text-red-400 truncate mt-0.5">
+              {{ log.errorMessage }}
+            </p>
+          </td>
+        </tr>
+
+        <tr *ngIf="logs.length === 0">
+          <td colspan="8" class="px-5 py-16 text-center text-[#998f81]/50">
+            <span class="material-symbols-outlined text-3xl block mb-2">security</span>
+            <p class="font-body text-sm">No se encontraron registros de auditoría</p>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div *ngIf="logs.length === 0" class="empty-state">
-      <i class="fas fa-clipboard-list"></i>
-      <p>No se encontraron logs de auditoría</p>
+    <!-- Pagination -->
+    <div class="px-6 py-4 bg-[#0a0a0a] border-t border-[#4d463a]/10 flex items-center justify-between">
+      <p class="font-label text-xs text-[#998f81]">
+        Mostrando <span class="text-[#e5e2e1]">{{ logs.length }}</span>
+        de <span class="text-[#e5e2e1]">{{ totalElements }}</span> registros
+      </p>
+      <div class="flex items-center gap-2">
+        <button (click)="previousPage()" [disabled]="!hasPreviousPage()"
+                class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-[#2a2a2a] text-[#998f81] disabled:opacity-30 transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_left</span>
+        </button>
+        <span class="w-8 h-8 flex items-center justify-center rounded-sm bg-primary/20 text-primary font-label text-[10px] font-bold">
+          {{ currentPage + 1 }}
+        </span>
+        <button (click)="nextPage()" [disabled]="!hasNextPage()"
+                class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-[#2a2a2a] text-[#998f81] disabled:opacity-30 transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_right</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Paginación -->
-  <div class="pagination" *ngIf="!loading && logs.length > 0">
-    <button class="btn-page" (click)="previousPage()" [disabled]="currentPage === 0">
-      <i class="fas fa-chevron-left"></i>
-      Anterior
-    </button>
-    <span class="page-info">Página {{ currentPage + 1 }}</span>
-    <button class="btn-page" (click)="nextPage()" [disabled]="logs.length < pageSize">
-      Siguiente
-      <i class="fas fa-chevron-right"></i>
-    </button>
+  <!-- Stats summary -->
+  <div *ngIf="!loading && logs.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8">
+    <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Total Registros</p>
+      <p class="font-headline text-3xl text-primary">{{ totalElements }}</p>
+    </div>
+    <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Fallidos (página actual)</p>
+      <p class="font-headline text-3xl text-red-400">{{ failedCount }}</p>
+    </div>
+    <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Críticos (página actual)</p>
+      <p class="font-headline text-3xl text-amber-400">{{ criticalCount }}</p>
+    </div>
   </div>
+
 </div>

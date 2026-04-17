@@ -84,7 +84,7 @@ export class StockAlertComponent implements OnInit {
   }
 
   viewProduct(product: LowStockProduct): void {
-    this.router.navigate(['/inventory/detail', product.id]);
+    this.router.navigate(['/admin/inventory/detail', product.id]);
   }
 
   getStockPercentage(product: LowStockProduct): number {

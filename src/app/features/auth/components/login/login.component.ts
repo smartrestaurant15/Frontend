@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -13,7 +13,7 @@ import { UserRole } from '../../models/user-role.enum';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   loginForm!: FormGroup;
   loading = false;
   showPassword = false;
@@ -24,6 +24,11 @@ export class LoginComponent implements OnInit {
   requires2FA = false;
   twoFAForm!: FormGroup;
   pendingEmail = '';
+
+  // Reenvío OTP
+  resending2FA = false;
+  cooldown2FA = 0;
+  private cooldownInterval: any;
 
   constructor(
     private fb: FormBuilder,
@@ -137,43 +142,33 @@ export class LoginComponent implements OnInit {
   }
 
   handleSuccessfulLogin(response: any): void {
-    // Guardar tokens PRIMERO
     this.storageService.setToken(response.accessToken);
     this.storageService.setRefreshToken(response.refreshToken);
 
-    // Decodificar el token JWT para obtener el rol
     const tokenPayload = this.decodeToken(response.accessToken);
     const userRole = tokenPayload?.role || UserRole.CUSTOMER;
 
-    this.notificationService.showSuccess('Inicio de sesión exitoso');
+    // Solo mostrar el toast si viene de un login real (no de cambio de contraseña)
+    this.storageService.setItem('showLoginSuccess', 'true');
     this.loading = false;
 
-    // Pequeño delay para asegurar que el token se guardó
     setTimeout(() => {
-      // Obtener información completa del usuario desde el backend
       this.authService.getCurrentUser().subscribe({
         next: (userInfo) => {
-          // Guardar información completa del usuario
           this.storageService.setUser(userInfo);
-
-          // Redirigir según el rol del usuario
           if (this.returnUrl) {
             this.router.navigateByUrl(this.returnUrl);
           } else {
-            // Usar RoleRedirectService para redirigir según el rol
             this.roleRedirectService.redirectByRole(userRole, response.requiresPasswordChange || false);
           }
         },
         error: (err) => {
           console.error('Error al obtener información del usuario:', err);
-          // Si falla, guardar información básica del token
           this.storageService.setUser({
             email: tokenPayload?.sub || this.loginForm.value.email,
             role: userRole,
             permissions: tokenPayload?.permissions || []
           });
-
-          // Redirigir de todas formas
           if (this.returnUrl) {
             this.router.navigateByUrl(this.returnUrl);
           } else {
@@ -181,7 +176,7 @@ export class LoginComponent implements OnInit {
           }
         }
       });
-    }, 100); // 100ms de delay
+    }, 100);
   }
 
   /**
@@ -237,5 +232,26 @@ export class LoginComponent implements OnInit {
     this.requires2FA = false;
     this.pendingEmail = '';
     this.twoFAForm.reset();
+  }
+
+  resend2FA(): void {
+    if (this.resending2FA || this.cooldown2FA > 0) return;
+    this.resending2FA = true;
+    this.authService.resend2FA(this.pendingEmail).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Código reenviado a tu correo');
+        this.resending2FA = false;
+        this.cooldown2FA = 60;
+        this.cooldownInterval = setInterval(() => {
+          this.cooldown2FA--;
+          if (this.cooldown2FA <= 0) clearInterval(this.cooldownInterval);
+        }, 1000);
+      },
+      error: () => { this.resending2FA = false; }
+    });
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.cooldownInterval);
   }
 }

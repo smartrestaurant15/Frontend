@@ -1,0 +1,242 @@
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1] font-body">
+
+  <!-- Fixed grainy overlay -->
+  <div class="fixed inset-0 grainy-overlay pointer-events-none z-10"></div>
+
+  <!-- Nav -->
+  <nav class="sticky top-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl border-b border-[#4d463a]/15 px-6 md:px-12 py-5 flex items-center justify-between">
+    <button (click)="goBack()"
+            class="flex items-center gap-2 text-[#998f81] hover:text-primary transition-colors font-label text-xs uppercase tracking-widest">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      Volver
+    </button>
+    <span class="font-headline text-lg text-primary uppercase tracking-widest">SmartRestaurant</span>
+    <div class="w-20"></div>
+  </nav>
+
+  <!-- Content -->
+  <main class="relative z-20 max-w-3xl mx-auto px-6 md:px-12 py-20">
+
+    <!-- Header -->
+    <div class="mb-16 space-y-4">
+      <span class="font-label text-[10px] uppercase tracking-[0.4em] text-primary block">Documentos Legales</span>
+      <h1 class="font-headline text-4xl md:text-5xl font-light text-[#e5e2e1] leading-tight">
+        Términos de Uso y<br>Política de Privacidad
+      </h1>
+      <div class="w-16 h-px bg-primary/40"></div>
+      <p class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+        Última actualización: 15 de abril de 2026 · SmartRestaurant, Armenia, Quindío, Colombia
+      </p>
+    </div>
+
+    <!-- Sections -->
+    <div class="space-y-14">
+
+      <!-- 1. Aceptación -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">1. Aceptación de los Términos</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm">
+          Al acceder y utilizar la plataforma SmartRestaurant, usted acepta quedar vinculado por estos Términos de Uso
+          y nuestra Política de Privacidad. Si no está de acuerdo con alguna parte de estos términos, le rogamos que
+          no utilice nuestros servicios. El uso continuado de la plataforma constituye la aceptación de cualquier
+          modificación que realicemos a estos términos.
+        </p>
+      </section>
+
+      <!-- 2. Descripción del servicio -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">2. Descripción del Servicio</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm mb-4">
+          SmartRestaurant es una plataforma de gestión gastronómica que ofrece los siguientes módulos:
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              <span class="text-primary font-label text-xs uppercase tracking-widest">Inventario —</span>
+              Control de insumos, categorías, proveedores y alertas de stock.
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              <span class="text-primary font-label text-xs uppercase tracking-widest">Menú del Día —</span>
+              Publicación y gestión de platos y bebidas disponibles.
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              <span class="text-primary font-label text-xs uppercase tracking-widest">Pedidos —</span>
+              Gestión de órdenes en línea y presenciales con seguimiento en tiempo real.
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              <span class="text-primary font-label text-xs uppercase tracking-widest">Administración —</span>
+              Gestión de usuarios, roles, auditoría y configuración del sistema.
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 3. Registro y cuenta -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">3. Registro y Cuenta de Usuario</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm mb-4">
+          Para acceder a los servicios de SmartRestaurant, deberá crear una cuenta proporcionando información
+          veraz, completa y actualizada. Usted es responsable de:
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Mantener la confidencialidad de sus credenciales de acceso.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Notificar inmediatamente cualquier uso no autorizado de su cuenta.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Todas las actividades realizadas bajo su cuenta.</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 4. Privacidad y datos -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">4. Política de Privacidad y Tratamiento de Datos</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm mb-6">
+          En cumplimiento de la Ley 1581 de 2012 (Ley de Protección de Datos Personales de Colombia) y sus
+          decretos reglamentarios, SmartRestaurant informa sobre el tratamiento de sus datos personales:
+        </p>
+
+        <div class="space-y-6">
+          <div class="border-l-2 border-primary/30 pl-6">
+            <h3 class="font-label text-xs uppercase tracking-widest text-primary mb-2">Datos que recopilamos</h3>
+            <p class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              Nombre completo, correo electrónico, información de perfil y datos de actividad dentro de la plataforma
+              (pedidos, preferencias, historial de acceso).
+            </p>
+          </div>
+
+          <div class="border-l-2 border-primary/30 pl-6">
+            <h3 class="font-label text-xs uppercase tracking-widest text-primary mb-2">Finalidad del tratamiento</h3>
+            <p class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              Gestión de la cuenta de usuario, prestación del servicio, personalización de la experiencia,
+              comunicaciones relacionadas con el servicio, seguridad y prevención de fraude.
+            </p>
+          </div>
+
+          <div class="border-l-2 border-primary/30 pl-6">
+            <h3 class="font-label text-xs uppercase tracking-widest text-primary mb-2">Almacenamiento y seguridad</h3>
+            <p class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              Sus datos se almacenan en servidores seguros con cifrado de extremo a extremo. Implementamos
+              medidas técnicas y organizativas para proteger su información contra acceso no autorizado,
+              pérdida o destrucción.
+            </p>
+          </div>
+
+          <div class="border-l-2 border-primary/30 pl-6">
+            <h3 class="font-label text-xs uppercase tracking-widest text-primary mb-2">Sus derechos</h3>
+            <p class="font-body text-[#d0c5b5] font-light text-sm leading-relaxed">
+              Usted tiene derecho a conocer, actualizar, rectificar y suprimir sus datos personales, así como
+              a revocar la autorización otorgada. Para ejercer estos derechos, contáctenos en
+              <span class="text-primary">Smartrestauran15&#64;gmail.com</span>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Uso aceptable -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">5. Uso Aceptable</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm mb-4">
+          Queda expresamente prohibido:
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-red-400/60 rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Usar la plataforma para actividades ilegales o fraudulentas.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-red-400/60 rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Intentar acceder a cuentas de otros usuarios sin autorización.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-red-400/60 rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Interferir con el funcionamiento normal de la plataforma.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-1 h-1 bg-red-400/60 rounded-full mt-2 flex-shrink-0"></span>
+            <span class="font-body text-[#d0c5b5] font-light text-sm">Compartir credenciales de acceso con terceros no autorizados.</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 6. Limitación de responsabilidad -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">6. Limitación de Responsabilidad</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm">
+          SmartRestaurant no será responsable por daños indirectos, incidentales o consecuentes derivados del
+          uso o la imposibilidad de uso de la plataforma. Nos esforzamos por mantener el servicio disponible
+          de forma continua, pero no garantizamos la disponibilidad ininterrumpida del mismo.
+        </p>
+      </section>
+
+      <!-- 7. Modificaciones -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">7. Modificaciones</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm">
+          Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones
+          entrarán en vigor inmediatamente después de su publicación en la plataforma. Le notificaremos
+          los cambios significativos a través del correo electrónico registrado en su cuenta.
+        </p>
+      </section>
+
+      <!-- 8. Contacto -->
+      <section>
+        <h2 class="font-headline text-2xl font-light text-[#e5e2e1] mb-4">8. Contacto</h2>
+        <div class="w-8 h-px bg-primary/30 mb-6"></div>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed text-sm mb-6">
+          Para cualquier consulta relacionada con estos términos o el tratamiento de sus datos personales:
+        </p>
+        <div class="bg-[#1c1b1b] border border-[#4d463a]/20 rounded-lg p-8 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-base">location_on</span>
+            <span class="font-body text-[#d0c5b5] text-sm">Universidad del Quindío, Armenia, Quindío, Colombia</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-base">mail</span>
+            <span class="font-body text-[#d0c5b5] text-sm">Smartrestauran15&#64;gmail.com</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-base">phone</span>
+            <span class="font-body text-[#d0c5b5] text-sm">3244454996</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Back button bottom -->
+    <div class="mt-20 pt-10 border-t border-[#4d463a]/15 flex justify-between items-center">
+      <button (click)="goBack()"
+              class="btn-metallic text-on-primary font-label text-xs uppercase tracking-widest px-8 py-3.5 rounded-md active:scale-[0.98] transition-all">
+        Volver al Registro
+      </button>
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#e5e2e1]/30">
+        © 2026 SmartRestaurant
+      </p>
+    </div>
+
+  </main>
+</div>

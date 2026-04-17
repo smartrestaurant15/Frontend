@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SuplierService } from '../../services/suplier.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SuplierResponse } from '../../models/suplier.model';
+import { CustomValidators } from '@shared/validators/custom-validators';
 
 @Component({
   selector: 'app-supplier-form-modal',
@@ -42,10 +43,10 @@ export class SupplierFormModalComponent implements OnInit, OnChanges {
 
   initForm(): void {
     this.supplierForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
-      address: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
-      phone: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10), Validators.pattern(/^\d{10}$/)]],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]]
+      name:    ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50), CustomValidators.noWhitespace()]],
+      address: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50), CustomValidators.noWhitespace()]],
+      phone:   ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10), Validators.pattern(/^\d{10}$/)]],
+      email:   ['', [Validators.required, Validators.email, Validators.maxLength(50)]]
     });
   }
 

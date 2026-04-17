@@ -1,7 +1,7 @@
 <app-navbar *ngIf="showNavbar()"></app-navbar>
-<div class="app-content">
+<div class="app-content" [class.no-bg]="isAdminRoute()">
   <router-outlet></router-outlet>
 </div>
 <app-accessibility></app-accessibility>
 <app-toast></app-toast>
-<app-chatbot></app-chatbot>
+<app-chatbot *ngIf="showChatbot()"></app-chatbot>

@@ -1,0 +1,181 @@
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1]">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-40 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#4d463a]/15 flex items-center justify-between px-6 md:px-10 h-14">
+    <button (click)="goHome()" class="flex items-center gap-2 text-[#998f81] hover:text-[#e6c487] transition-colors">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      <span class="font-label text-xs uppercase tracking-wider hidden sm:inline">Inicio</span>
+    </button>
+
+    <h1 class="font-headline text-base text-[#e5e2e1]">Menú</h1>
+
+    <!-- Cart button -->
+    <button (click)="cartOpen = !cartOpen" class="relative flex items-center gap-2 px-3 py-1.5 border border-[#4d463a]/30 hover:border-[#e6c487]/40 transition-colors">
+      <span class="material-symbols-outlined text-[#e6c487] text-lg">shopping_bag</span>
+      <span *ngIf="cartCount > 0" class="font-label text-xs text-[#e6c487]">{{ cartCount }}</span>
+      <span *ngIf="cartTotal > 0" class="font-headline text-xs text-[#998f81] hidden sm:inline">${{ cartTotal | number:'1.0-0' }}</span>
+    </button>
+  </nav>
+
+  <div class="flex h-[calc(100vh-3.5rem)]">
+
+    <!-- Products panel -->
+    <div class="flex-1 overflow-y-auto">
+
+      <!-- Tabs -->
+      <div class="sticky top-0 z-30 bg-[#0e0e0e]/95 backdrop-blur-sm border-b border-[#4d463a]/10 flex px-6 md:px-10">
+        <button
+          *ngFor="let tab of tabs"
+          (click)="activeTab = tab.value; searchQuery = ''"
+          class="flex items-center gap-2 px-4 py-3 font-label text-[10px] uppercase tracking-wider border-b-2 transition-colors -mb-px"
+          [ngClass]="activeTab === tab.value
+            ? 'border-[#e6c487] text-[#e6c487]'
+            : 'border-transparent text-[#998f81] hover:text-[#d0c5b5]'">
+          <span class="material-symbols-outlined text-sm">{{ tab.icon }}</span>
+          {{ tab.label }}
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="px-6 md:px-10 py-4">
+        <div class="relative max-w-md">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#998f81] text-base">search</span>
+          <input
+            [(ngModel)]="searchQuery"
+            placeholder="Buscar en el menú..."
+            class="w-full bg-[#1a1a1a] border border-[#4d463a]/20 pl-9 pr-4 py-2 text-sm text-[#e5e2e1] placeholder-[#998f81]/40 focus:outline-none focus:border-[#e6c487]/40 transition-colors" />
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex justify-center py-16">
+        <div class="w-7 h-7 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Products grid -->
+      <div *ngIf="!loading" class="px-6 md:px-10 pb-10">
+        <div *ngIf="currentProducts.length === 0" class="flex flex-col items-center py-20 gap-3">
+          <span class="material-symbols-outlined text-4xl text-[#4d463a]">search_off</span>
+          <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin resultados</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div
+            *ngFor="let product of currentProducts; trackBy: trackById"
+            class="group bg-[#131313] border border-[#4d463a]/15 hover:border-[#4d463a]/30 transition-all flex flex-col">
+
+            <!-- Product image -->
+            <div class="aspect-[4/3] overflow-hidden bg-[#1a1a1a] relative">
+              <img *ngIf="product.photo" [src]="product.photo" [alt]="product.name"
+                class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+              <div *ngIf="!product.photo" class="w-full h-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-[#4d463a]">
+                  {{ activeTab === 'DISH' ? 'restaurant_menu' : activeTab === 'DRINK' ? 'local_bar' : 'add_circle' }}
+                </span>
+              </div>
+              <!-- Qty badge -->
+              <div *ngIf="getQty(product) > 0"
+                class="absolute top-2 right-2 bg-[#e6c487] text-[#0e0e0e] font-bold text-xs w-6 h-6 flex items-center justify-center rounded-full">
+                {{ getQty(product) }}
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="p-4 flex flex-col flex-1">
+              <h3 class="font-body text-[#e5e2e1] text-sm leading-tight mb-1 flex-1">{{ product.name }}</h3>
+              <div class="flex items-center justify-between mt-3">
+                <span class="font-headline text-[#e6c487] text-base">${{ product.price | number:'1.0-0' }}</span>
+                <button
+                  (click)="addToCart(product)"
+                  class="flex items-center gap-1 px-3 py-1.5 bg-[#e6c487]/10 border border-[#e6c487]/20 text-[#e6c487] font-label text-[10px] uppercase tracking-wider hover:bg-[#e6c487]/20 transition-colors">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                  Añadir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart sidebar (desktop) -->
+    <aside
+      class="hidden lg:flex flex-col w-80 border-l border-[#4d463a]/15 bg-[#111111] shrink-0"
+      [class.hidden]="!cartOpen && cartItems.length === 0">
+      <ng-container *ngTemplateOutlet="cartContent"></ng-container>
+    </aside>
+  </div>
+
+  <!-- Cart drawer (mobile) -->
+  <div *ngIf="cartOpen"
+    class="fixed inset-0 z-50 lg:hidden flex"
+    (click)="cartOpen = false">
+    <div class="flex-1 bg-black/60"></div>
+    <div class="w-80 bg-[#111111] border-l border-[#4d463a]/20 flex flex-col h-full overflow-hidden"
+      (click)="$event.stopPropagation()">
+      <ng-container *ngTemplateOutlet="cartContent"></ng-container>
+    </div>
+  </div>
+
+</div>
+
+<!-- Cart template -->
+<ng-template #cartContent>
+  <div class="px-5 py-4 border-b border-[#4d463a]/20 flex items-center justify-between shrink-0">
+    <h2 class="font-headline text-base text-[#e5e2e1]">Tu Pedido</h2>
+    <span class="font-label text-[10px] text-[#998f81] uppercase tracking-wider">{{ cartCount }} ítem{{ cartCount !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <!-- Empty cart -->
+  <div *ngIf="cartItems.length === 0" class="flex-1 flex flex-col items-center justify-center gap-3 px-5">
+    <span class="material-symbols-outlined text-4xl text-[#4d463a]">shopping_bag</span>
+    <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider text-center">Tu carrito está vacío</p>
+    <p class="font-body text-xs text-[#4d463a] text-center">Agrega productos del menú para comenzar</p>
+  </div>
+
+  <!-- Items -->
+  <div *ngIf="cartItems.length > 0" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+    <div *ngFor="let item of cartItems; trackBy: trackById"
+      class="flex gap-3 items-start bg-[#131313] border border-[#4d463a]/10 p-3">
+      <!-- Photo -->
+      <div class="w-12 h-12 shrink-0 bg-[#1a1a1a] overflow-hidden">
+        <img *ngIf="item.photo" [src]="item.photo" [alt]="item.productName" class="w-full h-full object-cover opacity-80" />
+        <div *ngIf="!item.photo" class="w-full h-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-sm text-[#4d463a]">fastfood</span>
+        </div>
+      </div>
+      <!-- Info -->
+      <div class="flex-1 min-w-0">
+        <p class="font-body text-[#e5e2e1] text-xs leading-tight truncate">{{ item.productName }}</p>
+        <p class="font-headline text-[#c9a96e] text-xs mt-0.5">${{ item.unitPrice * item.quantity | number:'1.0-0' }}</p>
+        <!-- Qty controls -->
+        <div class="flex items-center gap-2 mt-2">
+          <button (click)="decrement(item)" class="w-5 h-5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] text-xs flex items-center justify-center">−</button>
+          <span class="font-headline text-[#e5e2e1] text-xs w-4 text-center">{{ item.quantity }}</span>
+          <button (click)="increment(item)" class="w-5 h-5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] text-xs flex items-center justify-center">+</button>
+        </div>
+      </div>
+      <!-- Remove -->
+      <button (click)="removeItem(item)" class="text-[#4d463a] hover:text-red-400 transition-colors shrink-0">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div *ngIf="cartItems.length > 0" class="px-5 py-4 border-t border-[#4d463a]/20 shrink-0 space-y-3">
+    <div class="flex items-baseline justify-between">
+      <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Total</span>
+      <span class="font-headline text-xl text-[#e6c487]">${{ cartTotal | number:'1.0-0' }}</span>
+    </div>
+    <button
+      (click)="placeOrder()"
+      [disabled]="submitting"
+      class="w-full py-3 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+      <span *ngIf="submitting" class="w-3 h-3 border border-[#0e0e0e]/40 border-t-[#0e0e0e] rounded-full animate-spin"></span>
+      <span class="material-symbols-outlined text-sm" *ngIf="!submitting">check_circle</span>
+      {{ submitting ? 'Procesando...' : 'Realizar Pedido' }}
+    </button>
+    <p class="font-body text-[10px] text-[#4d463a] text-center">Pedido online · Pago con Wompi</p>
+  </div>
+</ng-template>

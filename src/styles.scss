@@ -1,3 +1,25 @@
+// Tailwind CSS
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Stitch shared utilities
+@layer components {
+  .grainy-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(to right, rgba(14, 14, 14, 0.9), rgba(14, 14, 14, 0.4));
+  }
+
+  .btn-metallic {
+    background: linear-gradient(45deg, #e6c487, #c9a96e);
+  }
+}
+
 :root {
   --app-font-size: 16px;
   --app-line-height: 1.6;
@@ -111,3 +133,434 @@ body {
 @import 'styles/variables';
 @import 'styles/mixins';
 @import 'styles/auth-shared';
+
+// ─── Dark Modal Override (all inventory/admin modals) ────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background: #1c1b1b !important;
+  border: 1px solid rgba(77, 70, 58, 0.3);
+  border-radius: 0.125rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+
+  &.modal-large { max-width: 720px; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(77, 70, 58, 0.2);
+
+  h2 {
+    font-family: 'Noto Serif', serif;
+    font-size: 1.25rem;
+    font-weight: 300;
+    font-style: italic;
+    color: #e6c487;
+    margin: 0;
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #998f81;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+
+    &:hover { color: #e5e2e1; }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem 2rem;
+
+  .form-group {
+    margin-bottom: 1.25rem;
+
+    label {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #c9a96e;
+      margin-bottom: 0.5rem;
+
+      .required { color: #e6c487; margin-left: 2px; }
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(77, 70, 58, 0.4);
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      padding: 0.625rem 0;
+      outline: none;
+      transition: border-color 0.2s;
+
+      &:focus { border-bottom-color: #e6c487; }
+      &::placeholder { color: rgba(229, 226, 225, 0.2); }
+      &.error { border-bottom-color: #ef4444; }
+
+      option { background: #1c1b1b; color: #e5e2e1; }
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    select { cursor: pointer; }
+
+    .error-message {
+      font-size: 0.625rem;
+      color: #f87171;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+    }
+
+    .char-counter {
+      font-size: 0.625rem;
+      color: rgba(153, 143, 129, 0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: #d0c5b5;
+      font-size: 0.875rem;
+      text-transform: none;
+      letter-spacing: 0;
+
+      input[type="checkbox"] { accent-color: #e6c487; width: 1rem; height: 1rem; }
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  // Ingredients section
+  .ingredients-section {
+    .ingredient-item {
+      margin-bottom: 0.75rem;
+
+      .ingredient-fields {
+        display: grid;
+        grid-template-columns: 1fr 0.6fr 0.6fr auto;
+        gap: 0.75rem;
+        align-items: end;
+
+        select, input { font-size: 0.8rem; }
+
+        .remove-ingredient-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #998f81;
+          padding: 0.25rem;
+          display: flex;
+          align-items: center;
+          transition: color 0.2s;
+          margin-bottom: 0.5rem;
+
+          &:hover { color: #f87171; }
+        }
+      }
+    }
+
+    .add-ingredient-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1px dashed rgba(77, 70, 58, 0.4);
+      color: #998f81;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+
+      &:hover { border-color: #e6c487; color: #e6c487; }
+    }
+  }
+
+  // Photos section
+  .photos-section {
+    .upload-area {
+      input[type="file"] { display: none; }
+
+      .upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 1px dashed rgba(77, 70, 58, 0.4);
+        padding: 1.5rem;
+        cursor: pointer;
+        color: #998f81;
+        font-size: 0.75rem;
+        font-family: 'Inter', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.2s;
+        width: 100%;
+
+        &:hover:not(.disabled) { border-color: #e6c487; color: #e6c487; }
+        &.disabled { opacity: 0.4; cursor: not-allowed; }
+      }
+
+      .help-text {
+        display: block;
+        font-size: 0.625rem;
+        color: rgba(153, 143, 129, 0.5);
+        margin-top: 0.25rem;
+        text-align: center;
+      }
+    }
+
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+
+      .photo-item {
+        position: relative;
+        aspect-ratio: 1;
+
+        .photo-preview {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .remove-photo {
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          background: rgba(0,0,0,0.7);
+          border: none;
+          color: #e5e2e1;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+
+          &:hover { background: #ef4444; }
+        }
+      }
+    }
+
+    .no-photos {
+      p {
+        font-size: 0.75rem;
+        color: rgba(153, 143, 129, 0.5);
+        text-align: center;
+        padding: 0.75rem 0;
+        font-style: italic;
+      }
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 2rem;
+  border-top: 1px solid rgba(77, 70, 58, 0.2);
+
+  // Override app-button styles inside modal
+  app-button {
+    button {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.125rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    &:first-child button {
+      background: transparent;
+      border: 1px solid rgba(77, 70, 58, 0.4);
+      color: #d0c5b5;
+
+      &:hover { border-color: rgba(230, 196, 135, 0.4); color: #e5e2e1; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
+    }
+
+    &:last-child button {
+      background: linear-gradient(45deg, #e6c487, #c9a96e);
+      color: #412d00;
+
+      &:hover { opacity: 0.9; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
+    }
+  }
+}
+
+// ─── User management role/status badges ──────────────────────────────────────
+.badge-admin    { background: rgba(251,146,60,0.15); color: #fb923c; }
+.badge-kitchen  { background: rgba(167,139,250,0.15); color: #a78bfa; }
+.badge-waiter   { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.badge-customer { background: rgba(148,163,184,0.15); color: #94a3b8; }
+.badge-success  { background: rgba(230,196,135,0.15); color: #e6c487; }
+.badge-warning  { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.badge-info     { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.badge-danger   { background: rgba(248,113,113,0.15); color: #f87171; }
+
+// ─── Inventory form dark override ────────────────────────────────────────────
+.inventory-form-container {
+  app-form-field {
+    .form-field, .field-wrapper, label {
+      color: #c9a96e !important;
+      font-size: 0.75rem !important;
+    }
+    input, textarea, select {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid rgba(77, 70, 58, 0.4) !important;
+      border-radius: 0 !important;
+      color: #e5e2e1 !important;
+      padding: 0.625rem 0 !important;
+      font-size: 0.9rem !important;
+      &:focus { border-bottom-color: #e6c487 !important; outline: none !important; box-shadow: none !important; }
+      &::placeholder { color: rgba(229, 226, 225, 0.2) !important; }
+      option { background: #1c1b1b; }
+    }
+  }
+
+  // Upload area inside inventory form
+  .upload-area {
+    .upload-label {
+      background: transparent !important;
+      border: 1px dashed rgba(77, 70, 58, 0.4) !important;
+      color: #998f81 !important;
+      padding: 1rem !important;
+      display: block;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+      &:hover:not(.disabled) { border-color: #e6c487 !important; color: #e6c487 !important; }
+    }
+    .help-text { color: rgba(153, 143, 129, 0.5) !important; }
+  }
+
+  .no-photos p { color: rgba(153, 143, 129, 0.5) !important; background: transparent !important; }
+
+  .photos-grid .photo-item {
+    border-color: rgba(77, 70, 58, 0.3) !important;
+    background: #1a1a1a !important;
+  }
+}
+
+// ─── Chatbot & accessibility size fix ────────────────────────────────────────
+.chat-fab {
+  width: 48px !important;
+  height: 48px !important;
+  bottom: 24px !important;
+  right: 84px !important;
+  svg { width: 22px !important; height: 22px !important; }
+}
+.chat-window {
+  right: 84px !important;
+  bottom: calc(48px + 40px) !important;
+}
+
+// ─── Modal font size increase ─────────────────────────────────────────────────
+.modal-body {
+  input, textarea, select {
+    font-size: 1rem !important;
+  }
+  .form-group label {
+    font-size: 0.75rem !important;
+  }
+  .char-counter {
+    font-size: 0.7rem !important;
+  }
+}
+
+// ─── User management white background fix ────────────────────────────────────
+.user-management-container {
+  background: #0e0e0e !important;
+  color: #e5e2e1 !important;
+
+  .header h1, h1 { color: #e5e2e1 !important; }
+
+  .filters-section {
+    background: #111111 !important;
+    border: 1px solid rgba(77,70,58,0.2) !important;
+    label { color: #c9a96e !important; }
+    .filter-select {
+      background: #1a1a1a !important;
+      border-color: rgba(77,70,58,0.4) !important;
+      color: #e5e2e1 !important;
+    }
+  }
+
+  .table-container {
+    background: #111111 !important;
+    border: 1px solid rgba(77,70,58,0.15) !important;
+    box-shadow: none !important;
+  }
+
+  .users-table {
+    thead { background: #0a0a0a !important; th { color: #998f81 !important; border-color: rgba(77,70,58,0.1) !important; } }
+    tbody tr {
+      border-color: rgba(77,70,58,0.05) !important;
+      &:hover { background: #1a1a1a !important; }
+      td { color: #e5e2e1 !important; }
+    }
+  }
+
+  .modal-content { background: #1c1b1b !important; }
+  .modal-header { border-color: rgba(77,70,58,0.2) !important; h2 { color: #e6c487 !important; } }
+  .modal-body { .user-info { background: #2a2a2a !important; p { color: #d0c5b5 !important; } } }
+  .modal-footer { border-color: rgba(77,70,58,0.2) !important; }
+}

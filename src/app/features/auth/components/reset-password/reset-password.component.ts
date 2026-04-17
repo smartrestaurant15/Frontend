@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -10,10 +10,15 @@ import { CustomValidators } from '@shared/validators/custom-validators';
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
   resetPasswordForm!: FormGroup;
   loading = false;
   emailFromRoute = '';
+  showPassword = false;
+  showConfirmPassword = false;
+  resending = false;
+  cooldown = 0;
+  private cooldownInterval: any;
 
   constructor(
     private fb: FormBuilder,
@@ -25,14 +30,16 @@ export class ResetPasswordComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-
-    // Leer email pasado desde forgot-password
     this.route.queryParams.subscribe(params => {
       if (params['email']) {
         this.emailFromRoute = params['email'];
         this.resetPasswordForm.patchValue({ email: params['email'] });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.cooldownInterval);
   }
 
   initForm(): void {
@@ -42,7 +49,6 @@ export class ResetPasswordComponent implements OnInit {
       newPassword: ['', [Validators.required, CustomValidators.passwordStrength()]],
       confirmPassword: ['', [Validators.required]]
     });
-
     this.resetPasswordForm.get('confirmPassword')?.setValidators([
       Validators.required,
       CustomValidators.matchPassword('newPassword')
@@ -53,22 +59,35 @@ export class ResetPasswordComponent implements OnInit {
     if (this.resetPasswordForm.valid) {
       this.loading = true;
       const { email, code, newPassword } = this.resetPasswordForm.value;
-
-      const request = {
-        email,
-        otp: code,
-        newPassword
-      };
-
-      this.authService.resetPassword(request).subscribe({
+      this.authService.resetPassword({ email, otp: code, newPassword }).subscribe({
         next: () => {
           this.notificationService.showSuccess('Contraseña restablecida exitosamente');
           this.router.navigate(['/auth/login']);
         },
-        error: () => {
-          this.loading = false;
-        }
+        error: () => { this.loading = false; }
       });
     }
+  }
+
+  resendCode(): void {
+    const email = this.resetPasswordForm.value.email;
+    if (!email || this.resending || this.cooldown > 0) return;
+    this.resending = true;
+    this.authService.forgotPassword(email).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Código reenviado a tu correo');
+        this.resending = false;
+        this.startCooldown();
+      },
+      error: () => { this.resending = false; }
+    });
+  }
+
+  private startCooldown(): void {
+    this.cooldown = 60;
+    this.cooldownInterval = setInterval(() => {
+      this.cooldown--;
+      if (this.cooldown <= 0) clearInterval(this.cooldownInterval);
+    }, 1000);
   }
 }
