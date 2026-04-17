@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 import { NotificationService } from '@core/services/notification.service';
+import { StorageService } from '@core/services/storage.service';
 
 @Component({
   selector: 'app-profile',
@@ -20,6 +21,7 @@ export class ProfileComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private storageService: StorageService,
     private router: Router
   ) {}
 
@@ -83,10 +85,24 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    // Nota: Necesitarías un endpoint en el backend para que el usuario actualice su propio perfil
-    // Por ahora, solo mostramos un mensaje
-    this.notificationService.showInfo('Funcionalidad de actualización de perfil pendiente de implementar en el backend');
-    this.toggleEdit();
+    const { firstName, lastName } = this.profileForm.value;
+    this.loading = true;
+
+    this.authService.updateProfile({ firstName, lastName }).subscribe({
+      next: (updatedUser) => {
+        this.loading = false;
+        // Actualizar datos en storage
+        if (this.user) {
+          this.user = { ...this.user, firstName, lastName };
+          this.storageService.setUser(this.user);
+        }
+        this.notificationService.showSuccess('Perfil actualizado exitosamente');
+        this.toggleEdit();
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
 
   navigateToChangePassword(): void {
@@ -94,6 +110,6 @@ export class ProfileComponent implements OnInit {
   }
 
   navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/admin/dashboard']);
   }
 }

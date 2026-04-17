@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CategoryService } from '../../services/category.service';
 import { NotificationService } from '@core/services/notification.service';
 import { CategoryResponse } from '../../models/category.model';
+import { CustomValidators } from '@shared/validators/custom-validators';
 
 @Component({
   selector: 'app-category-form-modal',
@@ -42,8 +43,8 @@ export class CategoryFormModalComponent implements OnInit, OnChanges {
 
   initForm(): void {
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+      name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100), CustomValidators.noWhitespace()]],
+      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500), CustomValidators.noWhitespace()]]
     });
   }
 

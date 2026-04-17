@@ -1,91 +1,88 @@
-<div class="stock-alert-container">
-  <!-- Header con navegación -->
-  <header class="page-header">
-    <div class="header-top">
-      <app-button variant="secondary" size="small" (clicked)="navigateToDashboard()">
-        ← Volver al Dashboard
-      </app-button>
-    </div>
-    <div class="header-main">
-      <div class="header-info">
-        <h1>Alertas de Stock Bajo</h1>
-        <p>Productos que requieren reabastecimiento</p>
-      </div>
-      <div class="header-actions" *ngIf="!loading && lowStockProducts.length > 0">
-        <div class="alert-summary">
-          <span class="alert-count">{{ lowStockProducts.length }} productos con stock bajo</span>
-        </div>
-      </div>
-    </div>
-  </header>
+<div class="min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body px-8 py-8">
 
-  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
-
-  <!-- Contenido principal -->
-  <main class="page-content" *ngIf="!loading">
-    <div *ngIf="lowStockProducts.length === 0" class="no-alerts">
-      <div class="success-icon">✓</div>
-      <h2>¡Todo en orden!</h2>
-      <p>No hay productos con stock bajo en este momento</p>
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Inventario</p>
+      <h1 class="font-headline text-2xl italic text-[#e5e2e1]">Alertas de Stock</h1>
     </div>
+    <div *ngIf="!loading && lowStockProducts.length > 0"
+         class="flex items-center gap-2 px-4 py-2 bg-red-900/20 border border-red-900/30 rounded-sm">
+      <span class="material-symbols-outlined text-red-400 text-base">warning</span>
+      <span class="font-label text-[10px] uppercase tracking-widest text-red-400">
+        {{ lowStockProducts.length }} productos críticos
+      </span>
+    </div>
+  </div>
 
-    <div *ngIf="lowStockProducts.length > 0" class="alerts-grid">
-      <div 
-        *ngFor="let product of lowStockProducts" 
-        class="alert-card"
-        [class.critical]="getAlertLevel(product) === 'critical'"
-        [class.warning]="getAlertLevel(product) === 'warning'"
-        [class.low]="getAlertLevel(product) === 'low'"
-        (click)="viewProduct(product)">
-        
-        <div class="alert-severity">
-          <div class="severity-icon">
-            <svg *ngIf="getAlertLevel(product) === 'critical'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <svg *ngIf="getAlertLevel(product) === 'warning'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-              <line x1="12" y1="9" x2="12" y2="13"></line>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            <svg *ngIf="getAlertLevel(product) === 'low'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
+  <div *ngIf="loading" class="flex items-center justify-center h-32">
+    <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <div *ngIf="!loading && lowStockProducts.length === 0"
+       class="flex flex-col items-center justify-center h-48 text-[#998f81]/50">
+    <span class="material-symbols-outlined text-4xl mb-3 text-green-400/60">check_circle</span>
+    <p class="font-headline text-lg text-[#e5e2e1]/60">¡Todo en orden!</p>
+    <p class="font-body text-sm mt-1">No hay productos con stock bajo</p>
+  </div>
+
+  <div *ngIf="!loading && lowStockProducts.length > 0"
+       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div *ngFor="let product of lowStockProducts"
+         class="bg-[#111111] border p-6 cursor-pointer hover:bg-[#1a1a1a] transition-colors"
+         [class.border-red-900]="getAlertLevel(product) === 'critical'"
+         [class.border-amber-900]="getAlertLevel(product) === 'warning'"
+         [class.border-[#4d463a]]="getAlertLevel(product) === 'low'"
+         (click)="viewProduct(product)">
+
+      <div class="flex items-start gap-4 mb-5">
+        <!-- Image -->
+        <div class="w-16 h-16 bg-[#2a2a2a] overflow-hidden rounded-sm flex-shrink-0">
+          <img *ngIf="product.photo" [src]="product.photo" [alt]="product.name" class="w-full h-full object-cover">
+          <div *ngIf="!product.photo" class="w-full h-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-[#998f81] text-xl">inventory_2</span>
           </div>
-          <span class="severity-label">
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-headline text-base font-semibold text-[#e5e2e1] mb-1 truncate">{{ product.name }}</p>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full font-label text-[10px] font-bold uppercase tracking-wider"
+                [class.bg-red-900]="getAlertLevel(product) === 'critical'"
+                [class.text-red-300]="getAlertLevel(product) === 'critical'"
+                [class.bg-amber-900]="getAlertLevel(product) === 'warning'"
+                [class.text-amber-300]="getAlertLevel(product) === 'warning'"
+                [class.bg-primary]="getAlertLevel(product) === 'low'"
+                [class.text-on-primary]="getAlertLevel(product) === 'low'">
             {{ getAlertLevel(product) === 'critical' ? 'Crítico' : getAlertLevel(product) === 'warning' ? 'Advertencia' : 'Bajo' }}
           </span>
         </div>
+      </div>
 
-        <div class="product-image">
-          <img *ngIf="product.photo" [src]="product.photo" [alt]="product.name">
-          <div *ngIf="!product.photo" class="no-image">📦</div>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="font-label text-xs text-[#998f81] uppercase tracking-widest">Stock actual</span>
+          <span class="font-body text-sm font-semibold"
+                [class.text-red-400]="getAlertLevel(product) === 'critical'"
+                [class.text-amber-400]="getAlertLevel(product) === 'warning'"
+                [class.text-primary]="getAlertLevel(product) === 'low'">
+            {{ product.weight }}
+          </span>
         </div>
-
-        <div class="alert-content">
-          <h3>{{ product.name }}</h3>
-          <div class="stock-info">
-            <div class="stock-numbers">
-              <span class="current-stock">Stock actual: <strong>{{ product.weight }}g</strong></span>
-              <span class="min-stock">Mínimo: <strong>{{ product.minimumStock }}g</strong></span>
-            </div>
-            <div class="stock-bar">
-              <div class="stock-fill" [style.width.%]="getStockPercentage(product)"></div>
-            </div>
-            <span class="stock-percentage">{{ getStockPercentage(product) | number:'1.0-0' }}% del mínimo</span>
+        <div class="flex justify-between items-center">
+          <span class="font-label text-xs text-[#998f81] uppercase tracking-widest">Mínimo requerido</span>
+          <span class="font-body text-sm text-[#d0c5b5]">{{ product.minimumStock }}</span>
+        </div>
+        <!-- Progress bar -->
+        <div class="h-2 bg-[#2a2a2a] rounded-full overflow-hidden mt-2">
+          <div class="h-full rounded-full transition-all"
+               [class.bg-red-500]="getAlertLevel(product) === 'critical'"
+               [class.bg-amber-500]="getAlertLevel(product) === 'warning'"
+               [class.bg-primary]="getAlertLevel(product) === 'low'"
+               [style.width.%]="getStockPercentage(product)">
           </div>
         </div>
-
-        <div class="alert-action">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </div>
+        <p class="font-label text-[10px] text-[#998f81] text-right">
+          {{ getStockPercentage(product) | number:'1.0-0' }}% del mínimo
+        </p>
       </div>
     </div>
-  </main>
+  </div>
 </div>

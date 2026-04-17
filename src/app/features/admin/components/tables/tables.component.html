@@ -1,0 +1,198 @@
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1] font-body px-8 py-8">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Salón</p>
+      <h1 class="font-headline text-2xl italic text-[#e5e2e1]">Gestión de Mesas</h1>
+    </div>
+    <button (click)="openCreate()"
+            class="btn-metallic text-on-primary font-label text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
+      <span class="material-symbols-outlined text-sm">add</span>
+      Nueva Mesa
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="bg-[#111111] border border-green-900/30 p-5">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Libres</p>
+      <p class="font-headline text-2xl text-green-400">{{ statusCounts.free }}</p>
+    </div>
+    <div class="bg-[#111111] border border-red-900/30 p-5">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Ocupadas</p>
+      <p class="font-headline text-2xl text-red-400">{{ statusCounts.occupied }}</p>
+    </div>
+    <div class="bg-[#111111] border border-amber-900/30 p-5">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Reservadas</p>
+      <p class="font-headline text-2xl text-amber-400">{{ statusCounts.reserved }}</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="flex gap-2 mb-6">
+    <button *ngFor="let opt of [{value:'',label:'Todas'},{value:'FREE',label:'Libres'},{value:'OCCUPIED',label:'Ocupadas'},{value:'RESERVED',label:'Reservadas'}]"
+            (click)="filterStatus = $any(opt.value); loadTables()"
+            [ngClass]="filterStatus === opt.value
+              ? 'bg-primary text-on-primary'
+              : 'bg-[#111111] text-[#998f81] border border-[#4d463a]/20 hover:text-[#e5e2e1]'"
+            class="px-4 py-2 font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors">
+      {{ opt.label }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center h-40">
+    <div class="w-7 h-7 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && tables.length === 0"
+       class="flex flex-col items-center justify-center h-48 text-[#998f81]/50">
+    <span class="material-symbols-outlined text-4xl mb-3">table_restaurant</span>
+    <p class="font-body text-sm">No hay mesas registradas</p>
+    <button (click)="openCreate()"
+            class="mt-4 text-primary font-label text-xs uppercase tracking-widest hover:text-[#e6c487] transition-colors">
+      Crear primera mesa
+    </button>
+  </div>
+
+  <!-- Grid of tables -->
+  <div *ngIf="!loading && tables.length > 0"
+       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+
+    <div *ngFor="let table of filteredTables"
+         class="bg-[#111111] border p-5 flex flex-col gap-3 transition-all"
+         [ngClass]="statusBg(table.status)"
+         [class.opacity-40]="!table.active">
+
+      <!-- Table number + status -->
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="font-headline text-2xl font-light text-[#e5e2e1]">{{ table.number }}</p>
+          <p class="font-label text-[9px] uppercase tracking-widest mt-0.5" [ngClass]="statusColor(table.status)">
+            {{ statusLabel(table.status) }}
+          </p>
+        </div>
+        <span class="material-symbols-outlined text-xl" [ngClass]="statusColor(table.status)">
+          table_restaurant
+        </span>
+      </div>
+
+      <!-- Info -->
+      <div class="space-y-1">
+        <div class="flex items-center gap-1.5 text-[#998f81]">
+          <span class="material-symbols-outlined text-sm">group</span>
+          <span class="font-body text-xs">{{ table.capacity }} personas</span>
+        </div>
+        <div *ngIf="table.location" class="flex items-center gap-1.5 text-[#998f81]">
+          <span class="material-symbols-outlined text-sm">location_on</span>
+          <span class="font-body text-xs truncate">{{ table.location }}</span>
+        </div>
+      </div>
+
+      <!-- Status selector -->
+      <div>
+        <label class="font-label text-[9px] uppercase tracking-widest text-[#998f81] block mb-1">Estado</label>
+        <select [ngModel]="table.status"
+                (ngModelChange)="changeStatus(table, $event)"
+                [disabled]="!table.active"
+                class="w-full bg-[#1a1a1a] border border-[#4d463a]/30 text-[#e5e2e1] font-body text-xs py-1.5 px-2 focus:outline-none focus:border-primary transition-colors rounded-sm disabled:opacity-40">
+          <option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</option>
+        </select>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between pt-2 border-t border-[#4d463a]/10">
+        <button (click)="openEdit(table)" [disabled]="!table.active"
+                class="flex items-center gap-1 text-[#998f81] hover:text-primary transition-colors disabled:opacity-30 font-label text-[9px] uppercase tracking-widest">
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Editar
+        </button>
+        <button (click)="deactivate(table)"
+                [disabled]="!table.active || table.status === 'OCCUPIED'"
+                class="flex items-center gap-1 text-[#998f81] hover:text-red-400 transition-colors disabled:opacity-30 font-label text-[9px] uppercase tracking-widest">
+          <span class="material-symbols-outlined text-sm">block</span>
+          Desactivar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Create / Edit Modal -->
+<div *ngIf="modalOpen"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+     (click)="closeModal()">
+  <div class="bg-[#1c1b1b] border border-[#4d463a]/30 rounded-sm w-full max-w-sm shadow-2xl"
+       (click)="$event.stopPropagation()">
+
+    <div class="flex items-center justify-between px-8 py-6 border-b border-[#4d463a]/20">
+      <h3 class="font-headline text-xl font-light italic text-primary">
+        {{ modalMode === 'create' ? 'Nueva Mesa' : 'Editar Mesa' }}
+      </h3>
+      <button (click)="closeModal()" class="text-[#998f81] hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="px-8 py-6 space-y-6">
+
+      <!-- Number (create only) -->
+      <div *ngIf="modalMode === 'create'">
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#c9a96e] mb-2">
+          Número de Mesa <span class="text-primary">*</span>
+        </label>
+        <input type="number" formControlName="number" placeholder="1"
+               class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-2.5 px-0 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+        <p *ngIf="form.get('number')?.invalid && form.get('number')?.touched"
+           class="mt-1 font-label text-[10px] text-red-400 uppercase tracking-widest">
+          Número requerido y mayor a 0
+        </p>
+      </div>
+
+      <!-- Number display (edit mode) -->
+      <div *ngIf="modalMode === 'edit'">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Mesa</p>
+        <p class="font-headline text-3xl text-primary">{{ selectedTable?.number }}</p>
+      </div>
+
+      <!-- Capacity -->
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#c9a96e] mb-2">
+          Capacidad (personas) <span class="text-primary">*</span>
+        </label>
+        <input type="number" formControlName="capacity" placeholder="4"
+               class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-2.5 px-0 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+        <p *ngIf="form.get('capacity')?.invalid && form.get('capacity')?.touched"
+           class="mt-1 font-label text-[10px] text-red-400 uppercase tracking-widest">
+          Capacidad requerida y mayor a 0
+        </p>
+      </div>
+
+      <!-- Location -->
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#c9a96e] mb-2">
+          Ubicación / Zona
+        </label>
+        <input type="text" formControlName="location" placeholder="Ej: Terraza, Interior, Bar"
+               class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-2.5 px-0 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 pt-4 border-t border-[#4d463a]/15">
+        <button type="button" (click)="closeModal()"
+                class="px-5 py-2.5 border border-[#4d463a]/40 text-[#d0c5b5] hover:border-primary/40 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="form.invalid || submitting"
+                class="btn-metallic text-on-primary px-6 py-2.5 font-label text-[10px] uppercase tracking-widest rounded-sm disabled:opacity-40 flex items-center gap-2 hover:opacity-90 transition-all">
+          <span *ngIf="submitting" class="w-3 h-3 border border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
+          {{ modalMode === 'create' ? 'Crear Mesa' : 'Guardar Cambios' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

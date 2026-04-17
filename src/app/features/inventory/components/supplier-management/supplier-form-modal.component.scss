@@ -1,13 +1,1 @@
-@import '../category-management/category-form-modal.component.scss';
-
-// Estilos adicionales específicos para supplier
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-}
+:host { display: block; }

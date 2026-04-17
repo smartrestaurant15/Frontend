@@ -1,142 +1,147 @@
-<div class="drink-management-container">
-  <!-- Header con navegación -->
-  <header class="page-header">
-    <div class="header-top">
-      <app-button variant="secondary" size="small" (clicked)="navigateToDashboard()">
-        ← Volver al Dashboard
-      </app-button>
-    </div>
-    <div class="header-main">
-      <div class="header-info">
-        <h1>Gestión de Bebidas</h1>
-        <p>Administra las bebidas del inventario</p>
-      </div>
-      <div class="header-actions">
-        <app-button variant="primary" (clicked)="openCreateModal()">
-          Agregar Bebida
-        </app-button>
-      </div>
-    </div>
-  </header>
+<div class="flex min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body">
 
-  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
-
-  <!-- Contenido principal -->
-  <main class="page-content" *ngIf="!loading">
-    <div *ngIf="drinks.length > 0" class="drinks-grid">
-      <div *ngFor="let drink of drinks" class="drink-card" (click)="viewDrinkDetail(drink.id)">
-        <div class="drink-image">
-          <ng-container *ngIf="drink.photo; else noImage">
-            <img [src]="drink.photo" [alt]="drink.name" (error)="onImageError($event)">
-          </ng-container>
-          <ng-template #noImage>
-            <div class="placeholder-image">
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                <line x1="6" y1="1" x2="6" y2="4"></line>
-                <line x1="10" y1="1" x2="10" y2="4"></line>
-                <line x1="14" y1="1" x2="14" y2="4"></line>
-              </svg>
-              <span>Sin imagen</span>
-            </div>
-          </ng-template>
-          <span class="alcohol-badge" *ngIf="drink.alcohol">🍺 Alcohol</span>
+  <section class="flex flex-col flex-1 border-r border-[#4d463a]/10">
+    <div class="px-8 py-6 border-b border-[#4d463a]/10 flex justify-between items-end flex-shrink-0">
+      <div>
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Carta</p>
+        <h2 class="font-headline text-xl italic text-[#e5e2e1]">Bebidas Registradas</h2>
+      </div>
+      <div class="flex gap-6 items-center">
+        <div class="text-right">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Total</p>
+          <p class="font-headline text-lg text-primary">{{ drinks.length }}</p>
         </div>
-        
-        <div class="drink-info">
-          <h3 class="drink-name">{{ drink.name }}</h3>
-          <div class="drink-details">
-            <span class="detail-item">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-              </svg>
-              {{ drink.mililiters }}ml
-            </span>
-            <span class="detail-item">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
-              </svg>
-              {{ drink.units }} unidades
-            </span>
-          </div>
-          <div class="drink-actions" (click)="$event.stopPropagation()">
-            <button class="action-btn edit" (click)="openEditModal(drink.id)" title="Editar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-            </button>
-            <button class="action-btn delete" (click)="deleteDrink(drink.id)" title="Eliminar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
+        <button (click)="openCreateModal()"
+                class="btn-metallic text-on-primary font-label text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
+          <span class="material-symbols-outlined text-sm">add</span>
+          Nueva Bebida
+        </button>
       </div>
     </div>
 
-    <div *ngIf="drinks.length === 0" class="empty-state">
-      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-        <line x1="6" y1="1" x2="6" y2="4"></line>
-        <line x1="10" y1="1" x2="10" y2="4"></line>
-        <line x1="14" y1="1" x2="14" y2="4"></line>
-      </svg>
-      <h3>{{ currentPage > 1 ? 'No hay bebidas en esta página' : 'No hay bebidas' }}</h3>
-      <p>{{ currentPage > 1 ? 'Intenta volver a la página anterior' : 'Comienza agregando tu primera bebida al inventario' }}</p>
-      <div class="empty-actions">
-        <app-button 
-          variant="secondary" 
-          *ngIf="currentPage > 1"
-          (clicked)="previousPage()">
-          ← Página anterior
-        </app-button>
-        <app-button 
-          variant="primary" 
-          *ngIf="currentPage === 1"
-          (clicked)="openCreateModal()">
-          Agregar bebida
-        </app-button>
+    <div class="px-8 py-4 border-b border-[#4d463a]/10 flex-shrink-0">
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#998f81] text-sm">search</span>
+        <input [(ngModel)]="searchTerm"
+               class="w-full bg-[#1a1a1a] border-none focus:ring-1 focus:ring-primary/30 text-sm pl-10 pr-4 py-2 rounded-sm text-[#e5e2e1] placeholder:text-[#998f81]/50"
+               placeholder="Buscar bebidas..." type="text">
       </div>
     </div>
-  </main>
 
-  <!-- Footer con paginación -->
-  <footer class="page-footer" *ngIf="!loading && drinks.length > 0">
-    <div class="pagination">
-      <app-button 
-        variant="secondary" 
-        size="small" 
-        [disabled]="currentPage === 1"
-        (clicked)="previousPage()">
-        ← Anterior
-      </app-button>
-      <span class="page-info">Página <strong>{{ currentPage }}</strong></span>
-      <app-button 
-        variant="secondary" 
-        size="small"
-        [disabled]="!hasMorePages"
-        (clicked)="nextPage()">
-        Siguiente →
-      </app-button>
+    <div class="flex-1 overflow-y-auto">
+      <div *ngIf="loading" class="flex items-center justify-center h-32">
+        <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+      </div>
+
+      <table *ngIf="!loading" class="w-full text-left border-collapse">
+        <thead class="sticky top-0 z-10">
+          <tr class="bg-[#111111] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+            <th class="px-4 py-4 font-medium">Bebida</th>
+            <th class="px-4 py-4 font-medium text-right">ml</th>
+            <th class="px-4 py-4 font-medium text-center">Unidades</th>
+            <th class="px-4 py-4 font-medium text-center">Alcohol</th>
+            <th class="px-4 py-4 font-medium text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#4d463a]/5">
+          <tr *ngFor="let drink of filteredDrinks"
+              class="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+              (click)="viewDrinkDetail(drink.id)">
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#2a2a2a] overflow-hidden rounded-sm flex-shrink-0">
+                  <img *ngIf="drink.photo" [src]="drink.photo" [alt]="drink.name"
+                       class="w-full h-full object-cover" (error)="onImageError($event)">
+                  <div *ngIf="!drink.photo" class="w-full h-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#998f81] text-base">wine_bar</span>
+                  </div>
+                </div>
+                <p class="font-headline text-sm font-semibold text-[#e5e2e1]">{{ drink.name }}</p>
+              </div>
+            </td>
+            <td class="px-4 py-4 text-right">
+              <span class="font-body text-sm text-primary">{{ drink.mililiters }} ml</span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span class="font-body text-sm text-[#d0c5b5]">{{ drink.units }}</span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span *ngIf="drink.alcohol"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label text-[9px] font-bold uppercase tracking-wider bg-amber-900/30 text-amber-400">
+                Sí
+              </span>
+              <span *ngIf="!drink.alcohol"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label text-[9px] font-bold uppercase tracking-wider bg-[#2a2a2a] text-[#998f81]">
+                No
+              </span>
+            </td>
+            <td class="px-4 py-4 text-right" (click)="$event.stopPropagation()">
+              <div class="flex items-center justify-end gap-2">
+                <button (click)="openEditModal(drink.id)" class="p-1.5 text-[#998f81] hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-base">edit</span>
+                </button>
+                <button (click)="deleteDrink(drink.id)" class="p-1.5 text-[#998f81] hover:text-red-400 transition-colors">
+                  <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!loading && filteredDrinks.length === 0">
+            <td colspan="5" class="px-4 py-16 text-center text-[#998f81]/50">
+              <span class="material-symbols-outlined text-3xl block mb-2">wine_bar</span>
+              <p class="font-body text-sm">No se encontraron bebidas</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </footer>
 
-  <!-- Modal de formulario -->
-  <app-drink-form-modal
-    [isOpen]="isModalOpen"
-    [drinkId]="selectedDrinkId"
-    (closeModal)="closeModal()"
-    (drinkSaved)="onDrinkSaved()">
-  </app-drink-form-modal>
+    <div class="px-8 py-4 bg-[#111111] border-t border-[#4d463a]/10 flex items-center justify-between flex-shrink-0">
+      <p class="font-label text-[10px] text-[#998f81] uppercase tracking-wider">
+        Página <span class="text-[#e5e2e1] font-semibold">{{ currentPage }}</span>
+      </p>
+      <div class="flex items-center gap-2">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+                class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-[#2a2a2a] text-[#998f81] disabled:opacity-30 transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_left</span>
+        </button>
+        <span class="w-8 h-8 flex items-center justify-center rounded-sm bg-primary text-on-primary font-label text-[10px] font-bold">{{ currentPage }}</span>
+        <button (click)="nextPage()" [disabled]="!hasMorePages"
+                class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-[#2a2a2a] text-[#998f81] disabled:opacity-30 transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_right</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="w-80 bg-[#111111] p-8 flex-shrink-0 flex flex-col gap-6">
+    <div class="border-b border-[#4d463a]/20 pb-4">
+      <h3 class="font-headline text-xl italic text-primary">Gestión de Bebidas</h3>
+      <p class="font-label text-[10px] text-[#998f81] uppercase tracking-[0.2em] mt-1">Panel de control</p>
+    </div>
+    <div class="space-y-4">
+      <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-5">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total Bebidas</p>
+        <p class="font-headline text-3xl text-[#e5e2e1]">{{ drinks.length }}</p>
+      </div>
+      <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-5">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Con Alcohol</p>
+        <p class="font-headline text-3xl text-amber-400">{{ alcoholCount }}</p>
+      </div>
+    </div>
+    <div class="mt-auto border-t border-[#4d463a]/15 pt-6">
+      <button (click)="openCreateModal()"
+              class="w-full flex items-center gap-3 p-3 hover:bg-[#1a1a1a] transition-colors rounded-sm group">
+        <span class="material-symbols-outlined text-[#998f81] group-hover:text-primary transition-colors text-[18px]">add_circle</span>
+        <span class="font-body text-sm text-[#d0c5b5]">Agregar bebida</span>
+      </button>
+    </div>
+  </section>
 </div>
+
+<app-drink-form-modal
+  [isOpen]="isModalOpen"
+  [drinkId]="selectedDrinkId"
+  (closeModal)="closeModal()"
+  (drinkSaved)="onDrinkSaved()">
+</app-drink-form-modal>

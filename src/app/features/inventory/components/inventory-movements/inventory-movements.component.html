@@ -1,73 +1,88 @@
-<div class="movements-container">
-  <div class="movements-header">
-    <h1>Movimientos de Inventario</h1>
-    <p>Historial de entradas y salidas de productos</p>
+<div class="min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body px-8 py-8">
+
+  <div class="mb-8">
+    <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Historial</p>
+    <h1 class="font-headline text-2xl italic text-[#e5e2e1]">Movimientos de Inventario</h1>
   </div>
 
-  <div class="filters-section">
-    <div class="search-box">
-      <input 
-        type="text" 
-        [(ngModel)]="searchTerm" 
-        (input)="onSearchChange()"
-        placeholder="Buscar por producto, usuario o razón..."
-        class="search-input">
+  <!-- Filters -->
+  <div class="flex flex-col md:flex-row gap-4 mb-6">
+    <div class="relative flex-1">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#998f81] text-sm">search</span>
+      <input [(ngModel)]="searchTerm" (input)="onSearchChange()"
+             class="w-full bg-[#111111] border border-[#4d463a]/20 focus:ring-1 focus:ring-primary/30 text-sm pl-10 pr-4 py-2.5 rounded-sm text-[#e5e2e1] placeholder:text-[#998f81]/50"
+             placeholder="Buscar por producto, usuario o razón..." type="text">
     </div>
-
-    <div class="filter-buttons">
-      <button 
-        [class.active]="filterType === 'ALL'"
-        (click)="onFilterTypeChange('ALL')"
-        class="filter-btn">
+    <div class="flex gap-2">
+      <button (click)="onFilterTypeChange('ALL')"
+              [ngClass]="filterType === 'ALL' ? 'bg-primary text-on-primary' : 'bg-[#111111] text-[#998f81] border border-[#4d463a]/20'"
+              class="px-4 py-2.5 font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors">
         Todos
       </button>
-      <button 
-        [class.active]="filterType === 'ENTRY'"
-        (click)="onFilterTypeChange('ENTRY')"
-        class="filter-btn filter-entry">
+      <button (click)="onFilterTypeChange('ENTRY')"
+              [ngClass]="filterType === 'ENTRY' ? 'bg-green-700 text-white' : 'bg-[#111111] text-[#998f81] border border-[#4d463a]/20'"
+              class="px-4 py-2.5 font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors">
         Entradas
       </button>
-      <button 
-        [class.active]="filterType === 'EXIT'"
-        (click)="onFilterTypeChange('EXIT')"
-        class="filter-btn filter-exit">
+      <button (click)="onFilterTypeChange('EXIT')"
+              [ngClass]="filterType === 'EXIT' ? 'bg-red-700 text-white' : 'bg-[#111111] text-[#998f81] border border-[#4d463a]/20'"
+              class="px-4 py-2.5 font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors">
         Salidas
       </button>
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading-container">
-    <app-loading-spinner></app-loading-spinner>
+  <div *ngIf="loading" class="flex items-center justify-center h-32">
+    <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
   </div>
 
-  <div *ngIf="!loading && filteredMovements.length === 0" class="empty-state">
-    <p>No se encontraron movimientos de inventario</p>
-  </div>
-
-  <div *ngIf="!loading && filteredMovements.length > 0" class="movements-table-container">
-    <table class="movements-table">
+  <div *ngIf="!loading" class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden">
+    <table class="w-full text-left border-collapse">
       <thead>
-        <tr>
-          <th>Fecha y Hora</th>
-          <th>Tipo</th>
-          <th>Producto ID</th>
-          <th>Cantidad</th>
-          <th>Usuario</th>
-          <th>Razón</th>
+        <tr class="bg-[#0a0a0a] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+          <th class="px-4 py-4 font-medium">Tipo</th>
+          <th class="px-4 py-4 font-medium">Producto</th>
+          <th class="px-4 py-4 font-medium text-right">Cantidad</th>
+          <th class="px-4 py-4 font-medium">Usuario</th>
+          <th class="px-4 py-4 font-medium">Razón</th>
+          <th class="px-4 py-4 font-medium">Fecha</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let movement of filteredMovements">
-          <td>{{ formatDate(movement.timeAt) }}</td>
-          <td>
-            <span [class]="'badge ' + getTypeClass(movement.type)">
+      <tbody class="divide-y divide-[#4d463a]/5">
+        <tr *ngFor="let movement of filteredMovements" class="hover:bg-[#1a1a1a] transition-colors">
+          <td class="px-4 py-4">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-label text-[9px] font-bold uppercase tracking-wider"
+                  [class.bg-green-900]="movement.type === 'ENTRY'" [class.text-green-300]="movement.type === 'ENTRY'"
+                  [class.bg-red-900]="movement.type === 'EXIT'" [class.text-red-300]="movement.type === 'EXIT'">
+              <span class="material-symbols-outlined text-[10px]">{{ movement.type === 'ENTRY' ? 'arrow_downward' : 'arrow_upward' }}</span>
               {{ getTypeLabel(movement.type) }}
             </span>
           </td>
-          <td class="product-id">{{ movement.productId }}</td>
-          <td class="quantity">{{ movement.weight }} kg</td>
-          <td>{{ movement.userName }}</td>
-          <td class="reason">{{ movement.reason }}</td>
+          <td class="px-4 py-4">
+            <p class="font-body text-sm text-[#e5e2e1]">{{ movement.productId }}</p>
+          </td>
+          <td class="px-4 py-4 text-right">
+            <span class="font-body text-sm font-semibold"
+                  [class.text-green-400]="movement.type === 'ENTRY'"
+                  [class.text-red-400]="movement.type === 'EXIT'">
+              {{ movement.type === 'ENTRY' ? '+' : '-' }}{{ movement.weight }}
+            </span>
+          </td>
+          <td class="px-4 py-4">
+            <p class="font-body text-sm text-[#d0c5b5]">{{ movement.userName }}</p>
+          </td>
+          <td class="px-4 py-4">
+            <p class="font-body text-sm text-[#d0c5b5] max-w-xs truncate">{{ movement.reason }}</p>
+          </td>
+          <td class="px-4 py-4">
+            <p class="font-body text-xs text-[#998f81]">{{ formatDate(movement.timeAt) }}</p>
+          </td>
+        </tr>
+        <tr *ngIf="filteredMovements.length === 0">
+          <td colspan="6" class="px-4 py-16 text-center text-[#998f81]/50">
+            <span class="material-symbols-outlined text-3xl block mb-2">swap_horiz</span>
+            <p class="font-body text-sm">No se encontraron movimientos</p>
+          </td>
         </tr>
       </tbody>
     </table>

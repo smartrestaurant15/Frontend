@@ -17,6 +17,13 @@ export class AdditionManagementComponent implements OnInit {
   pageSize = 10;
   isModalOpen = false;
   selectedAdditionId: string | null = null;
+  searchTerm = '';
+
+  get filteredAdditions(): AdditionResponse[] {
+    if (!this.searchTerm.trim()) return this.additions;
+    const term = this.searchTerm.toLowerCase();
+    return this.additions.filter(a => a.name.toLowerCase().includes(term));
+  }
 
   constructor(
     private additionService: AdditionService,

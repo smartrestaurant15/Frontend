@@ -1,0 +1,278 @@
+<div class="min-h-screen bg-[#0e0e0e] px-4 md:px-8 py-8">
+
+  <!-- Header -->
+  <header class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div>
+      <h1 class="font-headline text-3xl md:text-4xl text-[#e5e2e1] tracking-tight mb-1">
+        Tablero de Cocina
+      </h1>
+      <p class="font-body text-[#998f81] text-sm">
+        Actualización automática cada 15 s
+      </p>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <!-- Live indicator -->
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full transition-colors"
+          [class.bg-emerald-500]="sseOnline"
+          [class.animate-pulse]="sseOnline"
+          [class.bg-red-500]="!sseOnline"></span>
+        <span class="font-label text-[10px] uppercase tracking-widest"
+          [class.text-[#998f81]]="sseOnline"
+          [class.text-red-400]="!sseOnline">
+          {{ sseOnline ? 'En vivo' : 'Reconectando…' }}
+        </span>
+      </div>
+
+      <!-- Clock -->
+      <span class="font-body text-[#d0c5b5] text-sm tabular-nums">
+        {{ now | date:'HH:mm:ss' }}
+      </span>
+
+      <!-- Refresh -->
+      <button
+        (click)="loadOrders()"
+        class="flex items-center gap-1.5 px-3 py-1.5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/40 transition-colors text-xs font-label uppercase tracking-wider">
+        <span class="material-symbols-outlined text-base leading-none">refresh</span>
+        Actualizar
+      </button>
+
+      <!-- Logout -->
+      <button
+        (click)="logout()"
+        class="flex items-center gap-1.5 px-3 py-1.5 border border-[#4d463a]/40 text-[#998f81] hover:text-red-400 hover:border-red-400/40 transition-colors text-xs font-label uppercase tracking-wider">
+        <span class="material-symbols-outlined text-base leading-none">logout</span>
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <!-- Summary chips -->
+  <div class="flex gap-3 mb-8 flex-wrap">
+    <div class="px-4 py-2 bg-[#1a1a1a] border border-[#4d463a]/20 flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+      <span class="font-label text-xs text-[#d0c5b5]">Pendientes</span>
+      <span class="font-headline text-sm text-[#e6c487]">{{ pendingOrders.length }}</span>
+    </div>
+    <div class="px-4 py-2 bg-[#1a1a1a] border border-[#4d463a]/20 flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+      <span class="font-label text-xs text-[#d0c5b5]">En preparación</span>
+      <span class="font-headline text-sm text-[#e6c487]">{{ inProgressOrders.length }}</span>
+    </div>
+    <div class="px-4 py-2 bg-[#1a1a1a] border border-[#4d463a]/20 flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span class="font-label text-xs text-[#d0c5b5]">Listos</span>
+      <span class="font-headline text-sm text-[#e6c487]">{{ completedOrders.length }}</span>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="flex justify-center items-center h-48">
+    <div class="w-8 h-8 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Kanban board -->
+  <div *ngIf="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+    <!-- ── PENDIENTES ───────────────────────────────────────── -->
+    <section class="kitchen-col">
+      <div class="col-header border-l-2 border-amber-400 pl-3 mb-4 flex items-center justify-between">
+        <h2 class="font-headline text-base text-[#e5e2e1] uppercase tracking-wider">Pendientes</h2>
+        <span class="bg-amber-400/10 text-amber-400 font-label text-xs px-2 py-0.5">
+          {{ pendingOrders.length }}
+        </span>
+      </div>
+
+      <div *ngIf="pendingOrders.length === 0" class="empty-state">
+        <span class="material-symbols-outlined text-3xl text-[#4d463a] mb-2">done_all</span>
+        <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin pedidos pendientes</p>
+      </div>
+
+      <div
+        *ngFor="let order of pendingOrders; trackBy: trackById"
+        class="order-card border-amber-400/20"
+        [class.order-card--urgent]="urgencyClass(order.createdAt) === 'urgent'"
+        [class.order-card--warning]="urgencyClass(order.createdAt) === 'warning'">
+
+        <ng-container *ngTemplateOutlet="cardContent; context: { $implicit: order, action: 'start' }"></ng-container>
+      </div>
+    </section>
+
+    <!-- ── EN PREPARACIÓN ──────────────────────────────────── -->
+    <section class="kitchen-col">
+      <div class="col-header border-l-2 border-blue-400 pl-3 mb-4 flex items-center justify-between">
+        <h2 class="font-headline text-base text-[#e5e2e1] uppercase tracking-wider">En preparación</h2>
+        <span class="bg-blue-400/10 text-blue-400 font-label text-xs px-2 py-0.5">
+          {{ inProgressOrders.length }}
+        </span>
+      </div>
+
+      <div *ngIf="inProgressOrders.length === 0" class="empty-state">
+        <span class="material-symbols-outlined text-3xl text-[#4d463a] mb-2">hourglass_empty</span>
+        <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Nada en proceso</p>
+      </div>
+
+      <div
+        *ngFor="let order of inProgressOrders; trackBy: trackById"
+        class="order-card border-blue-400/20"
+        [class.order-card--urgent]="urgencyClass(order.createdAt) === 'urgent'"
+        [class.order-card--warning]="urgencyClass(order.createdAt) === 'warning'">
+
+        <ng-container *ngTemplateOutlet="cardContent; context: { $implicit: order, action: 'complete' }"></ng-container>
+      </div>
+    </section>
+
+    <!-- ── LISTOS ───────────────────────────────────────────── -->
+    <section class="kitchen-col">
+      <div class="col-header border-l-2 border-emerald-400 pl-3 mb-4 flex items-center justify-between">
+        <h2 class="font-headline text-base text-[#e5e2e1] uppercase tracking-wider">Listos</h2>
+        <span class="bg-emerald-400/10 text-emerald-400 font-label text-xs px-2 py-0.5">
+          {{ completedOrders.length }}
+        </span>
+      </div>
+
+      <div *ngIf="completedOrders.length === 0" class="empty-state">
+        <span class="material-symbols-outlined text-3xl text-[#4d463a] mb-2">inventory</span>
+        <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin pedidos listos</p>
+      </div>
+
+      <div
+        *ngFor="let order of completedOrders; trackBy: trackById"
+        class="order-card border-emerald-400/20 opacity-70">
+
+        <ng-container *ngTemplateOutlet="cardContent; context: { $implicit: order, action: 'none' }"></ng-container>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ─── Card Template ──────────────────────────────────────────────────────── -->
+<ng-template #cardContent let-order let-action="action">
+
+  <!-- Card header row -->
+  <div class="flex items-start justify-between gap-2 mb-3">
+
+    <div class="flex flex-col gap-1">
+      <!-- Order ID -->
+      <span class="font-label text-xs text-[#998f81] uppercase tracking-widest">
+        #{{ order.id.slice(-6).toUpperCase() }}
+      </span>
+
+      <!-- Channel + table -->
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-sm text-[#c9a96e]">
+          {{ order.channel === 'PRESENTIAL' ? 'table_restaurant' : 'public' }}
+        </span>
+        <span class="font-body text-[#d0c5b5] text-xs">
+          {{ order.channel === 'PRESENTIAL' ? 'Presencial' : 'Online' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Timer badge -->
+    <div class="flex flex-col items-end gap-1">
+      <span
+        class="timer-badge font-label text-xs tabular-nums px-2 py-0.5"
+        [ngClass]="{
+          'timer-urgent':  urgencyClass(order.createdAt) === 'urgent',
+          'timer-warning': urgencyClass(order.createdAt) === 'warning',
+          'timer-normal':  urgencyClass(order.createdAt) === 'normal'
+        }">
+        <span class="material-symbols-outlined text-[11px] align-middle">timer</span>
+        {{ elapsedMinutes(order.createdAt) }} min
+      </span>
+      <span class="font-label text-[10px] text-[#998f81]/60">
+        {{ order.createdAt | date:'HH:mm' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Item count summary -->
+  <div class="flex items-center gap-2 mb-3 py-2 border-y border-[#4d463a]/20">
+    <span class="material-symbols-outlined text-sm text-[#998f81]">receipt_long</span>
+    <span class="font-body text-[#d0c5b5] text-xs">
+      {{ order.itemCount }} ítem{{ order.itemCount !== 1 ? 's' : '' }}
+    </span>
+    <!-- Expand toggle -->
+    <button
+      (click)="toggleDetail(order)"
+      class="ml-auto flex items-center gap-1 text-[10px] font-label uppercase tracking-wider text-[#998f81] hover:text-[#e6c487] transition-colors">
+      {{ isExpanded(order.id) ? 'Ocultar' : 'Ver items' }}
+      <span class="material-symbols-outlined text-xs">
+        {{ isExpanded(order.id) ? 'expand_less' : 'expand_more' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Expanded items detail -->
+  <div *ngIf="isExpanded(order.id)" class="mb-3">
+    <!-- Loading detail -->
+    <div *ngIf="loadingDetail[order.id]" class="flex justify-center py-3">
+      <div class="w-4 h-4 border border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Items list -->
+    <div *ngIf="expandedDetails[order.id] as detail" class="space-y-2">
+
+      <!-- Table info if presential -->
+      <div *ngIf="detail.table" class="flex items-center gap-2 mb-2 px-2 py-1.5 bg-[#1a1a1a]">
+        <span class="material-symbols-outlined text-sm text-[#c9a96e]">table_restaurant</span>
+        <span class="font-label text-xs text-[#d0c5b5] uppercase tracking-wider">Mesa {{ detail.table.number }}</span>
+      </div>
+
+      <div
+        *ngFor="let item of detail.items; trackBy: trackById"
+        class="flex gap-3 px-2 py-2 bg-[#131313] border border-[#4d463a]/10">
+
+        <!-- Type icon -->
+        <span class="material-symbols-outlined text-base text-[#998f81] mt-0.5 shrink-0">
+          {{ typeIcon[item.productType] ?? 'fastfood' }}
+        </span>
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline justify-between gap-2">
+            <span class="font-body text-[#e5e2e1] text-sm leading-tight truncate">{{ item.productName }}</span>
+            <span class="font-headline text-[#e6c487] text-sm shrink-0">× {{ item.quantity }}</span>
+          </div>
+          <!-- Notes -->
+          <p *ngIf="item.notes" class="font-body text-[#998f81] text-xs mt-0.5 italic">
+            "{{ item.notes }}"
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action button -->
+  <div class="mt-3" *ngIf="action !== 'none'">
+    <button
+      *ngIf="action === 'start'"
+      (click)="startOrder(order)"
+      class="w-full btn-metallic py-2 px-4 font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined text-sm">play_arrow</span>
+      Iniciar preparación
+    </button>
+
+    <button
+      *ngIf="action === 'complete'"
+      (click)="requestComplete(order)"
+      class="w-full py-2 px-4 font-label text-xs uppercase tracking-widest font-semibold transition-all flex items-center justify-center gap-2"
+      [ngClass]="confirmingId === order.id
+        ? 'bg-emerald-500/20 border border-emerald-400 text-emerald-300 animate-pulse'
+        : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'">
+      <span class="material-symbols-outlined text-sm">
+        {{ confirmingId === order.id ? 'check' : 'check_circle' }}
+      </span>
+      {{ confirmingId === order.id ? 'Confirmar — ¿listo?' : 'Marcar como listo' }}
+    </button>
+  </div>
+
+  <!-- Completed indicator -->
+  <div *ngIf="action === 'none'" class="mt-3 flex items-center justify-center gap-2 py-1.5 bg-emerald-500/5 border border-emerald-500/20">
+    <span class="material-symbols-outlined text-sm text-emerald-400">check</span>
+    <span class="font-label text-[10px] uppercase tracking-widest text-emerald-400">Listo para entregar</span>
+  </div>
+
+</ng-template>

@@ -33,11 +33,36 @@ export class AppComponent implements OnInit, OnDestroy {
     this.inactivityService.stopMonitoring();
   }
 
+  isAdminRoute(): boolean {
+    return this.currentRoute.startsWith('/admin') ||
+           this.currentRoute.startsWith('/inventory');
+  }
+
   showNavbar(): boolean {
-    // No mostrar navbar en rutas de autenticacion
-    const authRoutes = ['/auth/login', '/auth/register', '/auth/verify-account',
-      '/auth/forgot-password', '/auth/reset-password'];
-    return !authRoutes.some(route => this.currentRoute.startsWith(route));
+    const hiddenRoutes = [
+      '/auth/login', '/auth/register', '/auth/verify-account',
+      '/auth/forgot-password', '/auth/reset-password',
+      '/auth/profile', '/auth/change-password',
+      '/admin',
+      '/inventory',
+      '/orders/kitchen',
+      '/orders/waiter',
+      '/customer'
+    ];
+    const isLanding = this.currentRoute === '/' || this.currentRoute === '';
+    return !isLanding && !hiddenRoutes.some(route => this.currentRoute.startsWith(route));
+  }
+
+  showChatbot(): boolean {
+    const isLanding = this.currentRoute === '/' || this.currentRoute === '';
+    const authRoutes = [
+      '/auth/login', '/auth/register', '/auth/verify-account',
+      '/auth/forgot-password', '/auth/reset-password',
+      '/orders/kitchen',
+      '/orders/waiter',
+      '/customer'
+    ];
+    return !isLanding && !authRoutes.some(route => this.currentRoute.startsWith(route));
   }
 }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -9,9 +9,12 @@ import { NotificationService } from '@core/services/notification.service';
   templateUrl: './verify-account.component.html',
   styleUrls: ['./verify-account.component.scss']
 })
-export class VerifyAccountComponent implements OnInit {
+export class VerifyAccountComponent implements OnInit, OnDestroy {
   verifyForm!: FormGroup;
   loading = false;
+  resending = false;
+  cooldown = 0;
+  private cooldownInterval: any;
 
   constructor(
     private fb: FormBuilder,
@@ -23,13 +26,15 @@ export class VerifyAccountComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    
-    // Leer email de los queryParams
     this.route.queryParams.subscribe(params => {
       if (params['email']) {
         this.verifyForm.patchValue({ email: params['email'] });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.cooldownInterval);
   }
 
   initForm(): void {
@@ -42,24 +47,40 @@ export class VerifyAccountComponent implements OnInit {
   onSubmit(): void {
     if (this.verifyForm.valid) {
       this.loading = true;
-      const { email, code } = this.verifyForm.value;
-      
       const request = {
-        email,
-        code: this.verifyForm.value.otp // El backend espera 'code', no 'otp'
+        email: this.verifyForm.value.email,
+        code: this.verifyForm.value.otp
       };
-      
       this.authService.verifyEmail(request).subscribe({
         next: (message) => {
           this.notificationService.showSuccess(message || 'Cuenta verificada exitosamente');
           this.router.navigate(['/auth/login']);
         },
-        error: (error) => {
-          this.loading = false;
-          const message = error?.error?.message || 'Error al verificar la cuenta';
-          this.notificationService.showError(message);
-        }
+        error: () => { this.loading = false; }
       });
     }
+  }
+
+  resendCode(): void {
+    const email = this.verifyForm.value.email;
+    if (!email || this.resending || this.cooldown > 0) return;
+
+    this.resending = true;
+    this.authService.resendVerification(email).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Código reenviado a tu correo');
+        this.resending = false;
+        this.startCooldown();
+      },
+      error: () => { this.resending = false; }
+    });
+  }
+
+  private startCooldown(): void {
+    this.cooldown = 60;
+    this.cooldownInterval = setInterval(() => {
+      this.cooldown--;
+      if (this.cooldown <= 0) clearInterval(this.cooldownInterval);
+    }, 1000);
   }
 }

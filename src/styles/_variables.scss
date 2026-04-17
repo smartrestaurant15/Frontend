@@ -1,36 +1,168 @@
-// Modern Premium Palette
-$primary-color: #1e293b; // Slate 800
-$secondary-color: #3b82f6; // Blue 500
-$accent-color: #8b5cf6; // Violet 500
-$success-color: #10b981; // Emerald 500
-$danger-color: #ef4444; // Red 500
-$warning-color: #f59e0b; // Amber 500
-$info-color: #3b82f6;
+// =============================================================================
+// SmartRestaurante — Design System Variables
+// Estilo: Restaurant Dashboard Pro
+// Filosofía: modernidad, confianza, eficiencia para industria gastronómica
+// =============================================================================
 
+// -----------------------------------------------------------------------------
+// PALETA PRINCIPAL
+// -----------------------------------------------------------------------------
+$primary-color:   #1e293b; // Slate 800 — fondo navbar, textos fuertes
+$secondary-color: #3b82f6; // Blue 500  — acciones primarias, enlaces
+$accent-color:    #8b5cf6; // Violet 500 — decorativo, gradientes hero
 
-$text-color: #333;
-$text-light: #666;
-$border-color: #ddd;
-$background-color: #f5f5f5;
+// Colores semánticos (industria gastronómica)
+$success-color:  #10b981; // Emerald 500 — stock OK, precio, éxito
+$danger-color:   #ef4444; // Red 500    — errores, alertas críticas
+$warning-color:  #f59e0b; // Amber 500  — alertas, destacados, stock bajo
+$info-color:     #3b82f6; // Blue 500   — información general
 
-// Spacing
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 16px;
-$spacing-lg: 24px;
-$spacing-xl: 32px;
+// -----------------------------------------------------------------------------
+// PALETA DE GRISES (Sistema completo slate-based)
+// Usada para fondos, bordes, textos secundarios, separadores
+// -----------------------------------------------------------------------------
+$gray-50:  #f8fafc;
+$gray-100: #f1f5f9;
+$gray-200: #e2e8f0;
+$gray-300: #cbd5e1;
+$gray-400: #94a3b8;
+$gray-500: #64748b;
+$gray-600: #475569;
+$gray-700: #334155;
+$gray-800: #1e293b;
+$gray-900: #0f172a;
 
-// Border radius
-$border-radius-sm: 4px;
-$border-radius-md: 8px;
-$border-radius-lg: 12px;
+// -----------------------------------------------------------------------------
+// COLORES DE TEXTO
+// -----------------------------------------------------------------------------
+$text-color:       #1e293b; // Slate 800  — texto principal (11.6:1 sobre #f8fafc)
+$text-secondary:   #475569; // Slate 600  — texto secundario (5.9:1 sobre blanco)
+$text-light:       #64748b; // Slate 500  — texto terciario, placeholders
+$text-muted:       #94a3b8; // Slate 400  — disabled, hints
+$text-inverse:     #ffffff; // Texto sobre fondos oscuros
 
-// Shadows
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+// -----------------------------------------------------------------------------
+// FONDOS Y BORDES
+// -----------------------------------------------------------------------------
+$background-color:    #f8fafc; // Gris muy suave — fondo general (no blanco puro)
+$surface-color:       #ffffff; // Blanco puro — cards, paneles
+$border-color:        #e2e8f0; // Gris 200 — bordes de cards y separadores
+$border-color-strong: #cbd5e1; // Gris 300 — bordes con más énfasis
 
-// Transitions
-$transition-fast: 0.15s ease;
-$transition-normal: 0.3s ease;
-$transition-slow: 0.5s ease;
+// -----------------------------------------------------------------------------
+// ESPACIADO — Múltiplos de 4px
+// -----------------------------------------------------------------------------
+$spacing-1:  4px;
+$spacing-2:  8px;
+$spacing-3:  12px;
+$spacing-4:  16px;
+$spacing-5:  20px;
+$spacing-6:  24px;
+$spacing-8:  32px;
+$spacing-10: 40px;
+$spacing-12: 48px;
+$spacing-16: 64px;
+
+// Aliases semánticos (retrocompatibilidad total)
+$spacing-xs: $spacing-1;
+$spacing-sm: $spacing-2;
+$spacing-md: $spacing-4;
+$spacing-lg: $spacing-6;
+$spacing-xl: $spacing-8;
+
+// -----------------------------------------------------------------------------
+// BORDER RADIUS — Sistema consistente
+// -----------------------------------------------------------------------------
+$radius-sm:   4px;  // Badges pequeños, tags
+$radius-md:   8px;  // Botones, inputs
+$radius-lg:   12px; // Cards principales
+$radius-xl:   16px; // Cards hero, modals
+$radius-2xl:  24px; // Cards glassmorphism
+$radius-full: 9999px; // Pills, avatares
+
+// Aliases (retrocompatibilidad)
+$border-radius-sm: $radius-sm;
+$border-radius-md: $radius-md;
+$border-radius-lg: $radius-lg;
+
+// -----------------------------------------------------------------------------
+// SOMBRAS — Sistema de 4 niveles (restaurante: sutiles y profesionales)
+// -----------------------------------------------------------------------------
+// Sombra "base": cards en reposo
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+// Sombra "card": elemento principal
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+// Sombra "hover": elevación al hacer hover
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+
+// Sombra "elevated": modals, dropdowns
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
+
+// Sombra "overlay": popovers, toasts
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.08), 0 8px 10px rgba(0, 0, 0, 0.04);
+
+// Sombra de foco (accesibilidad, no reemplaza outline)
+$shadow-focus-blue:    0 0 0 3px rgba(59, 130, 246, 0.2);
+$shadow-focus-violet:  0 0 0 3px rgba(139, 92, 246, 0.2);
+$shadow-focus-emerald: 0 0 0 3px rgba(16, 185, 129, 0.2);
+
+// Sombra de color para botones CTA
+$shadow-blue-glow:    0 4px 14px rgba(59, 130, 246, 0.35);
+$shadow-violet-glow:  0 4px 14px rgba(139, 92, 246, 0.35);
+$shadow-emerald-glow: 0 4px 14px rgba(16, 185, 129, 0.3);
+$shadow-amber-glow:   0 4px 14px rgba(245, 158, 11, 0.3);
+
+// -----------------------------------------------------------------------------
+// TIPOGRAFÍA — Inter / system-ui con jerarquía clara
+// -----------------------------------------------------------------------------
+$font-family-base: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+// Tamaños (escala 4px base)
+$font-size-xs:   11px;
+$font-size-sm:   13px;
+$font-size-base: 14px; // Body
+$font-size-md:   15px;
+$font-size-lg:   16px;
+$font-size-xl:   18px;
+$font-size-2xl:  20px; // h2
+$font-size-3xl:  24px;
+$font-size-4xl:  28px; // h1 componentes
+$font-size-5xl:  36px; // h1 hero
+
+// Pesos
+$font-weight-normal:    400;
+$font-weight-medium:    500;
+$font-weight-semibold:  600;
+$font-weight-bold:      700;
+$font-weight-extrabold: 800;
+
+// Line heights
+$line-height-tight:   1.25;
+$line-height-snug:    1.375;
+$line-height-normal:  1.5;
+$line-height-relaxed: 1.625;
+
+// -----------------------------------------------------------------------------
+// TRANSICIONES — cubic-bezier consistente para micro-interacciones
+// -----------------------------------------------------------------------------
+$ease-standard: cubic-bezier(0.4, 0, 0.2, 1); // Material Design standard
+$ease-decelerate: cubic-bezier(0, 0, 0.2, 1);  // Entrada (aparición)
+$ease-accelerate: cubic-bezier(0.4, 0, 1, 1);  // Salida (desaparición)
+$ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); // Rebote sutil
+
+$transition-fast:   0.15s #{$ease-standard};
+$transition-normal: 0.2s #{$ease-standard};
+$transition-slow:   0.3s #{$ease-standard};
+
+// -----------------------------------------------------------------------------
+// Z-INDEX — Escala definida para evitar guerras de capas
+// -----------------------------------------------------------------------------
+$z-base:    1;
+$z-dropdown: 100;
+$z-sticky:   200;
+$z-overlay:  300;
+$z-modal:    400;
+$z-toast:    500;
