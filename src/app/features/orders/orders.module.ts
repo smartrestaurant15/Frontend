@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 import { OrdersRoutingModule } from './orders-routing.module';
 import { SharedModule } from '@shared/shared.module';
@@ -21,6 +22,7 @@ import { CustomerOrdersComponent } from './components/customer-orders/customer-o
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    RouterModule,
     OrdersRoutingModule,
     SharedModule
   ]

@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { OrderService } from '../../services/order.service';
 import { SseService } from '../../services/sse.service';
 import { NotificationService } from '@core/services/notification.service';
-import { Order, OrderDetail, ORDER_STATUS_LABEL, ORDER_STATUS_CLASS } from '../../models/order.model';
+import { Order, OrderDetail, OrderStatus, ORDER_STATUS_LABEL, ORDER_STATUS_CLASS } from '../../models/order.model';
 
 @Component({
   selector: 'app-customer-orders',
@@ -21,6 +21,7 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
 
   readonly STATUS_LABEL = ORDER_STATUS_LABEL;
   readonly STATUS_CLASS  = ORDER_STATUS_CLASS;
+  readonly STEPS: OrderStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
 
   private sseSub?: Subscription;
 
