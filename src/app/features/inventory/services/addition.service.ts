@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClientService } from '@core/services/http-client.service';
-import { 
-  Addition, 
-  CreateAdditionDTO, 
+import {
+  Addition,
+  CreateAdditionDTO,
   UpdateAdditionDTO,
   AdditionResponse,
-  AdditionDetailResponse
+  AdditionDetailResponse,
+  AdditionStockDTO
 } from '../models/addition.model';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -55,5 +56,21 @@ export class AdditionService {
    */
   deleteAddition(id: string): Observable<ApiResponse<string>> {
     return this.httpClient.delete<ApiResponse<string>>(`/additions/${id}`);
+  }
+
+  /**
+   * Añadir unidades a adición
+   * PATCH /api/additions/{id}/add
+   */
+  addStock(id: string, dto: AdditionStockDTO): Observable<ApiResponse<string>> {
+    return this.httpClient.patch<ApiResponse<string>>(`/additions/${id}/add`, dto);
+  }
+
+  /**
+   * Descontar unidades de adición
+   * PATCH /api/additions/{id}/discount
+   */
+  discountStock(id: string, dto: AdditionStockDTO): Observable<ApiResponse<string>> {
+    return this.httpClient.patch<ApiResponse<string>>(`/additions/${id}/discount`, dto);
   }
 }

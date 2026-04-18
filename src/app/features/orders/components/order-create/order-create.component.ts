@@ -203,8 +203,11 @@ export class OrderCreateComponent implements OnInit {
         this.orderSaved.emit();
         this.closeModal.emit();
       },
-      error: () => {
-        this.notification.showError('Error al crear la orden');
+      error: (err) => {
+        // El interceptor ya muestra el mensaje específico para 409 (stock insuficiente)
+        if (err?.status !== 409) {
+          this.notification.showError('Error al crear la orden');
+        }
         this.submitting = false;
       }
     });

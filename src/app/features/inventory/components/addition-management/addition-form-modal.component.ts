@@ -49,7 +49,9 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
     this.additionForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
-      price: [0, [Validators.required, Validators.min(0.01)]]
+      price: [0, [Validators.required, Validators.min(0.01)]],
+      units: [0, [Validators.required, Validators.min(0)]],
+      minimumStock: [0, [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -63,7 +65,9 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
           this.additionForm.patchValue({
             name: addition.name,
             description: addition.description,
-            price: addition.price
+            price: addition.price,
+            units: addition.units,
+            minimumStock: addition.minimumStock
           });
           this.uploadedPhotos = addition.photos || [];
         }
@@ -174,5 +178,13 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
 
   get price() {
     return this.additionForm.get('price');
+  }
+
+  get units() {
+    return this.additionForm.get('units');
+  }
+
+  get minimumStock() {
+    return this.additionForm.get('minimumStock');
   }
 }

@@ -57,6 +57,7 @@ export class DrinkFormModalComponent implements OnInit, OnChanges {
       mililiters: [0, [Validators.required, Validators.min(1)]],
       alcohol: [false, [Validators.required]],
       units: [0, [Validators.required, Validators.min(1)]],
+      minimumStock: [0, [Validators.required, Validators.min(0)]],
       categoryId: ['', [Validators.required]]
     });
   }
@@ -87,6 +88,7 @@ export class DrinkFormModalComponent implements OnInit, OnChanges {
             mililiters: drink.mililiters,
             alcohol: drink.alcohol,
             units: drink.units,
+            minimumStock: drink.minimumStock,
             categoryId: drink.categoryId || ''
           });
           this.uploadedPhotos = drink.photos || [drink.photo];
@@ -211,6 +213,10 @@ export class DrinkFormModalComponent implements OnInit, OnChanges {
 
   get units() {
     return this.drinkForm.get('units');
+  }
+
+  get minimumStock() {
+    return this.drinkForm.get('minimumStock');
   }
 
   get categoryId() {

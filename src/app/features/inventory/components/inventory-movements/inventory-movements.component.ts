@@ -44,8 +44,9 @@ export class InventoryMovementsComponent implements OnInit {
 
   applyFilters(): void {
     this.filteredMovements = this.movements.filter(movement => {
-      const matchesSearch = !this.searchTerm || 
+      const matchesSearch = !this.searchTerm ||
         movement.productId.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        (movement.productName || '').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         movement.userName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         movement.reason.toLowerCase().includes(this.searchTerm.toLowerCase());
       
