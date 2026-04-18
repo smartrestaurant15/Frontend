@@ -64,6 +64,40 @@
             </div>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label for="units">Unidades en Stock <span class="required">*</span></label>
+              <input
+                type="number"
+                id="units"
+                formControlName="units"
+                placeholder="50"
+                min="0"
+                [class.error]="units?.invalid && units?.touched"
+              />
+              <div class="error-message" *ngIf="units?.invalid && units?.touched">
+                <span *ngIf="units?.errors?.['required']">Las unidades son requeridas</span>
+                <span *ngIf="units?.errors?.['min']">Debe ser 0 o mayor</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="minimumStock">Stock Mínimo <span class="required">*</span></label>
+              <input
+                type="number"
+                id="minimumStock"
+                formControlName="minimumStock"
+                placeholder="10"
+                min="0"
+                [class.error]="minimumStock?.invalid && minimumStock?.touched"
+              />
+              <div class="error-message" *ngIf="minimumStock?.invalid && minimumStock?.touched">
+                <span *ngIf="minimumStock?.errors?.['required']">El stock mínimo es requerido</span>
+                <span *ngIf="minimumStock?.errors?.['min']">Debe ser 0 o mayor</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Sección de Fotos (Opcional) -->
           <div class="form-group">
             <label>Fotos de la Adición (Opcional)</label>

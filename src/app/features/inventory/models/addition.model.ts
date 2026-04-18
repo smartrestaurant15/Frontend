@@ -7,6 +7,8 @@ export interface Addition {
   photos: string[];
   createdAt: string;
   state: 'ACTIVE' | 'INACTIVE';
+  units: number;
+  minimumStock: number;
 }
 
 // DTO para crear adición
@@ -14,6 +16,8 @@ export interface CreateAdditionDTO {
   name: string;
   description: string;
   price: number;
+  units: number;
+  minimumStock: number;
 }
 
 // DTO para actualizar adición
@@ -21,6 +25,13 @@ export interface UpdateAdditionDTO {
   name: string;
   description: string;
   price: number;
+  units: number;
+  minimumStock: number;
+}
+
+// DTO para ajuste manual de stock de adición
+export interface AdditionStockDTO {
+  unit: number;
 }
 
 // Respuesta de adición
@@ -29,6 +40,7 @@ export interface AdditionResponse {
   name: string;
   photo: string;
   price: number;
+  units: number;
 }
 
 // Detalle de adición
@@ -38,4 +50,6 @@ export interface AdditionDetailResponse {
   description: string;
   photos: string[];
   price: number;
+  units: number;
+  minimumStock: number;
 }

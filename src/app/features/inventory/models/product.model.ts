@@ -35,6 +35,7 @@ export interface UpdateProductDTO {
 // DTO para movimiento de stock
 export interface StockMovementDTO {
   weight: number;
+  reason?: string;
 }
 
 // Proveedor asociado a producto
