@@ -7,6 +7,7 @@ export interface Drink {
   alcohol: boolean;
   photos: string[];
   units: number;
+  minimumStock: number;
   state: 'ACTIVE' | 'INACTIVE';
   categoryId?: string;
   categoryName?: string;
@@ -20,6 +21,7 @@ export interface CreateDrinkDTO {
   alcohol: boolean;
   photos: string[];
   units: number;
+  minimumStock: number;
 }
 
 // DTO para actualizar bebida
@@ -30,6 +32,12 @@ export interface UpdateDrinkDTO {
   alcohol: boolean;
   photos: string[];
   units: number;
+  minimumStock: number;
+}
+
+// DTO para ajuste manual de stock de bebida
+export interface DrinkStockDTO {
+  unit: number;
 }
 
 // Respuesta de bebida
@@ -52,6 +60,7 @@ export interface DrinkDetailResponse {
   alcohol: boolean;
   photo: string;
   units: number;
+  minimumStock: number;
   state: string;
   categoryName: string;
 }

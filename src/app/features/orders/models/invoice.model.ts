@@ -1,6 +1,5 @@
-export type PaymentMethodType = 'CASH' | 'CARD' | 'TRANSFER';
-
 export type InvoiceStatus = 'PENDING' | 'PAID' | 'CANCELLED';
+export type PaymentMethodType = 'CASH' | 'CARD' | 'TRANSFER' | 'WOMPI';
 
 export interface Invoice {
   id: string;
@@ -9,8 +8,7 @@ export interface Invoice {
   subtotal: number;
   tax: number;
   total: number;
-  paymentMethod?: PaymentMethodType;
-  reference?: string;
+  notes?: string;
   createdAt: string;
   paidAt?: string;
 }

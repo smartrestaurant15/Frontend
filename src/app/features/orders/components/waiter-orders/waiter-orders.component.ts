@@ -261,3 +261,5 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
 
   trackById(_: number, o: { id: string }): string { return o.id; }
 }
+
+

@@ -1,80 +1,109 @@
-<div class="min-h-screen bg-[#0e0e0e] p-6">
-
-  <h1 class="font-headline text-2xl text-[#e5e2e1] mb-6">Mis Órdenes</h1>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="flex justify-center py-12">
-    <span class="material-icons animate-spin text-[#c9a96e]">refresh</span>
-  </div>
-
-  <!-- Orders list -->
-  <div *ngIf="!loading" class="space-y-4">
-    <div *ngFor="let order of orders; trackBy: trackById"
-         class="bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-4 cursor-pointer hover:border-[#c9a96e]/40 transition-colors"
-         (click)="viewDetail(order.id)">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="font-label text-xs text-[#998f81] uppercase tracking-widest mb-1">
-            Orden #{{ order.id.slice(-6).toUpperCase() }}
-          </p>
-          <p class="font-body text-sm text-[#e5e2e1]">{{ order.itemCount }} ítem(s)</p>
-        </div>
-        <span class="text-xs px-3 py-1 rounded-full border font-label uppercase tracking-widest"
-              [ngClass]="STATUS_CLASS[order.status]">
-          {{ STATUS_LABEL[order.status] }}
-        </span>
+<div class="customer-orders">
+  <header class="page-header">
+    <div class="header-main">
+      <div class="header-info">
+        <h1>🛍 Mis Pedidos</h1>
+        <p>Seguimiento de tus órdenes</p>
       </div>
     </div>
+  </header>
 
-    <p *ngIf="orders.length === 0" class="text-center text-[#998f81] py-8">
-      No tienes órdenes aún.
-    </p>
-  </div>
+  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
 
-  <!-- Pagination -->
-  <div class="flex justify-between mt-6" *ngIf="orders.length > 0">
-    <button (click)="previousPage()" [disabled]="currentPage === 1"
-            class="px-4 py-2 text-sm text-[#998f81] disabled:opacity-40">
-      Anterior
-    </button>
-    <button (click)="nextPage()" [disabled]="!hasMorePages"
-            class="px-4 py-2 text-sm text-[#998f81] disabled:opacity-40">
-      Siguiente
-    </button>
-  </div>
+  <main class="page-content" *ngIf="!loading">
 
-  <!-- Order detail overlay -->
-  <div *ngIf="selectedOrder" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div class="bg-[#1a1a1a] border border-[#2e2e2e] rounded-2xl w-full max-w-lg p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-headline text-lg text-[#e5e2e1]">
-          Detalle #{{ selectedOrder.id.slice(-6).toUpperCase() }}
-        </h2>
-        <button (click)="closeDetail()" class="material-icons text-[#998f81] hover:text-[#e5e2e1]">close</button>
-      </div>
+    <div *ngIf="orders.length === 0" class="empty-state">
+      <div class="empty-icon">🛒</div>
+      <h3>Aún no tienes pedidos</h3>
+      <p>Tus órdenes aparecerán aquí una vez que realices tu primer pedido.</p>
+    </div>
 
-      <!-- Progress steps -->
-      <div class="flex justify-between mb-6">
-        <div *ngFor="let step of STEPS"
-             class="flex flex-col items-center gap-1">
-          <span class="material-icons text-sm"
-                [class.text-[#c9a96e]]="isStepDone(selectedOrder.status, step)"
-                [class.text-[#3e3e3e]]="!isStepDone(selectedOrder.status, step)">
-            check_circle
+    <div class="orders-list" *ngIf="orders.length > 0">
+      <div
+        *ngFor="let order of orders; trackBy: trackById"
+        class="order-card"
+        (click)="viewDetail(order.id)">
+
+        <div class="order-card-left">
+          <div class="order-id">#{{ order.id.slice(-6) }}</div>
+          <div class="order-date">{{ order.createdAt | date:'dd MMM, HH:mm' }}</div>
+        </div>
+
+        <div class="order-card-center">
+          <div class="order-items">{{ order.itemCount }} producto(s)</div>
+          <div class="order-total">${{ order.totalAmount | number:'1.0-0' }}</div>
+        </div>
+
+        <div class="order-card-right">
+          <span class="status-badge" [ngClass]="STATUS_CLASS[order.status]">
+            {{ STATUS_LABEL[order.status] }}
           </span>
-          <span class="text-[10px] text-[#998f81]">{{ STATUS_LABEL[step] }}</span>
+          <span class="view-detail">Ver detalle →</span>
         </div>
       </div>
+    </div>
 
-      <!-- Items -->
-      <div class="space-y-2">
-        <div *ngFor="let item of selectedOrder.items"
-             class="flex justify-between text-sm text-[#e5e2e1]">
-          <span>{{ item.productName }} × {{ item.quantity }}</span>
-          <span>${{ item.totalPrice | number:'1.0-0' }}</span>
+    <div class="pagination" *ngIf="orders.length > 0">
+      <app-button variant="secondary" size="small" [disabled]="currentPage === 1" (clicked)="previousPage()">
+        ← Anterior
+      </app-button>
+      <span class="page-info">Página <strong>{{ currentPage }}</strong></span>
+      <app-button variant="secondary" size="small" [disabled]="!hasMorePages" (clicked)="nextPage()">
+        Siguiente →
+      </app-button>
+    </div>
+
+  </main>
+
+  <div class="detail-overlay" *ngIf="selectedOrder" (click)="closeDetail()">
+    <div class="detail-panel" (click)="$event.stopPropagation()">
+      <div class="detail-header">
+        <h2>Orden #{{ selectedOrder.id.slice(-6) }}</h2>
+        <button class="close-btn" (click)="closeDetail()">✕</button>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-status">
+          <span class="status-badge" [ngClass]="STATUS_CLASS[selectedOrder.status]">
+            {{ STATUS_LABEL[selectedOrder.status] }}
+          </span>
+        </div>
+
+        <div class="progress-steps">
+          <div class="step" [class.done]="isStepDone(selectedOrder.status, 'PENDING')">
+            <div class="step-dot"></div>
+            <span>Recibido</span>
+          </div>
+          <div class="step-line" [class.done]="isStepDone(selectedOrder.status, 'IN_PROGRESS')"></div>
+          <div class="step" [class.done]="isStepDone(selectedOrder.status, 'IN_PROGRESS')">
+            <div class="step-dot"></div>
+            <span>Preparando</span>
+          </div>
+          <div class="step-line" [class.done]="isStepDone(selectedOrder.status, 'COMPLETED')"></div>
+          <div class="step" [class.done]="isStepDone(selectedOrder.status, 'COMPLETED')">
+            <div class="step-dot"></div>
+            <span>Listo</span>
+          </div>
+          <div class="step-line" [class.done]="isStepDone(selectedOrder.status, 'DELIVERED')"></div>
+          <div class="step" [class.done]="isStepDone(selectedOrder.status, 'DELIVERED')">
+            <div class="step-dot"></div>
+            <span>Entregado</span>
+          </div>
+        </div>
+
+        <div class="detail-items">
+          <h3>Productos</h3>
+          <div class="item-row" *ngFor="let item of selectedOrder.items">
+            <span class="item-name">{{ item.productName }}</span>
+            <span class="item-qty">× {{ item.quantity }}</span>
+            <span class="item-price">${{ item.totalPrice | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-total">
+          Total: <strong>${{ selectedOrder.totalAmount | number:'1.0-0' }}</strong>
         </div>
       </div>
     </div>
   </div>
-
 </div>
