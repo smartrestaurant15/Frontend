@@ -41,7 +41,7 @@ export class SseService {
 
         const read = (): void => {
           reader.read().then(({ done, value }) => {
-            if (done) { observer.complete(); return; }
+            if (done) { observer.error(new Error('SSE_CLOSED')); return; }
 
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split('\n');

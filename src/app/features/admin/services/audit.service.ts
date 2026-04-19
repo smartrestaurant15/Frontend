@@ -42,7 +42,9 @@ export class AuditService {
 
   // Logs por rango de fechas
   getLogsByDateRange(startDate: string, endDate: string, page: number = 0, size: number = 20): Observable<PageResponse<AuditLogResponse>> {
-    return this.http.get<PageResponse<AuditLogResponse>>(`/admin/audit-logs/by-date-range?startDate=${startDate}&endDate=${endDate}&page=${page}&size=${size}`);
+    const start = `${startDate}T00:00:00`;
+    const end   = `${endDate}T23:59:59`;
+    return this.http.get<PageResponse<AuditLogResponse>>(`/admin/audit-logs/by-date-range?startDate=${start}&endDate=${end}&page=${page}&size=${size}`);
   }
 
   // Logs fallidos

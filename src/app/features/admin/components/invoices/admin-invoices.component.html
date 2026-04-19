@@ -1,0 +1,187 @@
+<div class="p-6 md:p-10">
+
+  <!-- Header -->
+  <div class="mb-8 flex items-center justify-between">
+    <div>
+      <h1 class="font-headline text-2xl text-[#e5e2e1]">Facturas</h1>
+      <p class="font-body text-xs text-[#998f81] mt-0.5">Historial de todas las facturas generadas</p>
+    </div>
+    <button (click)="loadInvoices()"
+      class="flex items-center gap-2 px-4 py-2 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] font-label text-xs uppercase tracking-wider transition-colors">
+      <span class="material-symbols-outlined text-base">refresh</span>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center h-40">
+    <div class="w-7 h-7 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && invoices.length === 0"
+    class="flex flex-col items-center justify-center h-48 gap-3">
+    <span class="material-symbols-outlined text-4xl text-[#4d463a]">receipt</span>
+    <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin facturas registradas</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!loading && invoices.length > 0" class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="border-b border-[#4d463a]/20">
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-left py-3 px-4">ID Factura</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-left py-3 px-4">Orden</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-left py-3 px-4">Estado</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-right py-3 px-4">Subtotal</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-right py-3 px-4">IVA</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-right py-3 px-4">Total</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-left py-3 px-4">Creada</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-left py-3 px-4">Pagada</th>
+          <th class="font-label text-[10px] uppercase tracking-widest text-[#998f81] text-center py-3 px-4">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of invoices; trackBy: trackById"
+          class="border-b border-[#4d463a]/10 hover:bg-[#1a1a1a] transition-colors">
+
+          <td class="py-3 px-4">
+            <span class="font-label text-xs text-[#e5e2e1] uppercase tracking-widest">
+              #{{ inv.id.slice(-8).toUpperCase() }}
+            </span>
+          </td>
+
+          <td class="py-3 px-4">
+            <span class="font-label text-xs text-[#c9a96e] uppercase tracking-widest">
+              #{{ inv.orderId.slice(-6).toUpperCase() }}
+            </span>
+          </td>
+
+          <td class="py-3 px-4">
+            <span class="font-label text-[10px] uppercase tracking-wider px-2 py-0.5 border"
+              [ngClass]="statusBadge[inv.status]">
+              {{ statusLabel[inv.status] }}
+            </span>
+          </td>
+
+          <td class="py-3 px-4 text-right font-headline text-[#998f81] text-xs tabular-nums">
+            ${{ inv.subtotal | number:'1.0-0' }}
+          </td>
+          <td class="py-3 px-4 text-right font-headline text-[#998f81] text-xs tabular-nums">
+            ${{ inv.tax | number:'1.0-0' }}
+          </td>
+          <td class="py-3 px-4 text-right font-headline text-[#e6c487] text-sm tabular-nums">
+            ${{ inv.total | number:'1.0-0' }}
+          </td>
+
+          <td class="py-3 px-4">
+            <span class="font-body text-xs text-[#998f81] tabular-nums">
+              {{ inv.createdAt | date:'dd/MM/yy HH:mm' }}
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <span *ngIf="inv.paidAt" class="font-body text-xs text-emerald-400 tabular-nums">
+              {{ inv.paidAt | date:'dd/MM/yy HH:mm' }}
+            </span>
+            <span *ngIf="!inv.paidAt" class="font-body text-xs text-[#4d463a]">—</span>
+          </td>
+
+          <!-- Acciones -->
+          <td class="py-3 px-4">
+            <div class="flex items-center justify-center gap-2">
+              <button
+                *ngIf="inv.status === 'PENDING'"
+                (click)="openPayment(inv)"
+                title="Registrar pago"
+                class="p-1.5 text-[#e6c487] hover:bg-[#e6c487]/10 transition-colors">
+                <span class="material-symbols-outlined text-base">payments</span>
+              </button>
+              <button
+                *ngIf="inv.status === 'PENDING'"
+                (click)="requestCancel(inv)"
+                title="Cancelar factura"
+                class="p-1.5 transition-colors"
+                [ngClass]="confirmCancelId === inv.id
+                  ? 'text-red-400 bg-red-400/10 animate-pulse'
+                  : 'text-[#4d463a] hover:text-red-400'">
+                <span class="material-symbols-outlined text-base">
+                  {{ confirmCancelId === inv.id ? 'warning' : 'cancel' }}
+                </span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal pago -->
+<div
+  *ngIf="payingInvoice"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+  (click)="closePayment()">
+  <div
+    class="w-full max-w-sm bg-[#111111] border border-[#4d463a]/30"
+    (click)="$event.stopPropagation()">
+
+    <div class="px-6 py-4 border-b border-[#4d463a]/20 flex items-center justify-between">
+      <h3 class="font-headline text-base text-[#e5e2e1]">Registrar Pago</h3>
+      <button (click)="closePayment()" class="text-[#998f81] hover:text-[#e5e2e1]">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="px-6 py-5 space-y-5">
+
+      <div class="text-center py-3 bg-[#1a1a1a] border border-[#4d463a]/15">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total a cobrar</p>
+        <p class="font-headline text-3xl text-[#e6c487]">${{ payingInvoice.total | number:'1.0-0' }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">
+          Subtotal ${{ payingInvoice.subtotal | number:'1.0-0' }} · IVA ${{ payingInvoice.tax | number:'1.0-0' }}
+        </p>
+      </div>
+
+      <div>
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Método</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            *ngFor="let m of PAYMENT_METHODS"
+            (click)="selectedMethod = m.value"
+            class="py-3 flex flex-col items-center gap-1 border font-label text-xs transition-colors"
+            [ngClass]="selectedMethod === m.value
+              ? 'border-[#e6c487]/60 bg-[#e6c487]/8 text-[#e6c487]'
+              : 'border-[#4d463a]/30 text-[#998f81] hover:border-[#4d463a]'">
+            <span class="material-symbols-outlined text-lg">{{ m.icon }}</span>
+            {{ m.label }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="selectedMethod !== 'CASH'">
+        <label class="font-label text-[10px] uppercase tracking-widest text-[#998f81] block mb-1">
+          Referencia <span class="text-[#4d463a]">(opcional)</span>
+        </label>
+        <input
+          [(ngModel)]="paymentReference"
+          placeholder="Nº autorización, referencia..."
+          class="w-full bg-[#1a1a1a] border border-[#4d463a]/30 px-3 py-2 text-sm text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/40" />
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#4d463a]/20 flex justify-end gap-3">
+      <button (click)="closePayment()"
+        class="px-4 py-2 border border-[#4d463a]/40 text-[#998f81] font-label text-xs uppercase tracking-wider hover:text-[#e5e2e1] transition-colors">
+        Cancelar
+      </button>
+      <button
+        (click)="submitPayment()"
+        [disabled]="submittingPayment"
+        class="px-6 py-2 btn-metallic text-[#0e0e0e] font-label text-xs uppercase tracking-widest font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity flex items-center gap-2">
+        <span *ngIf="submittingPayment" class="w-3 h-3 border border-[#0e0e0e]/40 border-t-[#0e0e0e] rounded-full animate-spin"></span>
+        <span class="material-symbols-outlined text-sm" *ngIf="!submittingPayment">check</span>
+        {{ submittingPayment ? 'Procesando...' : 'Confirmar pago' }}
+      </button>
+    </div>
+  </div>
+</div>

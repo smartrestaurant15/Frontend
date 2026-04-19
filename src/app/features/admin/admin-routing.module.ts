@@ -6,6 +6,7 @@ import { UserManagementComponent } from './components/user-management/user-manag
 import { UserDetailComponent } from './components/user-detail/user-detail.component';
 import { AuditLogsComponent } from './components/audit-logs/audit-logs.component';
 import { TablesComponent } from './components/tables/tables.component';
+import { AdminInvoicesComponent } from './components/invoices/admin-invoices.component';
 
 const routes: Routes = [
   {
@@ -17,6 +18,7 @@ const routes: Routes = [
       { path: 'users/:id',  component: UserDetailComponent },
       { path: 'audit-logs', component: AuditLogsComponent },
       { path: 'tables',     component: TablesComponent },
+      { path: 'invoices',   component: AdminInvoicesComponent },
       {
         path: 'inventory',
         loadChildren: () => import('../inventory/inventory.module').then(m => m.InventoryModule)

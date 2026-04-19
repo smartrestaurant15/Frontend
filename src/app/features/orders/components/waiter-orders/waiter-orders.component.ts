@@ -6,8 +6,11 @@ import { SseService } from '../../services/sse.service';
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@features/auth/services/auth.service';
 import { Router } from '@angular/router';
-import { Order, OrderDetail, OrderStatus, ORDER_STATUS_LABEL } from '../../models/order.model';
+import { Order, OrderDetail, OrderStatus, ORDER_STATUS_LABEL, CartItem, ProductType, CreateOrderItemDTO } from '../../models/order.model';
 import { Invoice, PaymentMethodType } from '../../models/invoice.model';
+import { DishService } from '@features/inventory/services/dish.service';
+import { DrinkService } from '@features/inventory/services/drink.service';
+import { AdditionService } from '@features/inventory/services/addition.service';
 
 @Component({
   selector: 'app-waiter-orders',
@@ -35,6 +38,27 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
   submittingPayment = false;
 
   confirmCancelId: string | null = null;
+
+  editingNotes = false;
+  notesText    = '';
+  savingNotes  = false;
+
+  // Edición de items (solo PENDING)
+  editingItems   = false;
+  editItemsList: CartItem[] = [];
+  savingItems    = false;
+  showAddProduct = false;
+  addProductTab: ProductType = 'DISH';
+  addProductSearch = '';
+  availableDishes:    any[] = [];
+  availableDrinks:    any[] = [];
+  availableAdditions: any[] = [];
+
+  readonly PRODUCT_TABS: { value: ProductType; label: string }[] = [
+    { value: 'DISH',     label: 'Platos'   },
+    { value: 'DRINK',    label: 'Bebidas'  },
+    { value: 'ADDITION', label: 'Adiciones' },
+  ];
 
   private sseSub?: Subscription;
   private reconnectSub?: Subscription;
@@ -73,7 +97,10 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private authService: AuthService,
     private router: Router,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private dishService: DishService,
+    private drinkService: DrinkService,
+    private additionService: AdditionService
   ) {}
 
   ngOnInit(): void {
@@ -175,6 +202,37 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
     this.selectedOrder = null;
     this.orderDetail = null;
     this.payingInvoice = null;
+    this.editingNotes = false;
+    this.editingItems = false;
+  }
+
+  startEditNotes(): void {
+    this.notesText    = this.orderDetail?.notes ?? '';
+    this.editingNotes = true;
+  }
+
+  cancelEditNotes(): void {
+    this.editingNotes = false;
+  }
+
+  saveNotes(): void {
+    if (!this.selectedOrder || !this.orderDetail || this.savingNotes) { return; }
+    this.savingNotes = true;
+    this.orderService.updateOrder(this.selectedOrder.id, {
+      status: this.orderDetail.status as any,
+      notes:  this.notesText
+    }).subscribe({
+      next: () => {
+        this.notification.showSuccess('Notas actualizadas');
+        this.orderDetail!.notes = this.notesText;
+        this.editingNotes = false;
+        this.savingNotes  = false;
+      },
+      error: () => {
+        this.notification.showError('Error al guardar las notas');
+        this.savingNotes = false;
+      }
+    });
   }
 
   deliverOrder(order: Order): void {
@@ -248,6 +306,109 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  // ── Edit items ──────────────────────────────────────────────────────────────
+
+  startEditItems(): void {
+    if (!this.orderDetail) { return; }
+    this.editItemsList = this.orderDetail.items.map(i => ({
+      productId:   i.productId,
+      productName: i.productName,
+      productType: i.productType,
+      unitPrice:   i.unitPrice,
+      quantity:    i.quantity,
+      notes:       i.notes
+    }));
+    this.showAddProduct = false;
+    this.addProductSearch = '';
+    this.editingItems = true;
+    this.loadProductsForEdit();
+  }
+
+  cancelEditItems(): void {
+    this.editingItems = false;
+    this.showAddProduct = false;
+  }
+
+  private loadProductsForEdit(): void {
+    this.dishService.getDishes(0).subscribe({
+      next: res => { this.availableDishes = this.asAny(res.message); },
+      error: () => { this.availableDishes = []; }
+    });
+    this.drinkService.getDrinks(0).subscribe({
+      next: res => { this.availableDrinks = this.asAny(res.message); },
+      error: () => { this.availableDrinks = []; }
+    });
+    this.additionService.getAdditions(0).subscribe({
+      next: res => { this.availableAdditions = this.asAny(res.message); },
+      error: () => { this.availableAdditions = []; }
+    });
+  }
+
+  increaseQty(item: CartItem): void { item.quantity++; }
+
+  decreaseQty(item: CartItem): void {
+    if (item.quantity > 1) { item.quantity--; }
+    else { this.removeEditItem(item); }
+  }
+
+  removeEditItem(item: CartItem): void {
+    this.editItemsList = this.editItemsList.filter(i => i !== item);
+  }
+
+  addProductToEdit(product: any, type: ProductType): void {
+    const existing = this.editItemsList.find(
+      i => i.productId === product.id && i.productType === type
+    );
+    if (existing) {
+      existing.quantity++;
+    } else {
+      this.editItemsList.push({
+        productId:   product.id,
+        productName: product.name,
+        productType: type,
+        unitPrice:   product.price ?? 0,
+        quantity:    1
+      });
+    }
+  }
+
+  get filteredProductsForEdit(): any[] {
+    const q = this.addProductSearch.toLowerCase();
+    const list = this.addProductTab === 'DISH'     ? this.availableDishes
+               : this.addProductTab === 'DRINK'    ? this.availableDrinks
+               : this.availableAdditions;
+    return q ? list.filter(p => p.name?.toLowerCase().includes(q)) : list;
+  }
+
+  saveItems(): void {
+    if (!this.selectedOrder || this.savingItems || this.editItemsList.length === 0) { return; }
+    this.savingItems = true;
+    const payload: CreateOrderItemDTO[] = this.editItemsList.map(i => ({
+      productId:   i.productId,
+      productType: i.productType,
+      quantity:    i.quantity,
+      notes:       i.notes
+    }));
+    const orderRef = this.selectedOrder;
+    this.orderService.editOrderItems(this.selectedOrder.id, payload).subscribe({
+      next: () => {
+        this.notification.showSuccess('Items actualizados');
+        this.editingItems = false;
+        this.savingItems  = false;
+        // Forzar recarga del detalle limpiando la referencia antes de abrir
+        this.selectedOrder = null;
+        this.openDetail(orderRef);
+        this.loadOrders();
+      },
+      error: () => {
+        this.notification.showError('Error al actualizar los items');
+        this.savingItems = false;
+      }
+    });
+  }
+
+  private asAny(val: any): any[] { return Array.isArray(val) ? val : []; }
 
   canDeliver(o: Order): boolean { return o.status === 'COMPLETED'; }
   canCancel(o: Order): boolean  { return o.status === 'PENDING' || o.status === 'IN_PROGRESS'; }

@@ -11,6 +11,7 @@ import { UserFormModalComponent } from './components/user-management/user-form-m
 import { UserDetailComponent } from './components/user-detail/user-detail.component';
 import { AuditLogsComponent } from './components/audit-logs/audit-logs.component';
 import { TablesComponent } from './components/tables/tables.component';
+import { AdminInvoicesComponent } from './components/invoices/admin-invoices.component';
 
 import { AdminService } from './services/admin.service';
 import { AuditService } from './services/audit.service';
@@ -25,7 +26,8 @@ import { TableService } from './services/table.service';
     UserFormModalComponent,
     UserDetailComponent,
     AuditLogsComponent,
-    TablesComponent
+    TablesComponent,
+    AdminInvoicesComponent
   ],
   imports: [
     CommonModule,

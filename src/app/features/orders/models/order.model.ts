@@ -67,6 +67,7 @@ export interface OrderDetail {
   updatedAt: string | null;
   items: OrderItem[];
   paymentStatus: OrderPaymentStatus;
+  notes?: string;
   // alias de compatibilidad (legacy)
   customerName?: string;
   tableNumber?: string;

@@ -1,6 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { SocialLoginModule, SocialAuthServiceConfig, GoogleLoginProvider } from '@abacritt/angularx-social-login';
 import { environment } from '../environments/environment';
 
@@ -9,6 +10,7 @@ import { AppComponent } from './app.component';
 import { ChatbotComponent } from './features/chatbot/chatbot.component';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [
@@ -19,9 +21,16 @@ import { SharedModule } from './shared/shared.module';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
     CoreModule,
     SharedModule,
-    SocialLoginModule
+    SocialLoginModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ],
   providers: [
     {

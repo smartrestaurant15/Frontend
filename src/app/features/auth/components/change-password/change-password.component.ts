@@ -51,7 +51,7 @@ export class ChangePasswordComponent implements OnInit {
       // Cambio voluntario: solo contraseña actual + nueva (sin OTP)
       this.changePasswordForm = this.fb.group({
         currentPassword: ['', [Validators.required]],
-        newPassword: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength()]],
+        newPassword: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength(), CustomValidators.notMatchPassword('currentPassword')]],
         confirmPassword: ['', [Validators.required]]
       });
     }

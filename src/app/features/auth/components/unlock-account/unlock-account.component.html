@@ -1,0 +1,131 @@
+<main class="flex min-h-screen bg-[#0e0e0e] text-[#e5e2e1] font-body overflow-hidden">
+
+  <!-- LEFT -->
+  <section class="relative hidden md:flex w-1/2 h-screen overflow-hidden">
+    <div class="absolute inset-0 bg-[#0e0e0e]/65 z-10"></div>
+    <img
+      src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=80"
+      alt="Restaurante"
+      class="absolute inset-0 w-full h-full object-cover">
+    <div class="relative z-20 flex flex-col items-center justify-center w-full h-full text-center px-12">
+      <div class="space-y-4">
+        <h1 class="font-headline text-5xl lg:text-6xl font-light tracking-tight text-primary italic uppercase">
+          SmartRestaurant
+        </h1>
+        <div class="h-px w-24 bg-primary/40 mx-auto"></div>
+        <p class="font-body tracking-[0.3em] text-[#d0c5b5] text-sm uppercase opacity-80">Seguridad de Cuenta</p>
+      </div>
+    </div>
+    <div class="absolute bottom-12 left-12 z-20">
+      <p class="text-[10px] uppercase tracking-[0.4em] text-[#998f81]/40 -rotate-90 origin-left">EST. MMXXVI</p>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <section class="w-full md:w-1/2 flex items-center justify-center bg-[#131313] px-8 md:px-24 overflow-y-auto">
+    <div class="w-full max-w-md py-12">
+
+      <div class="md:hidden mb-12 text-center">
+        <h1 class="font-headline text-3xl font-light text-primary italic uppercase">SmartRestaurant</h1>
+      </div>
+
+      <!-- Header -->
+      <div class="mb-10 space-y-3">
+        <div class="w-14 h-14 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined text-red-400 text-2xl">lock</span>
+        </div>
+        <h2 class="font-headline text-3xl lg:text-4xl text-[#e5e2e1] font-light">
+          Desbloquear Cuenta
+        </h2>
+        <p class="text-[#d0c5b5] font-body text-sm leading-relaxed max-w-sm font-light">
+          Tu cuenta fue bloqueada por múltiples intentos fallidos. Ingresa el código que enviamos a tu correo para desbloquearla.
+        </p>
+      </div>
+
+      <form [formGroup]="unlockForm" (ngSubmit)="onSubmit()" class="space-y-7">
+
+        <!-- Email -->
+        <div class="group relative">
+          <label for="email"
+            class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2 transition-colors group-focus-within:text-primary">
+            Correo Electrónico
+          </label>
+          <input id="email" type="email" formControlName="email"
+            placeholder="correo@ejemplo.com" autocomplete="email"
+            class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 text-[#e5e2e1] placeholder:text-[#e5e2e1]/20 focus:outline-none focus:border-primary transition-all duration-300 font-light text-sm">
+          <p *ngIf="unlockForm.get('email')?.invalid && unlockForm.get('email')?.touched"
+             class="mt-1 text-[10px] text-red-400 font-label uppercase tracking-widest">
+            Correo inválido
+          </p>
+        </div>
+
+        <!-- Code -->
+        <div class="group relative">
+          <label for="code"
+            class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2 transition-colors group-focus-within:text-primary">
+            Código de Desbloqueo
+          </label>
+          <input id="code" type="text" formControlName="code"
+            placeholder="123456" maxlength="6" autocomplete="one-time-code"
+            class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 text-[#e5e2e1] placeholder:text-[#e5e2e1]/20 focus:outline-none focus:border-primary transition-all duration-300 font-light text-sm text-center tracking-[0.5em]">
+          <p *ngIf="unlockForm.get('code')?.invalid && unlockForm.get('code')?.touched"
+             class="mt-1 text-[10px] text-red-400 font-label uppercase tracking-widest">
+            El código debe tener 6 dígitos
+          </p>
+        </div>
+
+        <!-- Resend -->
+        <div class="flex items-center justify-between py-1">
+          <span class="font-body text-xs text-[#d0c5b5]/50">¿No recibiste el código?</span>
+          <button type="button" (click)="resendCode()"
+            [disabled]="resending || cooldown > 0 || !unlockForm.get('email')?.valid"
+            [ngClass]="(cooldown > 0 || resending) ? 'text-[#998f81]/40 cursor-not-allowed' : 'text-primary hover:text-[#e6c487]'"
+            class="font-label text-xs uppercase tracking-widest transition-colors">
+            <span *ngIf="resending" class="flex items-center gap-1">
+              <span class="w-3 h-3 border border-[#998f81]/40 border-t-primary rounded-full animate-spin"></span>
+              Enviando...
+            </span>
+            <span *ngIf="!resending && cooldown === 0">Reenviar código</span>
+            <span *ngIf="!resending && cooldown > 0">Reenviar en {{ cooldown }}s</span>
+          </button>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-2">
+          <button type="submit" [disabled]="unlockForm.invalid || loading"
+            class="btn-metallic w-full py-4 px-6 rounded-md text-on-primary font-label text-xs font-bold tracking-widest uppercase hover:opacity-90 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="!loading">
+              Desbloquear Cuenta
+              <span class="material-symbols-outlined text-sm align-middle ml-1">lock_open</span>
+            </span>
+            <span *ngIf="loading" class="flex items-center gap-2">
+              <span class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
+              Desbloqueando...
+            </span>
+          </button>
+        </div>
+
+        <!-- Back -->
+        <div class="flex justify-center pt-2">
+          <a routerLink="/auth/login"
+            class="text-[#998f81] hover:text-primary text-xs uppercase tracking-widest transition-colors flex items-center gap-2 group">
+            <span class="material-symbols-outlined text-base">arrow_back</span>
+            <span class="border-b border-transparent group-hover:border-primary transition-all pb-0.5">
+              Volver al inicio de sesión
+            </span>
+          </a>
+        </div>
+
+      </form>
+
+      <div class="mt-16 pt-8 border-t border-[#4d463a]/10">
+        <div class="flex items-center justify-between text-[10px] text-[#998f81]/40 uppercase tracking-[0.2em]">
+          <span>Acceso Seguro</span>
+          <a routerLink="/auth/terms" class="hover:text-primary transition-colors">Privacidad</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
