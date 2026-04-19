@@ -8,13 +8,15 @@ import { CustomerHomeComponent } from './components/customer-home/customer-home.
 import { CustomerMenuComponent } from './components/customer-menu/customer-menu.component';
 import { CustomerMyOrdersComponent } from './components/customer-my-orders/customer-my-orders.component';
 import { PaymentResultComponent } from './components/payment-result/payment-result.component';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 
 @NgModule({
   declarations: [
     CustomerHomeComponent,
     CustomerMenuComponent,
     CustomerMyOrdersComponent,
-    PaymentResultComponent
+    PaymentResultComponent,
+    ChatbotComponent
   ],
   imports: [
     CommonModule,
