@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 import { InventoryRoutingModule } from './inventory-routing.module';
@@ -53,6 +53,7 @@ import { InventoryMovementsComponent } from './components/inventory-movements/in
     InventoryRoutingModule,
     SharedModule,
     ReactiveFormsModule,
+    FormsModule,
     HttpClientModule
   ]
 })

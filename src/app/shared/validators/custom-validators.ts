@@ -35,6 +35,14 @@ export class CustomValidators {
     };
   }
   
+  static notMatchPassword(passwordField: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const other = control.parent?.get(passwordField);
+      if (!other || !control.value) return null;
+      return other.value === control.value ? { samePassword: true } : null;
+    };
+  }
+
   static noWhitespace(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const isWhitespace = (control.value || '').trim().length === 0;

@@ -1,118 +1,217 @@
-<div class="addition-management-container">
-  <!-- Header con navegación -->
-  <header class="page-header">
-    <div class="header-top">
-      <app-button variant="secondary" size="small" (clicked)="navigateToDashboard()">
-        ← Volver al Dashboard
-      </app-button>
-    </div>
-    <div class="header-main">
-      <div class="header-info">
-        <h1>Gestión de Adiciones</h1>
-        <p>Administra las adiciones disponibles</p>
+<div class="flex min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body">
+  <section class="flex flex-col flex-1 border-r border-[#4d463a]/10">
+    <div class="px-8 py-6 border-b border-[#4d463a]/10 flex justify-between items-end flex-shrink-0">
+      <div>
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Extras</p>
+        <h2 class="font-headline text-xl italic text-[#e5e2e1]">Adiciones Registradas</h2>
       </div>
-      <div class="header-actions">
-        <app-button variant="primary" (clicked)="openCreateModal()">
-          Agregar Adición
-        </app-button>
-      </div>
-    </div>
-  </header>
-
-  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
-
-  <!-- Contenido principal -->
-  <main class="page-content" *ngIf="!loading">
-    <div *ngIf="additions.length > 0" class="additions-grid">
-      <div *ngFor="let addition of additions" class="addition-card">
-        <div class="addition-image">
-          <ng-container *ngIf="addition.photo; else noImage">
-            <img [src]="addition.photo" [alt]="addition.name" (error)="onImageError($event)">
-          </ng-container>
-          <ng-template #noImage>
-            <div class="placeholder-image">
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="16"></line>
-                <line x1="8" y1="12" x2="16" y2="12"></line>
-              </svg>
-              <span>Sin imagen</span>
-            </div>
-          </ng-template>
+      <div class="flex gap-6 items-center">
+        <div class="text-right">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Total</p>
+          <p class="font-headline text-lg text-primary">{{ additions.length }}</p>
         </div>
-        
-        <div class="addition-info">
-          <h3 class="addition-name">{{ addition.name }}</h3>
-          <p class="addition-price">{{ addition.price | currency }}</p>
-          <div class="addition-actions">
-            <button class="action-btn edit" (click)="openEditModal(addition.id)" title="Editar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
+        <button (click)="openCreateModal()" class="btn-metallic text-on-primary font-label text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
+          <span class="material-symbols-outlined text-sm">add</span>Nueva Adición
+        </button>
+      </div>
+    </div>
+
+    <div class="px-8 py-4 border-b border-[#4d463a]/10 flex-shrink-0">
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#998f81] text-sm">search</span>
+        <input [(ngModel)]="searchTerm" class="w-full bg-[#1a1a1a] border-none focus:ring-1 focus:ring-primary/30 text-sm pl-10 pr-4 py-2 rounded-sm text-[#e5e2e1] placeholder:text-[#998f81]/50" placeholder="Buscar adiciones..." type="text">
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      <div *ngIf="loading" class="flex items-center justify-center h-32">
+        <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+      </div>
+      <table *ngIf="!loading" class="w-full text-left border-collapse">
+        <thead class="sticky top-0 z-10">
+          <tr class="bg-[#111111] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+            <th class="px-4 py-4 font-medium">Adición</th>
+            <th class="px-4 py-4 font-medium text-right">Precio</th>
+            <th class="px-4 py-4 font-medium text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#4d463a]/5">
+          <tr *ngFor="let addition of filteredAdditions"
+              class="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+              [class.bg-[#1a1a1a]]="selectedDetail?.id === addition.id"
+              (click)="viewDetail(addition.id)">
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#2a2a2a] overflow-hidden rounded-sm flex-shrink-0">
+                  <img *ngIf="addition.photo" [src]="addition.photo" [alt]="addition.name" class="w-full h-full object-cover" (error)="onImageError($event)">
+                  <div *ngIf="!addition.photo" class="w-full h-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[#998f81] text-base">add_circle</span>
+                  </div>
+                </div>
+                <div>
+                  <p class="font-headline text-sm font-semibold text-[#e5e2e1]">{{ addition.name }}</p>
+                  <p class="font-label text-[10px] text-[#998f81]">{{ addition.units }} uds</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-4 text-right">
+              <span class="font-body text-sm text-primary">{{ addition.price | currency:'COP':'symbol':'1.0-0' }}</span>
+            </td>
+            <td class="px-4 py-4 text-right" (click)="$event.stopPropagation()">
+              <div class="flex items-center justify-end gap-2">
+                <button (click)="openEditModal(addition.id)" class="p-1.5 text-[#998f81] hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-base">edit</span>
+                </button>
+                <button (click)="deleteAddition(addition.id)" class="p-1.5 text-[#998f81] hover:text-red-400 transition-colors">
+                  <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!loading && filteredAdditions.length === 0">
+            <td colspan="3" class="px-4 py-16 text-center text-[#998f81]/50">
+              <span class="material-symbols-outlined text-3xl block mb-2">add_circle</span>
+              <p class="font-body text-sm">No se encontraron adiciones</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="px-8 py-4 bg-[#111111] border-t border-[#4d463a]/10 flex items-center justify-between flex-shrink-0">
+      <p class="font-label text-[10px] text-[#998f81] uppercase tracking-wider">Página <span class="text-[#e5e2e1] font-semibold">{{ currentPage }}</span></p>
+      <div class="flex items-center gap-2">
+        <button (click)="previousPage()" [disabled]="currentPage === 1" class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-[#2a2a2a] text-[#998f81] disabled:opacity-30 transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_left</span>
+        </button>
+        <span class="w-8 h-8 flex items-center justify-center rounded-sm bg-primary text-on-primary font-label text-[10px] font-bold">{{ currentPage }}</span>
+        <button (click)="nextPage()" [disabled]="!hasMorePages" class="w-8 h-8 flex items-center justify-center rounded-sm hover:bg-[#2a2a2a] text-[#998f81] disabled:opacity-30 transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_right</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sidebar: stats or detail -->
+  <section class="w-80 bg-[#111111] flex-shrink-0 flex flex-col overflow-y-auto">
+
+    <!-- Loading detail -->
+    <div *ngIf="loadingDetail" class="flex items-center justify-center flex-1 h-48">
+      <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Detail panel -->
+    <ng-container *ngIf="!loadingDetail && selectedDetail">
+      <!-- Photo -->
+      <div class="w-full aspect-video bg-[#1a1a1a] overflow-hidden relative flex-shrink-0">
+        <img *ngIf="selectedDetail.photos?.length"
+             [src]="selectedDetail.photos[0]" [alt]="selectedDetail.name"
+             class="w-full h-full object-cover"
+             (error)="onImageError($event)">
+        <div *ngIf="!selectedDetail.photos?.length"
+             class="w-full h-full flex flex-col items-center justify-center gap-2 text-[#4d463a]">
+          <span class="material-symbols-outlined text-3xl">add_circle</span>
+          <span class="font-label text-[10px] uppercase tracking-widest">Sin foto</span>
+        </div>
+        <button (click)="clearDetail()"
+          class="absolute top-2 right-2 w-7 h-7 bg-[#0e0e0e]/70 flex items-center justify-center text-[#998f81] hover:text-white transition-colors">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 flex flex-col gap-5 flex-1">
+        <!-- Name + price -->
+        <div>
+          <h3 class="font-headline text-lg text-[#e5e2e1]">{{ selectedDetail.name }}</h3>
+          <p class="font-body text-sm text-primary mt-0.5">
+            {{ selectedDetail.price | currency:'COP':'symbol':'1.0-0' }}
+          </p>
+          <p *ngIf="selectedDetail.description" class="font-body text-xs text-[#998f81] mt-2 leading-relaxed">
+            {{ selectedDetail.description }}
+          </p>
+        </div>
+
+        <!-- Stock info -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock actual</p>
+            <p class="font-headline text-2xl"
+               [class.text-red-400]="selectedDetail.units <= selectedDetail.minimumStock"
+               [class.text-[#e5e2e1]]="selectedDetail.units > selectedDetail.minimumStock">
+              {{ selectedDetail.units }}
+            </p>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock mínimo</p>
+            <p class="font-headline text-2xl text-[#998f81]">{{ selectedDetail.minimumStock }}</p>
+          </div>
+        </div>
+
+        <!-- Stock adjustment -->
+        <div class="border border-[#4d463a]/20 p-4">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Ajustar stock</p>
+          <div class="flex items-center gap-2 mb-3">
+            <button (click)="stockQty = stockQty > 1 ? stockQty - 1 : 1"
+              class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
+              <span class="material-symbols-outlined text-base">remove</span>
             </button>
-            <button class="action-btn delete" (click)="deleteAddition(addition.id)" title="Eliminar">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
+            <input type="number" [(ngModel)]="stockQty" min="1"
+              class="flex-1 bg-[#1a1a1a] border border-[#4d463a]/30 text-center text-[#e5e2e1] text-sm py-1.5 focus:outline-none focus:border-primary/40">
+            <button (click)="stockQty = stockQty + 1"
+              class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
+              <span class="material-symbols-outlined text-base">add</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button (click)="addStock()" [disabled]="adjustingStock"
+              class="flex items-center justify-center gap-1.5 py-2 bg-emerald-900/20 border border-emerald-900/30 text-emerald-400 font-label text-[10px] uppercase tracking-wider hover:bg-emerald-900/30 transition-colors disabled:opacity-40">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Añadir
+            </button>
+            <button (click)="discountStock()" [disabled]="adjustingStock"
+              class="flex items-center justify-center gap-1.5 py-2 bg-red-900/20 border border-red-900/30 text-red-400 font-label text-[10px] uppercase tracking-wider hover:bg-red-900/30 transition-colors disabled:opacity-40">
+              <span class="material-symbols-outlined text-sm">remove</span>
+              Descontar
             </button>
           </div>
         </div>
+
+        <!-- Edit button -->
+        <button (click)="openEditModal(selectedDetail.id)"
+          class="w-full flex items-center justify-center gap-2 py-2.5 border border-[#4d463a]/40 text-[#998f81] hover:text-primary hover:border-primary/40 transition-colors font-label text-[10px] uppercase tracking-wider mt-auto">
+          <span class="material-symbols-outlined text-base">edit</span>
+          Editar adición
+        </button>
       </div>
-    </div>
+    </ng-container>
 
-    <div *ngIf="additions.length === 0" class="empty-state">
-      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="16"></line>
-        <line x1="8" y1="12" x2="16" y2="12"></line>
-      </svg>
-      <h3>{{ currentPage > 1 ? 'No hay adiciones en esta página' : 'No hay adiciones' }}</h3>
-      <p>{{ currentPage > 1 ? 'Intenta volver a la página anterior' : 'Comienza agregando tu primera adición al inventario' }}</p>
-      <div class="empty-actions">
-        <app-button 
-          variant="secondary" 
-          *ngIf="currentPage > 1"
-          (clicked)="previousPage()">
-          ← Página anterior
-        </app-button>
-        <app-button 
-          variant="primary" 
-          *ngIf="currentPage === 1"
-          (clicked)="openCreateModal()">
-          Agregar adición
-        </app-button>
+    <!-- Default stats (no selection) -->
+    <ng-container *ngIf="!loadingDetail && !selectedDetail">
+      <div class="p-8 flex flex-col gap-6 flex-1">
+        <div class="border-b border-[#4d463a]/20 pb-4">
+          <h3 class="font-headline text-xl italic text-primary">Adiciones</h3>
+          <p class="font-label text-[10px] text-[#998f81] uppercase tracking-[0.2em] mt-1">Extras del menú</p>
+        </div>
+        <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-5">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total</p>
+          <p class="font-headline text-3xl text-[#e5e2e1]">{{ additions.length }}</p>
+        </div>
+        <p class="font-body text-xs text-[#4d463a] text-center mt-4">Haz clic en una adición para ver su detalle</p>
+        <div class="mt-auto border-t border-[#4d463a]/15 pt-6">
+          <button (click)="openCreateModal()" class="w-full flex items-center gap-3 p-3 hover:bg-[#1a1a1a] transition-colors rounded-sm group">
+            <span class="material-symbols-outlined text-[#998f81] group-hover:text-primary transition-colors text-[18px]">add_circle</span>
+            <span class="font-body text-sm text-[#d0c5b5]">Nueva adición</span>
+          </button>
+        </div>
       </div>
-    </div>
-  </main>
+    </ng-container>
 
-  <!-- Footer con paginación -->
-  <footer class="page-footer" *ngIf="!loading && additions.length > 0">
-    <div class="pagination">
-      <app-button 
-        variant="secondary" 
-        size="small" 
-        [disabled]="currentPage === 1"
-        (clicked)="previousPage()">
-        ← Anterior
-      </app-button>
-      <span class="page-info">Página <strong>{{ currentPage }}</strong></span>
-      <app-button 
-        variant="secondary" 
-        size="small"
-        [disabled]="!hasMorePages"
-        (clicked)="nextPage()">
-        Siguiente →
-      </app-button>
-    </div>
-  </footer>
-
-  <!-- Modal de formulario -->
-  <app-addition-form-modal
-    [isOpen]="isModalOpen"
-    [additionId]="selectedAdditionId"
-    (closeModal)="closeModal()"
-    (additionSaved)="onAdditionSaved()">
-  </app-addition-form-modal>
+  </section>
 </div>
+
+<app-addition-form-modal
+  [isOpen]="isModalOpen"
+  [additionId]="selectedAdditionId"
+  (closeModal)="closeModal()"
+  (additionSaved)="onAdditionSaved()">
+</app-addition-form-modal>

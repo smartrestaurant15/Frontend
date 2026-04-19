@@ -54,9 +54,7 @@ export class DrinkDetailComponent implements OnInit {
 
   editDrink(): void {
     if (this.drink) {
-      this.router.navigate(['/inventory/drinks'], { 
-        queryParams: { edit: this.drink.id } 
-      });
+      this.router.navigate(['/admin/inventory/drinks'], { queryParams: { edit: this.drink.id } });
     }
   }
 
@@ -71,15 +69,13 @@ export class DrinkDetailComponent implements OnInit {
             this.notificationService.showError(response.message as string);
           }
         },
-        error: () => {
-          this.notificationService.showError('Error al eliminar la bebida');
-        }
+        error: () => { this.notificationService.showError('Error al eliminar la bebida'); }
       });
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/inventory/drinks']);
+    this.router.navigate(['/admin/inventory/drinks']);
   }
 
   onImageError(event: Event): void {

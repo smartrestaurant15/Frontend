@@ -1,24 +1,27 @@
-<div class="auth-wrapper">
-  <!-- Left Side: Hero -->
-  <div class="auth-hero">
-    <div class="hero-content">
-      <h1>Únete a la<br>Revolución Digital</h1>
-      <p>Crea tu cuenta en segundos y descubre cómo la tecnología puede transformar tu restaurante en un negocio
-        inteligente y eficiente.</p>
-    </div>
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-  </div>
+<main class="min-h-screen flex flex-col md:flex-row bg-[#0e0e0e] font-body text-[#e5e2e1]">
 
-  <!-- Right Side: Form -->
-  <div class="auth-panel">
-    <div class="auth-form-container">
-      <div class="auth-header">
-        <h2>Crear Cuenta</h2>
-        <p class="subtitle">Completa los campos para comenzar</p>
+  <!-- LEFT: Atmospheric brand section -->
+  <section class="relative w-full md:w-1/2 lg:w-3/5 h-64 md:h-screen overflow-hidden">
+    <img
+      src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=80"
+      alt="Interior de restaurante de lujo"
+      class="absolute inset-0 w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-[#0e0e0e]/90 to-transparent"></div>
+
+    <div class="relative z-10 h-full flex flex-col justify-center items-center md:items-start px-12 lg:px-24">
+      <div class="space-y-4">
+        <h1 class="font-headline text-4xl md:text-6xl lg:text-7xl font-light tracking-tight text-primary">
+          SmartRestaurant
+        </h1>
+        <div class="h-px w-12 bg-[#c9a96e]"></div>
+        <p class="font-headline text-lg md:text-xl tracking-[0.3em] text-[#d0c5b5] font-light uppercase">
+          Tu mesa, tu historia
+        </p>
       </div>
+    </div>
+  </section>
 
+<<<<<<< HEAD
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
         <div class="form-row">
           <app-form-field label="Nombre" [required]="true" class="half-width">
@@ -34,86 +37,255 @@
               Solo se permiten letras
             </span>
           </app-form-field>
+=======
+  <!-- RIGHT: Registration form -->
+  <section class="w-full md:w-1/2 lg:w-2/5 bg-[#0a0a0a] flex items-center justify-center p-8 lg:p-16">
+    <div class="w-full max-w-md">
+
+      <header class="mb-10">
+        <h2 class="font-headline text-3xl text-[#e5e2e1] mb-2 font-light">Crear Cuenta</h2>
+        <p class="text-[#d0c5b5] font-light text-sm">
+          Únete y descubre una experiencia gastronómica sin igual.
+        </p>
+      </header>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+        <!-- Nombre + Apellido -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="group flex flex-col space-y-2">
+            <label for="firstName"
+              class="font-label text-[10px] uppercase tracking-widest text-[#998f81] transition-colors group-focus-within:text-primary">
+              Nombre
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              placeholder="Juan"
+              class="bg-transparent border-0 border-b border-[#4d463a]/30 py-2.5 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+            <p *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('onlyLetters')"
+               class="text-[10px] text-red-400 font-label uppercase tracking-widest">
+              Solo se permiten letras
+            </p>
+            <p *ngIf="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.hasError('required')"
+               class="text-[10px] text-red-400 font-label uppercase tracking-widest">
+              Campo requerido
+            </p>
+          </div>
+
+          <div class="group flex flex-col space-y-2">
+            <label for="lastName"
+              class="font-label text-[10px] uppercase tracking-widest text-[#998f81] transition-colors group-focus-within:text-primary">
+              Apellido
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              placeholder="Pérez"
+              class="bg-transparent border-0 border-b border-[#4d463a]/30 py-2.5 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+            <p *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('onlyLetters')"
+               class="text-[10px] text-red-400 font-label uppercase tracking-widest">
+              Solo se permiten letras
+            </p>
+            <p *ngIf="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.hasError('required')"
+               class="text-[10px] text-red-400 font-label uppercase tracking-widest">
+              Campo requerido
+            </p>
+          </div>
+>>>>>>> johanc
         </div>
 
-        <app-form-field label="Correo Electrónico" [required]="true">
-          <input type="email" formControlName="email" placeholder="nombre@ejemplo.com">
-        </app-form-field>
-
-        <app-form-field label="Clave" [required]="true">
-          <div class="password-input-wrapper">
-            <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********">
-            <button type="button" class="toggle-password" (click)="togglePasswordVisibility('password')">
-              <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
-            </button>
-          </div>
-        </app-form-field>
-
-        <div class="password-strength-info" *ngIf="registerForm.get('password')?.touched">
-          <p class="hint-text" [class.valid]="!registerForm.get('password')?.hasError('minlength')">
-            ✓ Minimo 8 caracteres
-          </p>
-          <p class="hint-text" [class.valid]="!registerForm.get('password')?.hasError('passwordStrength')">
-            ✓ Seguridad: Mayusculas, numeros y simbolos
+        <!-- Email -->
+        <div class="group flex flex-col space-y-2">
+          <label for="email"
+            class="font-label text-[10px] uppercase tracking-widest text-[#998f81] transition-colors group-focus-within:text-primary">
+            Correo Electrónico
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="juan.perez@ejemplo.com"
+            autocomplete="email"
+            class="bg-transparent border-0 border-b border-[#4d463a]/30 py-2.5 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+          <p *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid"
+             class="text-[10px] text-red-400 font-label uppercase tracking-widest">
+            Correo inválido
           </p>
         </div>
 
-        <app-form-field label="Confirmar Clave" [required]="true">
-          <div class="password-input-wrapper">
-            <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
-              placeholder="********">
-            <button type="button" class="toggle-password" (click)="togglePasswordVisibility('confirmPassword')">
-              <span class="icon">{{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}</span>
+        <!-- Password -->
+        <div class="group flex flex-col space-y-2">
+          <label for="password"
+            class="font-label text-[10px] uppercase tracking-widest text-[#998f81] transition-colors group-focus-within:text-primary">
+            Contraseña
+          </label>
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              class="w-full bg-transparent border-0 border-b border-[#4d463a]/30 py-2.5 pr-8 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+            <button type="button" (click)="togglePasswordVisibility('password')"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-[#998f81] hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-base">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
             </button>
           </div>
-          <span class="error-text" *ngIf="getConfirmPasswordError()">{{ getConfirmPasswordError() }}</span>
-        </app-form-field>
+          <!-- Password strength hints -->
+          <div *ngIf="registerForm.get('password')?.touched" class="space-y-1 pt-1">
+            <p class="font-label text-[10px] tracking-widest transition-colors"
+               [class.text-green-400]="!registerForm.get('password')?.hasError('minlength')"
+               [class.text-[#998f81]]="registerForm.get('password')?.hasError('minlength')">
+              ✓ Mínimo 8 caracteres
+            </p>
+            <p class="font-label text-[10px] tracking-widest transition-colors"
+               [class.text-green-400]="!registerForm.get('password')?.hasError('passwordStrength')"
+               [class.text-[#998f81]]="registerForm.get('password')?.hasError('passwordStrength')">
+              ✓ Mayúsculas, números y símbolos
+            </p>
+          </div>
+        </div>
 
-        <div class="checkbox-field">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="dataAuthorization">
-            <span class="checkbox-custom"></span>
-            <span class="checkbox-text">
-              Acepto los <a href="javascript:void(0)" (click)="togglePrivacyPolicy()">Términos y Privacidad</a>
-            </span>
+        <!-- Confirm Password -->
+        <div class="group flex flex-col space-y-2">
+          <label for="confirmPassword"
+            class="font-label text-[10px] uppercase tracking-widest text-[#998f81] transition-colors group-focus-within:text-primary">
+            Confirmar Contraseña
+          </label>
+          <div class="relative">
+            <input
+              id="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              class="w-full bg-transparent border-0 border-b border-[#4d463a]/30 py-2.5 pr-8 text-[#e5e2e1] text-sm focus:outline-none focus:border-primary transition-all placeholder:text-[#e5e2e1]/20">
+            <button type="button" (click)="togglePasswordVisibility('confirmPassword')"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-[#998f81] hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-base">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          <p *ngIf="registerForm.get('confirmPassword')?.touched && getConfirmPasswordError()"
+             class="text-[10px] text-red-400 font-label uppercase tracking-widest">
+            {{ getConfirmPasswordError() }}
+          </p>
+        </div>
+
+        <!-- Terms checkbox -->
+        <div class="flex items-start space-x-3 pt-2">
+          <input
+            id="terms"
+            type="checkbox"
+            formControlName="dataAuthorization"
+            class="mt-0.5 h-4 w-4 rounded-sm border-[#4d463a] bg-transparent accent-primary cursor-pointer">
+          <label for="terms" class="font-body text-xs text-[#d0c5b5] font-light leading-relaxed cursor-pointer">
+            Acepto los
+            <a routerLink="/auth/terms"
+               class="text-[#c9a96e] hover:text-primary transition-colors border-b border-[#c9a96e]/30 hover:border-primary">
+              términos y política de privacidad
+            </a>
           </label>
         </div>
+        <p *ngIf="registerForm.get('dataAuthorization')?.touched && registerForm.get('dataAuthorization')?.invalid"
+           class="text-[10px] text-red-400 font-label uppercase tracking-widest -mt-4">
+          Debes aceptar los términos
+        </p>
 
-        <div class="form-actions">
-          <app-button type="submit" variant="primary" [disabled]="registerForm.invalid" [loading]="loading"
-            class="full-width">
-            Comenzar Ahora
-          </app-button>
+        <!-- Submit -->
+        <div class="pt-4">
+          <button
+            type="submit"
+            [disabled]="registerForm.invalid || loading"
+            class="btn-metallic w-full py-4 text-on-primary font-label text-xs font-bold uppercase tracking-[0.2em] rounded-md shadow-lg active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="!loading">Crear Cuenta</span>
+            <span *ngIf="loading" class="flex items-center justify-center gap-2">
+              <span class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
+              Creando cuenta...
+            </span>
+          </button>
         </div>
-      </form>
 
-      <div class="auth-footer">
-        <p>¿Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesión</a></p>
-      </div>
+        <!-- Login link -->
+        <p class="text-center font-body text-xs text-[#d0c5b5]/60 pt-2">
+          ¿Ya tienes cuenta?
+          <a routerLink="/auth/login"
+             class="text-primary hover:text-[#e6c487] transition-colors ml-1 font-label uppercase tracking-widest">
+            Iniciar Sesión
+          </a>
+        </p>
+
+      </form>
     </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-[#0e0e0e] w-full py-6 flex flex-col md:flex-row justify-between items-center px-12 border-t border-[#4d463a]/15">
+  <span class="font-headline text-[#c9a96e] tracking-tight mb-4 md:mb-0">SmartRestaurant</span>
+  <div class="flex flex-wrap justify-center gap-6 items-center">
+    <a class="font-label text-[10px] tracking-widest uppercase text-[#4d463a] hover:text-[#e5e2e1] transition-colors">
+      Privacidad
+    </a>
+    <a class="font-label text-[10px] tracking-widest uppercase text-[#4d463a] hover:text-[#e5e2e1] transition-colors">
+      Términos
+    </a>
+    <p class="font-label text-[10px] tracking-widest uppercase text-[#4d463a]/80">
+      © 2026 SmartRestaurant. Todos los derechos reservados.
+    </p>
   </div>
-</div>
+</footer>
 
 <!-- Privacy Policy Modal -->
-<div class="modal-overlay" *ngIf="showPrivacyPolicy" (click)="togglePrivacyPolicy()">
-  <div class="modal-content animate-zoom-in" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Política de Privacidad</h3>
-      <button class="close-btn" (click)="togglePrivacyPolicy()">&times;</button>
+<div *ngIf="showPrivacyPolicy"
+     class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm"
+     (click)="togglePrivacyPolicy()">
+  <div class="bg-[#1c1b1b] border border-[#4d463a]/30 rounded-lg w-full max-w-lg shadow-2xl"
+       (click)="$event.stopPropagation()">
+
+    <div class="flex items-center justify-between px-8 py-6 border-b border-[#4d463a]/20">
+      <h3 class="font-headline text-xl font-light text-[#e5e2e1]">Política de Privacidad</h3>
+      <button (click)="togglePrivacyPolicy()"
+              class="text-[#998f81] hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-    <div class="modal-body">
-      <p>Al registrarte en <strong>SmartRestaurant</strong>, autorizas el tratamiento de tus datos para:</p>
-      <ul>
-        <li><strong>Gestión:</strong> Acceso seguro a la plataforma.</li>
-        <li><strong>Personalización:</strong> Herramientas según tu perfil gastronómico.</li>
-        <li><strong>Seguridad:</strong> Notificaciones críticas y recuperación.</li>
+
+    <div class="px-8 py-6 space-y-4 max-h-72 overflow-y-auto">
+      <p class="font-body text-sm text-[#d0c5b5] font-light leading-relaxed">
+        Al registrarte en <span class="text-primary">SmartRestaurant</span>, autorizas el tratamiento de tus datos para:
+      </p>
+      <ul class="space-y-3">
+        <li class="font-body text-sm text-[#d0c5b5] font-light">
+          <span class="text-primary font-label text-xs uppercase tracking-widest">Gestión —</span>
+          Acceso seguro y personalizado a la plataforma.
+        </li>
+        <li class="font-body text-sm text-[#d0c5b5] font-light">
+          <span class="text-primary font-label text-xs uppercase tracking-widest">Personalización —</span>
+          Herramientas adaptadas a tu perfil gastronómico.
+        </li>
+        <li class="font-body text-sm text-[#d0c5b5] font-light">
+          <span class="text-primary font-label text-xs uppercase tracking-widest">Seguridad —</span>
+          Notificaciones críticas y recuperación de cuenta.
+        </li>
       </ul>
-      <div class="privacy-note">
-        <p>Sus datos están protegidos por cifrado de extremo a extremo.</p>
+      <div class="border-l-2 border-primary/40 pl-4 mt-4">
+        <p class="font-body text-xs text-[#d0c5b5]/70 font-light">
+          Tus datos están protegidos con cifrado de extremo a extremo.
+        </p>
       </div>
     </div>
-    <div class="modal-footer">
-      <app-button (click)="togglePrivacyPolicy()" variant="primary">Aceptar</app-button>
+
+    <div class="px-8 py-5 border-t border-[#4d463a]/20 flex justify-end">
+      <button (click)="togglePrivacyPolicy()"
+              class="btn-metallic text-on-primary font-label text-xs uppercase tracking-widest px-8 py-3 rounded-md active:scale-[0.98] transition-all">
+        Aceptar
+      </button>
     </div>
+
   </div>
 </div>

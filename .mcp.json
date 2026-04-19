@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "nanobanana": {
+      "command": "python",
+      "args": ["-m", "nanobanana_mcp_server.server"],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyBsYhS5csCFIIUEY3G_Rf4FD9QoC2GSeEU"
+      }
+    },
+    "magic": {
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic@latest"],
+      "env": {
+        "API_KEY": "28bd96a10e369398c5bf1105b99fa744b4b9673d3465651dd5d78548ec9aec00"
+      }
+    }
+  }
+}

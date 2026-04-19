@@ -43,21 +43,18 @@ export class ChangePasswordComponent implements OnInit {
 
   initForm(): void {
     if (this.isForcedChange) {
-      // Formulario simplificado para primer login (sin contraseña actual ni OTP)
       this.changePasswordForm = this.fb.group({
         newPassword: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength()]],
         confirmPassword: ['', [Validators.required]]
       });
     } else {
-      // Formulario completo para cambio voluntario
+      // Cambio voluntario: solo contraseña actual + nueva (sin OTP)
       this.changePasswordForm = this.fb.group({
         currentPassword: ['', [Validators.required]],
-        newPassword: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength()]],
-        confirmPassword: ['', [Validators.required]],
-        otp: ['', []] // Inicialmente no requerido
+        newPassword: ['', [Validators.required, Validators.minLength(8), CustomValidators.passwordStrength(), CustomValidators.notMatchPassword('currentPassword')]],
+        confirmPassword: ['', [Validators.required]]
       });
     }
-
     this.changePasswordForm.get('confirmPassword')?.setValidators([
       Validators.required,
       CustomValidators.matchPassword('newPassword')
@@ -118,30 +115,14 @@ export class ChangePasswordComponent implements OnInit {
           }
         });
       } else {
-        // Cambio de contraseña voluntario (requiere OTP)
-        if (!this.otpRequested) {
-          this.notificationService.showWarning('Primero debes solicitar el código OTP');
-          this.loading = false;
-          return;
-        }
-
-        const { currentPassword, newPassword, otp } = this.changePasswordForm.value;
-        
-        const request = {
-          email: this.userEmail,
-          currentPassword,
-          newPassword,
-          otp
-        };
-        
-        this.authService.changePassword(request).subscribe({
+        // Cambio voluntario: contraseña actual + nueva (sin OTP, usuario autenticado)
+        const { currentPassword, newPassword } = this.changePasswordForm.value;
+        this.authService.changePasswordAuthenticated({ currentPassword, newPassword }).subscribe({
           next: () => {
             this.notificationService.showSuccess('Contraseña cambiada exitosamente');
-            this.router.navigate(['/']);
+            this.router.navigate(['/auth/profile']);
           },
-          error: () => {
-            this.loading = false;
-          }
+          error: () => { this.loading = false; }
         });
       }
     }

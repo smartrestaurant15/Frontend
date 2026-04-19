@@ -12,9 +12,9 @@ export class RoleRedirectService {
 
   // Mapeo de roles a rutas de dashboard
   private readonly ROLE_ROUTES: Record<UserRole, string> = {
-    [UserRole.ADMIN]: '/inventory/dashboard',
-    [UserRole.KITCHEN]: '/inventory/dashboard',
-    [UserRole.WAITER]: '/inventory/dashboard',
+    [UserRole.ADMIN]: '/admin/dashboard',
+    [UserRole.KITCHEN]: '/orders/kitchen',
+    [UserRole.WAITER]: '/orders/waiter',
     [UserRole.CUSTOMER]: '/customer/home'
   };
 

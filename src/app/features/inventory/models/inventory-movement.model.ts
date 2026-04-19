@@ -2,6 +2,7 @@
 export interface InventoryMovement {
   id: string;
   productId: string;
+  productName: string;
   type: 'ENTRY' | 'EXIT';
   weight: number;
   timeAt: string;
@@ -16,6 +17,7 @@ export type MovementType = 'ENTRY' | 'EXIT';
 export interface InventoryMovementResponse {
   id: string;
   productId: string;
+  productName: string;
   type: string;
   weight: number;
   timeAt: string;

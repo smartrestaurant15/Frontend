@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/leuna/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"restaurant dashboard management SaaS professional modern\" --design-system -p \"SmartRestaurante\" -f markdown)",
+      "Bash(python3 skills/ui-ux-pro-max/scripts/search.py \"restaurant dashboard management SaaS professional modern\" --design-system -p \"SmartRestaurante\" -f markdown)",
+      "Bash(python scripts/search.py \"restaurant dashboard management professional modern\" --design-system -p \"SmartRestaurante\" -f markdown)",
+      "Bash(grep:*)",
+      "Bash(npx ng:*)",
+      "mcp__nanobanana__generate_image"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "nanobanana"
+  ]
+}

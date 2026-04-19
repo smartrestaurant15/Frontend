@@ -1,92 +1,254 @@
-<div class="auth-wrapper">
-  <!-- Left Side: Hero -->
-  <div class="auth-hero">
-    <div class="hero-content">
-      <h1>Bienvenido a<br>SmartRestaurante</h1>
-      <p>La plataforma definitiva para la gestión gastronómica inteligente. Optimiza tus procesos y mejora la
-        experiencia de tus clientes.</p>
-    </div>
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-  </div>
+<main class="flex h-screen w-full relative bg-[#0e0e0e] font-body text-[#e5e2e1] overflow-hidden">
 
-  <!-- Right Side: Form -->
-  <div class="auth-panel">
-    <div class="auth-form-container">
-      <!-- Login Normal -->
-      <div *ngIf="!requires2FA">
-        <div class="auth-header">
-          <h2>Iniciar Sesión</h2>
-          <p class="subtitle">Ingresa tus credenciales para continuar</p>
+  <!-- Grainy texture -->
+  <div class="fixed inset-0 grainy-overlay z-50 pointer-events-none"></div>
+
+  <!-- LEFT: Hero image & branding -->
+  <section class="hidden lg:flex w-1/2 h-full relative overflow-hidden">
+    <img
+      src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80"
+      alt="Elegant dark dining room"
+      class="absolute inset-0 w-full h-full object-cover">
+
+    <div class="absolute inset-0 z-10 flex flex-col justify-between p-16"
+         style="background: linear-gradient(to right, rgba(14,14,14,0.92), rgba(14,14,14,0.35))">
+
+      <!-- Top: brand -->
+      <div class="space-y-4">
+        <h1 class="font-headline text-2xl font-light tracking-[0.4em] text-primary uppercase">
+          SmartRestaurant
+        </h1>
+        <div class="w-12 h-px bg-[#4d463a]/40"></div>
+      </div>
+
+      <!-- Bottom: tagline -->
+      <div class="max-w-md space-y-6">
+        <h2 class="font-headline text-5xl font-light leading-tight tracking-tight text-[#e5e2e1]">
+          Donde cada plato cuenta una historia
+        </h2>
+        <p class="font-body text-[#d0c5b5] font-light leading-relaxed">
+          Gestión gastronómica inteligente para equipos que entienden que la excelencia está en los detalles.
+        </p>
+        <div class="flex items-center space-x-6 text-[#e5e2e1]/30">
+          <span class="font-label text-[10px] tracking-[0.2em] uppercase">Est. 2024</span>
+          <span class="font-label text-[10px] tracking-[0.2em] uppercase">Armenia • Quindío</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: Form -->
+  <section class="w-full lg:w-1/2 h-full bg-[#0a0a0a] flex items-center justify-center relative p-8 md:p-24 overflow-y-auto">
+
+    <div class="w-full max-w-md space-y-10">
+
+      <!-- Mobile branding -->
+      <div class="lg:hidden text-center space-y-2">
+        <h1 class="font-headline text-xl font-light tracking-[0.3em] text-primary uppercase">SmartRestaurant</h1>
+        <p class="font-headline text-sm italic text-[#d0c5b5]">The Digital Sommelier</p>
+      </div>
+
+      <!-- ── LOGIN NORMAL ── -->
+      <ng-container *ngIf="!requires2FA">
+
+        <div class="space-y-2">
+          <h3 class="font-headline text-3xl font-light text-[#e5e2e1]">Bienvenido de nuevo</h3>
+          <p class="font-body text-sm text-[#d0c5b5] font-light">
+            Introduce tus credenciales para acceder al portal.
+          </p>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-          <app-form-field label="Correo Electrónico" [required]="true"
-            [error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched ? 'Correo inválido' : ''">
-            <input type="email" formControlName="email" placeholder="nombre@ejemplo.com" autocomplete="email">
-          </app-form-field>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-8">
+          <div class="space-y-6">
 
-          <app-form-field label="Clave" [required]="true"
-            [error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched ? 'Clave requerida' : ''">
-            <div class="password-input-wrapper">
-              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="********"
-                autocomplete="current-password">
-              <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
-                <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
-              </button>
+            <!-- Email -->
+            <div class="group relative">
+              <label for="email"
+                class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2 transition-colors group-focus-within:text-primary">
+                Correo Electrónico
+              </label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="correo@ejemplo.com"
+                autocomplete="email"
+                class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 focus:outline-none focus:border-primary transition-all text-[#e5e2e1] font-light placeholder:text-[#e5e2e1]/20">
+              <p *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                 class="mt-1 text-[10px] text-red-400 font-label uppercase tracking-widest">
+                Correo inválido
+              </p>
             </div>
-          </app-form-field>
 
-          <div class="form-actions">
-            <app-button type="submit" variant="primary" [disabled]="loginForm.invalid" [loading]="loading"
-              class="full-width">
-              Entrar
-            </app-button>
+            <!-- Password -->
+            <div class="group relative">
+              <div class="flex justify-between items-end mb-2">
+                <label for="password"
+                  class="font-label text-[10px] uppercase tracking-widest text-[#998f81] transition-colors group-focus-within:text-primary">
+                  Clave de Seguridad
+                </label>
+                <a routerLink="/auth/forgot-password"
+                   class="font-label text-[10px] uppercase tracking-widest text-[#c9a96e] hover:text-primary transition-colors">
+                  ¿Olvidaste tu clave?
+                </a>
+              </div>
+              <div class="relative">
+                <input
+                  id="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="••••••••••••"
+                  autocomplete="current-password"
+                  class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 pr-8 focus:outline-none focus:border-primary transition-all text-[#e5e2e1] font-light placeholder:text-[#e5e2e1]/20">
+                <button type="button"
+                        (click)="togglePasswordVisibility()"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 text-[#998f81] hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-base">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+              <p *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                 class="mt-1 text-[10px] text-red-400 font-label uppercase tracking-widest">
+                Clave requerida
+              </p>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="pt-2">
+            <button
+              type="submit"
+              [disabled]="loginForm.invalid || loading"
+              class="btn-metallic w-full py-4 text-on-primary font-label text-xs font-bold uppercase tracking-[0.2em] rounded-md shadow-lg active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span *ngIf="!loading">Entrar en la Experiencia</span>
+              <span *ngIf="loading" class="flex items-center justify-center gap-2">
+                <span class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
+                Verificando...
+              </span>
+            </button>
           </div>
         </form>
 
-        <div class="divider">
-          <span>O continuar con</span>
-        </div>
+        <!-- Divider + Google -->
+        <div class="space-y-6">
+          <div class="flex items-center w-full space-x-4">
+            <div class="h-px flex-1 bg-[#4d463a]/20"></div>
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#4d463a]">Portal de Socios</span>
+            <div class="h-px flex-1 bg-[#4d463a]/20"></div>
+          </div>
 
-        <div class="social-login-buttons">
-          <div class="google-signin-wrapper">
-            <asl-google-signin-button type="standard" shape="pill" size="large" width="340"></asl-google-signin-button>
+          <div class="flex justify-center">
+            <asl-google-signin-button type="standard" shape="pill" size="large" width="300"></asl-google-signin-button>
           </div>
         </div>
 
-        <div class="auth-footer">
-          <a routerLink="/auth/forgot-password" class="forgot-password">¿Olvidaste tu clave?</a>
-          <p>¿No tienes cuenta? <a routerLink="/auth/register">Registrate ahora</a></p>
+        <!-- Register link -->
+        <p class="text-center font-body text-sm text-[#d0c5b5]/60">
+          ¿No tienes cuenta?
+          <a routerLink="/auth/register" class="text-primary hover:text-[#e6c487] transition-colors ml-1">
+            Regístrate
+          </a>
+        </p>
+
+        <!-- Unlock account link -->
+        <p class="text-center font-body text-xs text-[#d0c5b5]/40">
+          ¿Cuenta bloqueada?
+          <a routerLink="/auth/unlock-account" class="text-[#998f81] hover:text-primary transition-colors ml-1">
+            Desbloquear cuenta
+          </a>
+        </p>
+
+      </ng-container>
+
+      <!-- ── 2FA ── -->
+      <ng-container *ngIf="requires2FA">
+
+        <div class="space-y-2">
+          <h3 class="font-headline text-3xl font-light text-[#e5e2e1]">Verificación</h3>
+          <p class="font-body text-sm text-[#d0c5b5] font-light">
+            Ingresa el código enviado a <span class="text-primary">{{ pendingEmail }}</span>
+          </p>
         </div>
-      </div>
 
-      <!-- Verificación 2FA -->
-      <div *ngIf="requires2FA">
-        <div class="auth-header">
-          <h2>Verificación</h2>
-          <p class="subtitle">Ingresa el código enviado a {{ pendingEmail }}</p>
-        </div>
+        <form [formGroup]="twoFAForm" (ngSubmit)="onSubmit2FA()" class="space-y-8">
+          <div class="group relative">
+            <label for="code"
+              class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2 transition-colors group-focus-within:text-primary">
+              Código de Verificación
+            </label>
+            <input
+              id="code"
+              type="text"
+              formControlName="code"
+              placeholder="123456"
+              maxlength="6"
+              autocomplete="one-time-code"
+              class="w-full bg-transparent border-0 border-b border-[#4d463a]/40 py-3 px-0 focus:outline-none focus:border-primary transition-all text-[#e5e2e1] font-light placeholder:text-[#e5e2e1]/20 text-center text-2xl tracking-[0.5em]">
+          </div>
 
-        <form [formGroup]="twoFAForm" (ngSubmit)="onSubmit2FA()">
-          <app-form-field label="Código de seguridad" [required]="true"
-            [error]="twoFAForm.get('code')?.invalid && twoFAForm.get('code')?.touched ? 'Código inválido' : ''">
-            <input type="text" formControlName="code" placeholder="123456" maxlength="6" autocomplete="one-time-code">
-          </app-form-field>
-
-          <div class="button-group">
-            <app-button type="button" variant="secondary" (clicked)="cancel2FA()" class="half-width">
+          <div class="flex gap-4">
+            <button
+              type="button"
+              (click)="cancel2FA()"
+              class="flex-1 py-4 border border-[#4d463a]/40 text-[#d0c5b5] font-label text-xs uppercase tracking-widest rounded-md hover:border-primary/40 transition-colors">
               Regresar
-            </app-button>
+            </button>
+            <button
+              type="submit"
+              [disabled]="twoFAForm.invalid || loading"
+              class="flex-1 btn-metallic py-4 text-on-primary font-label text-xs font-bold uppercase tracking-widest rounded-md active:scale-[0.98] transition-all disabled:opacity-50">
+              <span *ngIf="!loading">Verificar</span>
+              <span *ngIf="loading" class="flex items-center justify-center gap-2">
+                <span class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
+              </span>
+            </button>
+          </div>
 
-            <app-button type="submit" variant="primary" [disabled]="twoFAForm.invalid" [loading]="loading"
-              class="half-width">
-              Verificar
-            </app-button>
+          <!-- Reenviar código 2FA -->
+          <div class="flex items-center justify-between pt-1">
+            <span class="font-body text-xs text-[#d0c5b5]/50">¿No recibiste el código?</span>
+            <button
+              type="button"
+              (click)="resend2FA()"
+              [disabled]="resending2FA || cooldown2FA > 0"
+              [ngClass]="(cooldown2FA > 0 || resending2FA) ? 'text-[#998f81]/40 cursor-not-allowed' : 'text-primary hover:text-[#e6c487]'"
+              class="font-label text-xs uppercase tracking-widest transition-colors">
+              <span *ngIf="resending2FA" class="flex items-center gap-1">
+                <span class="w-3 h-3 border border-[#998f81]/40 border-t-primary rounded-full animate-spin"></span>
+                Enviando...
+              </span>
+              <span *ngIf="!resending2FA && cooldown2FA === 0">Reenviar código</span>
+              <span *ngIf="!resending2FA && cooldown2FA > 0">Reenviar en {{ cooldown2FA }}s</span>
+            </button>
           </div>
         </form>
-      </div>
+
+      </ng-container>
+
     </div>
+
+    <!-- Decorative elements -->
+    <div class="absolute top-12 right-12 opacity-10 pointer-events-none">
+      <span class="material-symbols-outlined text-4xl text-[#e5e2e1]">wine_bar</span>
+    </div>
+    <div class="absolute bottom-12 left-12 h-24 w-px bg-gradient-to-t from-primary/20 to-transparent pointer-events-none"></div>
+
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full py-6 px-12 flex justify-between items-center z-50 pointer-events-none">
+  <div class="flex space-x-8 pointer-events-auto">
+    <a routerLink="/auth/terms"
+       class="font-label text-[10px] tracking-widest uppercase text-[#e5e2e1]/30 hover:text-primary transition-colors cursor-pointer">
+      Privacidad
+    </a>
+    <a routerLink="/auth/terms"
+       class="font-label text-[10px] tracking-widest uppercase text-[#e5e2e1]/30 hover:text-primary transition-colors cursor-pointer">
+      Términos
+    </a>
   </div>
-</div>
+  <p class="font-label text-[10px] tracking-widest uppercase text-[#e5e2e1]/30">
+    © 2026 SmartRestaurant. All rights reserved.
+  </p>
+</footer>

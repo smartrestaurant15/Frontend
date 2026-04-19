@@ -1,135 +1,180 @@
-<div class="inventory-detail-container">
-  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
+<div class="min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body px-8 py-8">
 
-  <div *ngIf="!loading && product" class="detail-card">
-    <div class="header">
-      <h1>{{ product.name }}</h1>
-      <div class="actions">
-        <app-button variant="secondary" (clicked)="editProduct()">Editar</app-button>
-        <app-button variant="danger" (clicked)="deleteProduct()">Eliminar</app-button>
-        <app-button variant="primary" (clicked)="goBack()">Volver</app-button>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <div class="w-8 h-8 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && product">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack()"
+                class="flex items-center gap-2 text-[#998f81] hover:text-primary transition-colors font-label text-xs uppercase tracking-widest">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          Inventario
+        </button>
+        <div class="h-4 w-px bg-[#4d463a]/40"></div>
+        <h1 class="font-headline text-2xl italic text-primary">{{ product.name }}</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <button (click)="editProduct()"
+                class="flex items-center gap-2 px-5 py-2.5 border border-[#4d463a]/40 text-[#d0c5b5] hover:border-primary/40 hover:text-primary transition-colors font-label text-xs uppercase tracking-widest rounded-sm">
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Editar
+        </button>
+        <button (click)="deleteProduct()"
+                class="flex items-center gap-2 px-5 py-2.5 border border-red-900/40 text-red-400 hover:bg-red-900/20 transition-colors font-label text-xs uppercase tracking-widest rounded-sm">
+          <span class="material-symbols-outlined text-sm">delete</span>
+          Eliminar
+        </button>
       </div>
     </div>
 
-    <div class="detail-content">
-      <!-- Galería de fotos -->
-      <div class="photos-section" *ngIf="product.photos && product.photos.length > 0">
-        <div class="main-photo">
-          <img 
-            [src]="product.photos[selectedPhotoIndex]" 
-            [alt]="product.name"
-            (error)="onImageError($event)">
-        </div>
-        <div class="photo-thumbnails" *ngIf="product.photos.length > 1">
-          <div 
-            class="thumbnail" 
-            *ngFor="let photo of product.photos; let i = index"
-            [class.active]="i === selectedPhotoIndex"
-            (click)="selectPhoto(i)">
-            <img [src]="photo" [alt]="product.name" (error)="onImageError($event)">
+    <!-- Content grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- LEFT: Image + stock control -->
+      <div class="space-y-6">
+
+        <!-- Image -->
+        <div class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden">
+          <div class="aspect-square">
+            <img *ngIf="product.photos?.length"
+                 [src]="product.photos[selectedPhotoIndex]"
+                 [alt]="product.name"
+                 class="w-full h-full object-cover"
+                 (error)="onImageError($event)">
+            <div *ngIf="!product.photos?.length"
+                 class="w-full h-full flex flex-col items-center justify-center text-[#998f81]/40">
+              <span class="material-symbols-outlined text-5xl mb-2">inventory_2</span>
+              <p class="font-label text-[10px] uppercase tracking-widest">Sin imagen</p>
+            </div>
+          </div>
+          <!-- Thumbnails -->
+          <div *ngIf="product.photos && product.photos.length > 1" class="flex gap-2 p-3 border-t border-[#4d463a]/10">
+            <div *ngFor="let photo of product.photos; let i = index"
+                 class="w-12 h-12 overflow-hidden cursor-pointer border-2 transition-colors"
+                 [class.border-primary]="i === selectedPhotoIndex"
+                 [class.border-transparent]="i !== selectedPhotoIndex"
+                 (click)="selectPhoto(i)">
+              <img [src]="photo" [alt]="product.name" class="w-full h-full object-cover">
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Sin foto -->
-      <div class="no-photo" *ngIf="!product.photos || product.photos.length === 0">
-        <div class="placeholder">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
-          <p>Sin imagen</p>
-        </div>
-      </div>
-
-      <!-- Información del producto -->
-      <div class="info-section">
-        <div class="detail-row">
-          <span class="label">Descripción:</span>
-          <span class="value">{{ product.description }}</span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="label">Precio:</span>
-          <span class="value price">{{ product.price | currency }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="label">Peso/Cantidad:</span>
-          <span class="value">{{ product.weight }} g</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="label">Stock Mínimo:</span>
-          <span class="value">{{ product.minimumStock }}</span>
-        </div>
-
-        <!-- Stock Actual -->
-        <div class="detail-row" *ngIf="product.currentWeight !== undefined">
-          <span class="label">Stock Actual:</span>
-          <span class="value stock-current" [class.low-stock]="product.currentWeight <= product.minimumStock">
-            {{ product.currentWeight }} g
-          </span>
-        </div>
-
-        <div class="detail-row">
-          <span class="label">Estado:</span>
-          <span class="value" [class.active]="product.state === 'ACTIVE'" [class.inactive]="product.state === 'INACTIVE'">
-            {{ product.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
-          </span>
-        </div>
-
-        <div class="detail-row" *ngIf="product.suplier">
-          <span class="label">Proveedor:</span>
-          <span class="value">{{ product.suplier.name }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="product.suplier?.email">
-          <span class="label">Email Proveedor:</span>
-          <span class="value">{{ product.suplier?.email }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="product.suplier?.phone">
-          <span class="label">Teléfono Proveedor:</span>
-          <span class="value">{{ product.suplier?.phone }}</span>
-        </div>
-
-        <!-- Sección de control de stock -->
-        <div class="stock-control">
-          <h3>Control de Stock</h3>
-          <form [formGroup]="stockForm" class="stock-form">
-            <div class="stock-input">
-              <label for="weight">Cantidad (g):</label>
-              <input 
-                type="number" 
-                id="weight" 
-                formControlName="weight" 
-                min="1" 
-                step="1"
-                placeholder="0">
+        <!-- Stock control -->
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+          <h3 class="font-headline text-lg italic text-primary mb-5">Control de Stock</h3>
+          <form [formGroup]="stockForm" class="space-y-4">
+            <div>
+              <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">
+                Cantidad (g)
+              </label>
+              <input type="number" formControlName="weight" min="1" placeholder="0"
+                     class="w-full bg-transparent border-0 border-b border-[#4d463a] focus:border-primary focus:ring-0 transition-colors text-[#e5e2e1] py-2 px-0 font-body text-sm">
             </div>
-            <div class="stock-actions">
-              <app-button 
-                variant="success" 
-                type="button"
-                [disabled]="stockForm.invalid || processingStock"
-                [loading]="processingStock"
-                (clicked)="addStock()">
-                + Agregar
-              </app-button>
-              <app-button 
-                variant="danger" 
-                type="button"
-                [disabled]="stockForm.invalid || processingStock"
-                [loading]="processingStock"
-                (clicked)="discountStock()">
-                - Descontar
-              </app-button>
+            <div class="flex gap-3">
+              <button type="button"
+                      [disabled]="stockForm.invalid || processingStock"
+                      (click)="addStock()"
+                      class="flex-1 py-3 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm disabled:opacity-40 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Agregar
+              </button>
+              <button type="button"
+                      [disabled]="stockForm.invalid || processingStock"
+                      (click)="discountStock()"
+                      class="flex-1 py-3 bg-red-900/10 border border-red-900/30 text-red-400 hover:bg-red-900/20 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm disabled:opacity-40 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">remove</span>
+                Descontar
+              </button>
             </div>
           </form>
         </div>
+
+      </div>
+
+      <!-- RIGHT: Product info -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Main info -->
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-8">
+          <div class="flex items-start justify-between mb-6">
+            <div>
+              <h2 class="font-headline text-3xl font-light text-[#e5e2e1] mb-2">{{ product.name }}</h2>
+              <span class="inline-flex items-center px-3 py-1 rounded-full font-label text-[9px] font-bold uppercase tracking-wider"
+                    [class.bg-primary]="product.state === 'ACTIVE'"
+                    [class.text-on-primary]="product.state === 'ACTIVE'"
+                    [class.bg-red-900]="product.state !== 'ACTIVE'"
+                    [class.text-red-300]="product.state !== 'ACTIVE'">
+                {{ product.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            <div class="text-right">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Precio</p>
+              <p class="font-headline text-3xl text-primary">{{ product.price | currency:'COP':'symbol':'1.0-0' }}</p>
+            </div>
+          </div>
+
+          <p class="font-body text-[#d0c5b5] font-light leading-relaxed mb-8">{{ product.description }}</p>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6 border-t border-[#4d463a]/15">
+            <div>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Peso</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.weight }} g</p>
+            </div>
+            <div>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock Mínimo</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.minimumStock }}</p>
+            </div>
+            <div *ngIf="product.currentWeight !== undefined">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock Actual</p>
+              <p class="font-body font-semibold"
+                 [class.text-red-400]="product.currentWeight <= product.minimumStock"
+                 [class.text-primary]="product.currentWeight > product.minimumStock">
+                {{ product.currentWeight }} g
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Supplier info -->
+        <div *ngIf="product.suplier" class="bg-[#111111] border border-[#4d463a]/15 p-8">
+          <h3 class="font-headline text-lg italic text-primary mb-5">Proveedor</h3>
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Nombre</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.suplier.name }}</p>
+            </div>
+            <div *ngIf="product.suplier.email">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Email</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.suplier.email }}</p>
+            </div>
+            <div *ngIf="product.suplier.phone">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Teléfono</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.suplier.phone }}</p>
+            </div>
+            <div *ngIf="product.suplier.address">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Dirección</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.suplier.address }}</p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
+  </ng-container>
+
+  <!-- Not found -->
+  <div *ngIf="!loading && !product" class="flex flex-col items-center justify-center h-64 text-[#998f81]/50">
+    <span class="material-symbols-outlined text-4xl mb-3">inventory_2</span>
+    <p class="font-body text-sm">Producto no encontrado</p>
+    <button (click)="goBack()" class="mt-4 text-primary hover:text-[#e6c487] font-label text-xs uppercase tracking-widest transition-colors">
+      Volver al inventario
+    </button>
   </div>
+
 </div>

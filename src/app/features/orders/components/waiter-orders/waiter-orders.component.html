@@ -1,0 +1,501 @@
+<div class="min-h-screen bg-[#0e0e0e] flex flex-col">
+
+  <!-- Top Bar -->
+  <header class="px-6 md:px-10 py-5 border-b border-[#4d463a]/20 flex items-center justify-between gap-4 shrink-0">
+    <div>
+      <h1 class="font-headline text-2xl md:text-3xl text-[#e5e2e1] tracking-tight">Órdenes</h1>
+      <p class="font-body text-xs text-[#998f81] mt-0.5">Gestión de pedidos presenciales</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- SSE indicator -->
+      <div class="hidden sm:flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full transition-colors"
+          [class.bg-emerald-500]="sseOnline" [class.animate-pulse]="sseOnline"
+          [class.bg-red-500]="!sseOnline"></span>
+        <span class="font-label text-[10px] uppercase tracking-widest"
+          [class.text-[#998f81]]="sseOnline" [class.text-red-400]="!sseOnline">
+          {{ sseOnline ? 'En vivo' : 'Reconectando…' }}
+        </span>
+      </div>
+
+      <!-- Nueva orden -->
+      <button
+        (click)="isCreateModalOpen = true"
+        class="flex items-center gap-2 px-4 py-2 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity">
+        <span class="material-symbols-outlined text-sm">add</span>
+        Nueva Orden
+      </button>
+
+      <!-- Perfil -->
+      <a [routerLink]="'/auth/profile'"
+        class="flex items-center gap-1.5 px-3 py-2 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/40 transition-colors text-xs font-label uppercase tracking-wider"
+        title="Ver perfil">
+        <span class="material-symbols-outlined text-base leading-none">account_circle</span>
+        <span class="hidden sm:inline">Perfil</span>
+      </a>
+
+      <!-- Logout -->
+      <button
+        (click)="logout()"
+        class="flex items-center gap-1.5 px-3 py-2 border border-[#4d463a]/40 text-[#998f81] hover:text-red-400 hover:border-red-400/40 transition-colors text-xs font-label uppercase tracking-wider">
+        <span class="material-symbols-outlined text-base leading-none">logout</span>
+        <span class="hidden sm:inline">Salir</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <div class="px-6 md:px-10 py-3 border-b border-[#4d463a]/10 flex gap-1.5 overflow-x-auto shrink-0">
+    <button
+      *ngFor="let opt of STATUS_OPTIONS"
+      (click)="filterByStatus(opt.value)"
+      class="flex items-center gap-1.5 px-3 py-1.5 font-label text-[10px] uppercase tracking-wider border transition-colors whitespace-nowrap shrink-0"
+      [ngClass]="selectedStatus === opt.value
+        ? 'border-[#e6c487]/50 bg-[#e6c487]/8 text-[#e6c487]'
+        : 'border-[#4d463a]/20 text-[#998f81] hover:text-[#d0c5b5] hover:border-[#4d463a]/40'">
+      <span class="material-symbols-outlined text-xs">{{ opt.icon }}</span>
+      {{ opt.label }}
+    </button>
+  </div>
+
+  <!-- Main content split -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Orders list -->
+    <div class="flex-1 overflow-y-auto px-4 md:px-8 py-6" [class.max-w-2xl]="selectedOrder">
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex justify-center items-center h-40">
+        <div class="w-7 h-7 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!loading && orders.length === 0" class="flex flex-col items-center justify-center h-48 gap-3">
+        <span class="material-symbols-outlined text-4xl text-[#4d463a]">receipt_long</span>
+        <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">
+          Sin órdenes{{ selectedStatus ? ' con este estado' : '' }}
+        </p>
+      </div>
+
+      <!-- Cards grid -->
+      <div *ngIf="!loading && orders.length > 0" class="space-y-2">
+        <div
+          *ngFor="let order of orders; trackBy: trackById"
+          (click)="openDetail(order)"
+          class="group cursor-pointer border transition-all px-4 py-3 flex items-center gap-4"
+          [ngClass]="selectedOrder?.id === order.id
+            ? 'bg-[#1c1b1b] border-[#e6c487]/30'
+            : 'bg-[#131313] border-[#4d463a]/15 hover:bg-[#1a1a1a] hover:border-[#4d463a]/30'">
+
+          <!-- Status dot -->
+          <span class="w-2 h-2 rounded-full shrink-0"
+            [class.bg-amber-400]="order.status === 'PENDING'"
+            [class.bg-blue-400]="order.status === 'IN_PROGRESS'"
+            [class.bg-[#e6c487]]="order.status === 'COMPLETED'"
+            [class.bg-emerald-400]="order.status === 'DELIVERED'"
+            [class.bg-red-400]="order.status === 'CANCELLED'">
+          </span>
+
+          <!-- ID + time -->
+          <div class="w-20 shrink-0">
+            <p class="font-label text-xs text-[#e5e2e1] uppercase tracking-widest">#{{ order.id.slice(-6).toUpperCase() }}</p>
+            <p class="font-body text-[10px] text-[#998f81] tabular-nums mt-0.5">{{ order.createdAt | date:'HH:mm' }}</p>
+          </div>
+
+          <!-- Channel + info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="material-symbols-outlined text-xs text-[#c9a96e]">
+                {{ order.channel === 'PRESENTIAL' ? 'table_restaurant' : 'public' }}
+              </span>
+              <span class="font-body text-[#d0c5b5] text-xs truncate">
+                {{ order.customerName || (order.channel === 'PRESENTIAL' ? 'Presencial' : 'Online') }}
+              </span>
+            </div>
+            <p class="font-body text-[#998f81] text-xs">
+              {{ order.itemCount }} ítem{{ order.itemCount !== 1 ? 's' : '' }}
+              · ${{ order.totalAmount | number:'1.0-0' }}
+            </p>
+          </div>
+
+          <!-- Status badge -->
+          <span class="hidden sm:inline font-label text-[10px] uppercase tracking-wider px-2 py-0.5 border shrink-0"
+            [ngClass]="statusBadge[order.status]">
+            {{ STATUS_LABEL[order.status] }}
+          </span>
+
+          <!-- Quick actions (visible on hover) -->
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" (click)="$event.stopPropagation()">
+            <button
+              *ngIf="canDeliver(order)"
+              (click)="deliverOrder(order)"
+              title="Marcar como entregada"
+              class="p-1.5 text-emerald-400 hover:bg-emerald-400/10 transition-colors">
+              <span class="material-symbols-outlined text-base">done_all</span>
+            </button>
+            <button
+              *ngIf="canPay(order)"
+              (click)="openPayment(order)"
+              title="Registrar pago"
+              class="p-1.5 text-[#e6c487] hover:bg-[#e6c487]/10 transition-colors">
+              <span class="material-symbols-outlined text-base">payments</span>
+            </button>
+            <button
+              *ngIf="canCancel(order)"
+              (click)="requestCancel(order)"
+              title="Cancelar orden"
+              class="p-1.5 transition-colors"
+              [ngClass]="confirmCancelId === order.id ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-[#4d463a] hover:text-red-400'">
+              <span class="material-symbols-outlined text-base">{{ confirmCancelId === order.id ? 'warning' : 'cancel' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="orders.length > 0 && (currentPage > 1 || hasMorePages)" class="flex items-center justify-between mt-6 pt-4 border-t border-[#4d463a]/20">
+        <button
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+          class="flex items-center gap-1 px-3 py-1.5 border border-[#4d463a]/30 font-label text-xs uppercase tracking-wider text-[#998f81] hover:text-[#d0c5b5] disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_left</span>
+          Anterior
+        </button>
+        <span class="font-label text-[10px] text-[#998f81]/60 uppercase tracking-widest">Página {{ currentPage }}</span>
+        <button
+          (click)="nextPage()"
+          [disabled]="!hasMorePages"
+          class="flex items-center gap-1 px-3 py-1.5 border border-[#4d463a]/30 font-label text-xs uppercase tracking-wider text-[#998f81] hover:text-[#d0c5b5] disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+          Siguiente
+          <span class="material-symbols-outlined text-sm">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Detail panel -->
+    <aside
+      *ngIf="selectedOrder"
+      class="w-full md:w-96 border-l border-[#4d463a]/20 bg-[#111111] overflow-y-auto shrink-0 flex flex-col">
+
+      <!-- Panel header -->
+      <div class="px-5 py-4 border-b border-[#4d463a]/20 flex items-center justify-between shrink-0">
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Detalle de orden</p>
+          <h3 class="font-headline text-base text-[#e5e2e1] mt-0.5">
+            #{{ selectedOrder.id.slice(-6).toUpperCase() }}
+          </h3>
+        </div>
+        <button (click)="closeDetail()" class="text-[#998f81] hover:text-[#e5e2e1] transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- Loading detail -->
+      <div *ngIf="loadingDetail" class="flex justify-center items-center flex-1 py-12">
+        <div class="w-6 h-6 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Detail content -->
+      <div *ngIf="!loadingDetail && orderDetail" class="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+
+        <!-- Meta info -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Estado</p>
+            <span class="font-label text-xs px-2 py-0.5 border" [ngClass]="statusBadge[orderDetail.status]">
+              {{ STATUS_LABEL[orderDetail.status] }}
+            </span>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Canal</p>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-[#c9a96e]">
+                {{ orderDetail.channel === 'PRESENTIAL' ? 'table_restaurant' : 'public' }}
+              </span>
+              <span class="font-body text-[#d0c5b5] text-xs">{{ orderDetail.channel === 'PRESENTIAL' ? 'Presencial' : 'Online' }}</span>
+            </div>
+          </div>
+          <div *ngIf="orderDetail.table" class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Mesa</p>
+            <p class="font-body text-[#d0c5b5] text-sm">
+              Mesa {{ orderDetail.table.number }}
+              <span *ngIf="orderDetail.table.location" class="text-[#998f81]"> · {{ orderDetail.table.location }}</span>
+            </p>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Hora</p>
+            <p class="font-body text-[#d0c5b5] text-xs tabular-nums">{{ orderDetail.createdAt | date:'HH:mm · dd MMM' }}</p>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Productos</p>
+          <div class="space-y-1.5">
+            <div
+              *ngFor="let item of orderDetail.items; trackBy: trackById"
+              class="flex gap-3 items-start px-3 py-2.5 bg-[#131313] border border-[#4d463a]/10">
+              <span class="material-symbols-outlined text-sm text-[#998f81] mt-0.5 shrink-0">{{ itemTypeIcon(item.productType) }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-baseline justify-between gap-2">
+                  <span class="font-body text-[#e5e2e1] text-sm leading-tight">{{ item.productName }}</span>
+                  <span class="font-headline text-[#e6c487] text-sm shrink-0">× {{ item.quantity }}</span>
+                </div>
+                <p *ngIf="item.notes" class="font-body text-[#998f81] text-xs mt-0.5 italic">"{{ item.notes }}"</p>
+              </div>
+              <span class="font-headline text-[#998f81] text-xs tabular-nums shrink-0">${{ item.totalPrice | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editar notas -->
+        <div *ngIf="orderDetail.status === 'PENDING' || orderDetail.status === 'IN_PROGRESS'">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Notas de la orden</p>
+          <div *ngIf="!editingNotes" class="flex items-start justify-between gap-2">
+            <p class="font-body text-xs text-[#d0c5b5] italic flex-1">
+              {{ orderDetail.notes || 'Sin notas' }}
+            </p>
+            <button (click)="startEditNotes()" class="shrink-0 text-[#998f81] hover:text-[#e6c487] transition-colors">
+              <span class="material-symbols-outlined text-base">edit</span>
+            </button>
+          </div>
+          <div *ngIf="editingNotes" class="space-y-2">
+            <textarea
+              [(ngModel)]="notesText"
+              rows="3"
+              placeholder="Ej: sin cebolla, extra salsa..."
+              class="w-full bg-[#0e0e0e] border border-[#4d463a]/40 focus:border-[#c9a96e] outline-none text-[#e5e2e1] text-xs font-body px-3 py-2 resize-none transition-colors">
+            </textarea>
+            <div class="flex gap-2">
+              <button (click)="saveNotes()" [disabled]="savingNotes"
+                class="flex-1 py-1.5 bg-[#c9a96e]/10 border border-[#c9a96e]/40 text-[#e6c487] font-label text-[10px] uppercase tracking-wider hover:bg-[#c9a96e]/20 transition-colors disabled:opacity-40">
+                {{ savingNotes ? 'Guardando…' : 'Guardar' }}
+              </button>
+              <button (click)="cancelEditNotes()"
+                class="flex-1 py-1.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-wider hover:text-[#d0c5b5] transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editar items (solo PENDING) -->
+        <div *ngIf="orderDetail.status === 'PENDING'" class="border-t border-[#4d463a]/20 pt-4">
+
+          <!-- Cabecera sección -->
+          <div class="flex items-center justify-between mb-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Items de la orden</p>
+            <button *ngIf="!editingItems" (click)="startEditItems()"
+              class="flex items-center gap-1 text-[#c9a96e] hover:text-[#e6c487] transition-colors font-label text-[10px] uppercase tracking-wider">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              Editar
+            </button>
+          </div>
+
+          <!-- Modo edición -->
+          <div *ngIf="editingItems" class="space-y-3">
+
+            <!-- Lista de items editables -->
+            <div *ngFor="let item of editItemsList" class="flex items-center gap-2 px-2 py-1.5 bg-[#0e0e0e] border border-[#4d463a]/20">
+              <span class="flex-1 font-body text-xs text-[#d0c5b5] truncate">{{ item.productName }}</span>
+              <div class="flex items-center gap-1 shrink-0">
+                <button (click)="decreaseQty(item)" class="w-5 h-5 flex items-center justify-center border border-[#4d463a]/40 text-[#998f81] hover:text-red-400 hover:border-red-400/40 transition-colors text-xs">−</button>
+                <span class="w-5 text-center font-headline text-xs text-[#e5e2e1] tabular-nums">{{ item.quantity }}</span>
+                <button (click)="increaseQty(item)" class="w-5 h-5 flex items-center justify-center border border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/40 transition-colors text-xs">+</button>
+              </div>
+              <button (click)="removeEditItem(item)" class="text-[#4d463a] hover:text-red-400 transition-colors ml-1">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+
+            <div *ngIf="editItemsList.length === 0" class="text-center py-3">
+              <p class="font-label text-[10px] text-red-400/70 uppercase tracking-wider">Añade al menos un producto</p>
+            </div>
+
+            <!-- Añadir producto -->
+            <div class="border border-[#4d463a]/20">
+              <button (click)="showAddProduct = !showAddProduct"
+                class="w-full flex items-center justify-between px-3 py-2 text-[#998f81] hover:text-[#e6c487] transition-colors">
+                <span class="font-label text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                  Añadir producto
+                </span>
+                <span class="material-symbols-outlined text-sm">{{ showAddProduct ? 'expand_less' : 'expand_more' }}</span>
+              </button>
+
+              <div *ngIf="showAddProduct" class="border-t border-[#4d463a]/20 p-3 space-y-2">
+                <!-- Tabs -->
+                <div class="flex gap-1">
+                  <button *ngFor="let tab of PRODUCT_TABS"
+                    (click)="addProductTab = tab.value"
+                    class="px-2 py-1 font-label text-[10px] uppercase tracking-wider border transition-colors"
+                    [ngClass]="addProductTab === tab.value
+                      ? 'border-[#e6c487]/40 text-[#e6c487] bg-[#e6c487]/5'
+                      : 'border-[#4d463a]/20 text-[#998f81] hover:text-[#d0c5b5]'">
+                    {{ tab.label }}
+                  </button>
+                </div>
+                <!-- Búsqueda -->
+                <input [(ngModel)]="addProductSearch" placeholder="Buscar..."
+                  class="w-full bg-[#0e0e0e] border border-[#4d463a]/30 px-2 py-1.5 text-xs text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/30" />
+                <!-- Lista -->
+                <div class="max-h-36 overflow-y-auto space-y-0.5">
+                  <button *ngFor="let p of filteredProductsForEdit"
+                    (click)="addProductToEdit(p, addProductTab)"
+                    class="w-full flex items-center justify-between px-2 py-1.5 hover:bg-[#1a1a1a] transition-colors text-left">
+                    <span class="font-body text-xs text-[#d0c5b5] truncate">{{ p.name }}</span>
+                    <span class="font-headline text-[10px] text-[#998f81] tabular-nums shrink-0 ml-2">${{ p.price | number:'1.0-0' }}</span>
+                  </button>
+                  <p *ngIf="filteredProductsForEdit.length === 0"
+                    class="text-center py-2 font-label text-[10px] text-[#4d463a] uppercase tracking-wider">
+                    Sin resultados
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex gap-2 pt-1">
+              <button (click)="saveItems()" [disabled]="savingItems || editItemsList.length === 0"
+                class="flex-1 py-1.5 bg-[#c9a96e]/10 border border-[#c9a96e]/40 text-[#e6c487] font-label text-[10px] uppercase tracking-wider hover:bg-[#c9a96e]/20 transition-colors disabled:opacity-40">
+                {{ savingItems ? 'Guardando…' : 'Guardar items' }}
+              </button>
+              <button (click)="cancelEditItems()"
+                class="flex-1 py-1.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-wider hover:text-[#d0c5b5] transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pago info si existe -->
+        <div class="border-t border-[#4d463a]/20 pt-4">
+          <div class="flex items-center justify-between">
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Pago</span>
+            <span class="font-label text-xs px-2 py-0.5 border"
+              [ngClass]="{
+                'bg-amber-400/10 text-amber-400 border-amber-400/20':    orderDetail.paymentStatus === 'PENDING',
+                'bg-emerald-400/10 text-emerald-400 border-emerald-400/20': orderDetail.paymentStatus === 'CONFIRMED',
+                'bg-[#4d463a]/20 text-[#998f81] border-[#4d463a]/20':    orderDetail.paymentStatus === 'NOT_REQUIRED'
+              }">
+              {{ orderDetail.paymentStatus === 'NOT_REQUIRED' ? 'No requerido' : orderDetail.paymentStatus === 'CONFIRMED' ? 'Pagado' : 'Pendiente' }}
+            </span>
+          </div>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="font-label text-[10px] text-[#998f81]">Total</span>
+            <span class="font-headline text-xl text-[#e6c487]">${{ orderDetail.totalAmount | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Panel actions -->
+      <div *ngIf="!loadingDetail && selectedOrder" class="px-5 py-4 border-t border-[#4d463a]/20 space-y-2 shrink-0">
+        <button
+          *ngIf="canDeliver(selectedOrder)"
+          (click)="deliverOrder(selectedOrder)"
+          class="w-full py-2 px-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-label text-xs uppercase tracking-wider hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">done_all</span>
+          Marcar como entregada
+        </button>
+        <button
+          *ngIf="canPay(selectedOrder)"
+          (click)="openPayment(selectedOrder)"
+          class="w-full py-2 px-4 btn-metallic text-[#0e0e0e] font-label text-xs uppercase tracking-wider font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">payments</span>
+          Registrar pago
+        </button>
+        <button
+          *ngIf="canCancel(selectedOrder)"
+          (click)="requestCancel(selectedOrder)"
+          class="w-full py-2 px-4 border font-label text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+          [ngClass]="confirmCancelId === selectedOrder.id
+            ? 'border-red-400 bg-red-400/10 text-red-300 animate-pulse'
+            : 'border-[#4d463a]/30 text-[#998f81] hover:border-red-400/40 hover:text-red-400'">
+          <span class="material-symbols-outlined text-sm">{{ confirmCancelId === selectedOrder.id ? 'warning' : 'cancel' }}</span>
+          {{ confirmCancelId === selectedOrder.id ? 'Confirmar cancelación' : 'Cancelar orden' }}
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Modal crear orden -->
+<app-order-create
+  [isOpen]="isCreateModalOpen"
+  (closeModal)="isCreateModalOpen = false"
+  (orderSaved)="loadOrders()">
+</app-order-create>
+
+<!-- Modal pago -->
+<div
+  *ngIf="payingInvoice"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+  (click)="closePayment()">
+  <div
+    class="w-full max-w-sm bg-[#111111] border border-[#4d463a]/30"
+    (click)="$event.stopPropagation()">
+
+    <div class="px-6 py-4 border-b border-[#4d463a]/20 flex items-center justify-between">
+      <h3 class="font-headline text-base text-[#e5e2e1]">Registrar Pago</h3>
+      <button (click)="closePayment()" class="text-[#998f81] hover:text-[#e5e2e1]">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="px-6 py-5 space-y-5">
+
+      <!-- Total factura -->
+      <div class="text-center py-3 bg-[#1a1a1a] border border-[#4d463a]/15">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total a cobrar</p>
+        <p class="font-headline text-3xl text-[#e6c487]">${{ payingInvoice.total | number:'1.0-0' }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">
+          Subtotal ${{ payingInvoice.subtotal | number:'1.0-0' }} · IVA ${{ payingInvoice.tax | number:'1.0-0' }}
+        </p>
+      </div>
+
+      <!-- Método de pago -->
+      <div>
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Método</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            *ngFor="let m of PAYMENT_METHODS"
+            (click)="selectedMethod = m.value"
+            class="py-3 flex flex-col items-center gap-1 border font-label text-xs transition-colors"
+            [ngClass]="selectedMethod === m.value
+              ? 'border-[#e6c487]/60 bg-[#e6c487]/8 text-[#e6c487]'
+              : 'border-[#4d463a]/30 text-[#998f81] hover:border-[#4d463a]'">
+            <span class="material-symbols-outlined text-lg">{{ m.icon }}</span>
+            {{ m.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Referencia -->
+      <div *ngIf="selectedMethod !== 'CASH'">
+        <label class="font-label text-[10px] uppercase tracking-widest text-[#998f81] block mb-1">
+          Referencia <span class="text-[#4d463a]">(opcional)</span>
+        </label>
+        <input
+          [(ngModel)]="paymentReference"
+          placeholder="Nº autorización, referencia..."
+          class="w-full bg-[#1a1a1a] border border-[#4d463a]/30 px-3 py-2 text-sm text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/40" />
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#4d463a]/20 flex justify-end gap-3">
+      <button (click)="closePayment()" class="px-4 py-2 border border-[#4d463a]/40 text-[#998f81] font-label text-xs uppercase tracking-wider hover:text-[#e5e2e1] transition-colors">
+        Cancelar
+      </button>
+      <button
+        (click)="submitPayment()"
+        [disabled]="submittingPayment"
+        class="px-6 py-2 btn-metallic text-[#0e0e0e] font-label text-xs uppercase tracking-widest font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity flex items-center gap-2">
+        <span *ngIf="submittingPayment" class="w-3 h-3 border border-[#0e0e0e]/40 border-t-[#0e0e0e] rounded-full animate-spin"></span>
+        <span class="material-symbols-outlined text-sm" *ngIf="!submittingPayment">check</span>
+        {{ submittingPayment ? 'Procesando...' : 'Confirmar pago' }}
+      </button>
+    </div>
+  </div>
+</div>

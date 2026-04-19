@@ -1,0 +1,199 @@
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1]">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-40 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#4d463a]/15 flex items-center justify-between px-6 md:px-10 h-14">
+    <button (click)="goHome()" class="flex items-center gap-2 text-[#998f81] hover:text-[#e6c487] transition-colors">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      <span class="font-label text-xs uppercase tracking-wider hidden sm:inline">Inicio</span>
+    </button>
+    <h1 class="font-headline text-base text-[#e5e2e1]">Mis Pedidos</h1>
+    <button (click)="goToMenu()" class="flex items-center gap-1.5 px-3 py-1.5 btn-metallic font-label text-[10px] uppercase tracking-wider text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined text-sm">add</span>
+      Nuevo
+    </button>
+  </nav>
+
+  <div class="flex h-[calc(100vh-3.5rem)]">
+
+    <!-- Orders list -->
+    <div class="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex justify-center py-16">
+        <div class="w-7 h-7 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!loading && orders.length === 0" class="flex flex-col items-center justify-center h-64 gap-4">
+        <span class="material-symbols-outlined text-5xl text-[#4d463a]">receipt_long</span>
+        <p class="font-headline text-xl text-[#e5e2e1]">Aún no tienes pedidos</p>
+        <p class="font-body text-sm text-[#998f81]">Explora el menú y realiza tu primer pedido</p>
+        <button (click)="goToMenu()" class="mt-2 px-6 py-2.5 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity">
+          Ver Menú
+        </button>
+      </div>
+
+      <!-- List -->
+      <div *ngIf="!loading && orders.length > 0" class="space-y-2 max-w-2xl mx-auto">
+        <div
+          *ngFor="let order of orders; trackBy: trackById"
+          (click)="openDetail(order)"
+          class="group cursor-pointer border transition-all px-4 py-3.5 flex items-center gap-4"
+          [ngClass]="selectedOrder?.id === order.id
+            ? 'bg-[#1c1b1b] border-[#e6c487]/25'
+            : 'bg-[#131313] border-[#4d463a]/15 hover:bg-[#1a1a1a] hover:border-[#4d463a]/30'">
+
+          <!-- Status dot -->
+          <span class="w-2 h-2 rounded-full shrink-0"
+            [class.bg-amber-400]="order.status === 'PENDING'"
+            [class.bg-blue-400]="order.status === 'IN_PROGRESS'"
+            [class.animate-pulse]="order.status === 'IN_PROGRESS'"
+            [class.bg-yellow-400]="order.status === 'COMPLETED'"
+            [class.bg-emerald-400]="order.status === 'DELIVERED'"
+            [class.bg-red-400]="order.status === 'CANCELLED'">
+          </span>
+
+          <!-- ID + date -->
+          <div class="w-24 shrink-0">
+            <p class="font-label text-xs text-[#e5e2e1] uppercase tracking-widest">#{{ order.id.slice(-6).toUpperCase() }}</p>
+            <p class="font-body text-[10px] text-[#998f81] tabular-nums mt-0.5">{{ order.createdAt | date:'dd MMM · HH:mm' }}</p>
+          </div>
+
+          <!-- Items + total -->
+          <div class="flex-1 min-w-0">
+            <p class="font-body text-[#d0c5b5] text-xs">{{ order.itemCount }} ítem{{ order.itemCount !== 1 ? 's' : '' }}</p>
+            <p class="font-headline text-[#e6c487] text-sm">${{ order.totalAmount | number:'1.0-0' }}</p>
+          </div>
+
+          <!-- Status badge -->
+          <span class="font-label text-[10px] uppercase tracking-wider px-2 py-0.5 border shrink-0"
+            [ngClass]="statusBadge[order.status]">
+            {{ STATUS_LABEL[order.status] }}
+          </span>
+
+          <span class="material-symbols-outlined text-sm text-[#4d463a] group-hover:text-[#998f81] transition-colors">
+            {{ selectedOrder?.id === order.id ? 'expand_less' : 'chevron_right' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="orders.length > 0 && (currentPage > 1 || hasMorePages)"
+        class="flex items-center justify-between mt-6 pt-4 border-t border-[#4d463a]/20 max-w-2xl mx-auto">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+          class="flex items-center gap-1 px-3 py-1.5 border border-[#4d463a]/30 font-label text-xs uppercase tracking-wider text-[#998f81] hover:text-[#d0c5b5] disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+          <span class="material-symbols-outlined text-sm">chevron_left</span>
+          Anterior
+        </button>
+        <span class="font-label text-[10px] text-[#998f81]/60 uppercase tracking-widest">Página {{ currentPage }}</span>
+        <button (click)="nextPage()" [disabled]="!hasMorePages"
+          class="flex items-center gap-1 px-3 py-1.5 border border-[#4d463a]/30 font-label text-xs uppercase tracking-wider text-[#998f81] hover:text-[#d0c5b5] disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+          Siguiente
+          <span class="material-symbols-outlined text-sm">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Detail panel -->
+    <aside *ngIf="selectedOrder"
+      class="w-full md:w-96 border-l border-[#4d463a]/20 bg-[#111111] overflow-y-auto shrink-0 flex flex-col">
+
+      <div class="px-5 py-4 border-b border-[#4d463a]/20 flex items-center justify-between shrink-0">
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Detalle</p>
+          <h3 class="font-headline text-base text-[#e5e2e1] mt-0.5">#{{ selectedOrder.id.slice(-6).toUpperCase() }}</h3>
+        </div>
+        <button (click)="closeDetail()" class="text-[#998f81] hover:text-[#e5e2e1] transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div *ngIf="loadingDetail" class="flex justify-center py-12">
+        <div class="w-6 h-6 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
+      </div>
+
+      <div *ngIf="!loadingDetail" class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+
+        <!-- Progress tracker -->
+        <div *ngIf="selectedOrder.status !== 'CANCELLED'">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-4">Estado del pedido</p>
+          <div class="relative">
+            <!-- Track line -->
+            <div class="absolute top-4 left-4 right-4 h-px bg-[#4d463a]/20"></div>
+            <div class="flex justify-between relative z-10">
+              <div *ngFor="let step of STEPS" class="flex flex-col items-center gap-2 w-1/4">
+                <!-- Step circle -->
+                <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all"
+                  [ngClass]="isStepDone(selectedOrder.status, step.key)
+                    ? 'bg-[#e6c487] border-[#e6c487]'
+                    : 'bg-[#131313] border-[#4d463a]/30'">
+                  <span class="material-symbols-outlined text-sm"
+                    [ngClass]="isStepDone(selectedOrder.status, step.key) ? 'text-[#0e0e0e]' : 'text-[#4d463a]'"
+                    style="font-variation-settings: 'FILL' 1;">
+                    {{ step.icon }}
+                  </span>
+                </div>
+                <span class="font-label text-[9px] uppercase tracking-wider text-center leading-tight"
+                  [ngClass]="isStepDone(selectedOrder.status, step.key) ? 'text-[#e6c487]' : 'text-[#4d463a]'">
+                  {{ step.label }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cancelled state -->
+        <div *ngIf="selectedOrder.status === 'CANCELLED'"
+          class="flex items-center gap-3 px-4 py-3 bg-red-400/5 border border-red-400/20">
+          <span class="material-symbols-outlined text-red-400">cancel</span>
+          <span class="font-label text-xs text-red-400 uppercase tracking-wider">Pedido cancelado</span>
+        </div>
+
+        <!-- Meta -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Canal</p>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-[#c9a96e]">
+                {{ selectedOrder.channel === 'PRESENTIAL' ? 'table_restaurant' : 'public' }}
+              </span>
+              <span class="font-body text-[#d0c5b5] text-xs">{{ selectedOrder.channel === 'PRESENTIAL' ? 'Presencial' : 'Online' }}</span>
+            </div>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Fecha</p>
+            <p class="font-body text-[#d0c5b5] text-xs tabular-nums">{{ selectedOrder.createdAt | date:'dd MMM · HH:mm' }}</p>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Productos</p>
+          <div class="space-y-2">
+            <div *ngFor="let item of selectedOrder.items"
+              class="flex gap-3 items-start px-3 py-2.5 bg-[#131313] border border-[#4d463a]/10">
+              <span class="material-symbols-outlined text-sm text-[#998f81] mt-0.5 shrink-0">
+                {{ item.productType === 'DISH' ? 'restaurant_menu' : item.productType === 'DRINK' ? 'local_bar' : 'add_circle' }}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-baseline justify-between gap-2">
+                  <span class="font-body text-[#e5e2e1] text-sm leading-tight">{{ item.productName }}</span>
+                  <span class="font-headline text-[#e6c487] text-sm shrink-0">× {{ item.quantity }}</span>
+                </div>
+                <p *ngIf="item.notes" class="font-body text-[#998f81] text-xs mt-0.5 italic">"{{ item.notes }}"</p>
+              </div>
+              <span class="font-headline text-[#998f81] text-xs tabular-nums shrink-0">${{ item.totalPrice | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div class="border-t border-[#4d463a]/20 pt-4 flex items-baseline justify-between">
+          <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Total</span>
+          <span class="font-headline text-2xl text-[#e6c487]">${{ selectedOrder.totalAmount | number:'1.0-0' }}</span>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+</div>

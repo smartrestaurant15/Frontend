@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdditionService } from '../../services/addition.service';
-import { AdditionResponse } from '../../models/addition.model';
+import { AdditionResponse, AdditionDetailResponse } from '../../models/addition.model';
 import { NotificationService } from '@core/services/notification.service';
 
 @Component({
@@ -17,6 +17,18 @@ export class AdditionManagementComponent implements OnInit {
   pageSize = 10;
   isModalOpen = false;
   selectedAdditionId: string | null = null;
+  searchTerm = '';
+
+  selectedDetail: AdditionDetailResponse | null = null;
+  loadingDetail = false;
+  stockQty = 1;
+  adjustingStock = false;
+
+  get filteredAdditions(): AdditionResponse[] {
+    if (!this.searchTerm.trim()) return this.additions;
+    const term = this.searchTerm.toLowerCase();
+    return this.additions.filter(a => a.name.toLowerCase().includes(term));
+  }
 
   constructor(
     private additionService: AdditionService,
@@ -90,6 +102,51 @@ export class AdditionManagementComponent implements OnInit {
 
   onAdditionSaved(): void {
     this.loadAdditions();
+    if (this.selectedDetail) this.viewDetail(this.selectedDetail.id);
+  }
+
+  viewDetail(id: string): void {
+    this.loadingDetail = true;
+    this.additionService.getAdditionById(id).subscribe({
+      next: (res) => {
+        this.selectedDetail = res.message as unknown as AdditionDetailResponse;
+        this.stockQty = 1;
+        this.loadingDetail = false;
+      },
+      error: () => { this.loadingDetail = false; }
+    });
+  }
+
+  clearDetail(): void {
+    this.selectedDetail = null;
+  }
+
+  addStock(): void {
+    if (!this.selectedDetail || this.adjustingStock || this.stockQty < 1) return;
+    this.adjustingStock = true;
+    this.additionService.addStock(this.selectedDetail.id, { unit: this.stockQty }).subscribe({
+      next: () => {
+        this.notificationService.showSuccess(`+${this.stockQty} unidades añadidas`);
+        this.adjustingStock = false;
+        this.loadAdditions();
+        this.viewDetail(this.selectedDetail!.id);
+      },
+      error: () => { this.adjustingStock = false; }
+    });
+  }
+
+  discountStock(): void {
+    if (!this.selectedDetail || this.adjustingStock || this.stockQty < 1) return;
+    this.adjustingStock = true;
+    this.additionService.discountStock(this.selectedDetail.id, { unit: this.stockQty }).subscribe({
+      next: () => {
+        this.notificationService.showSuccess(`-${this.stockQty} unidades descontadas`);
+        this.adjustingStock = false;
+        this.loadAdditions();
+        this.viewDetail(this.selectedDetail!.id);
+      },
+      error: () => { this.adjustingStock = false; }
+    });
   }
 
   deleteAddition(id: string): void {

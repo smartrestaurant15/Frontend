@@ -156,6 +156,14 @@ export class AuditLogsComponent implements OnInit {
   }
 
   navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/admin/dashboard']);
+  }
+
+  get failedCount(): number {
+    return this.logs.filter(l => !l.success).length;
+  }
+
+  get criticalCount(): number {
+    return this.logs.filter(l => l.critical).length;
   }
 }

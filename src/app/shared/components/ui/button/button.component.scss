@@ -1,33 +1,254 @@
 @import 'styles/variables';
 @import 'styles/mixins';
 
-.btn {
-  padding: $spacing-sm $spacing-md;
-  border: none;
-  border-radius: $border-radius-sm;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: $transition-fast;
+// =============================================================================
+// Button Component — SmartRestaurante
+// Cambios: variantes ghost y outline añadidas, cubic-bezier 0.2s en todas,
+// disabled elegante con pointer-events:none, tamaños sm/md(default)/lg
+// =============================================================================
 
-  &:disabled {
+// -----------------------------------------------------------------------------
+// BASE
+// -----------------------------------------------------------------------------
+.btn {
+  // Layout
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+
+  // Tipografía
+  font-family: $font-family-base;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-base; // 14px — tamaño md por defecto
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+
+  // Forma
+  border: 1.5px solid transparent;
+  border-radius: $radius-md; // 8px
+  cursor: pointer;
+  text-decoration: none;
+  outline: none;
+  user-select: none;
+
+  // Tamaño md — height 40px (default)
+  height: 40px;
+  padding: 0 $spacing-4; // 0 16px
+
+  // Transición estándar con cubic-bezier consistente
+  transition:
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color     0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color            0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow       0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform        0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity          0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Focus accesible
+  &:focus-visible {
+    box-shadow: $shadow-focus-blue;
+    outline: none;
+  }
+
+  // Estado activo — pequeño "press"
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  // -----------------------------------------------------------------------
+  // ESTADO DISABLED — más elegante que sólo opacity
+  // -----------------------------------------------------------------------
+  &:disabled,
+  &[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
+    pointer-events: none; // Previene cualquier interacción
+    transform: none !important;
+    box-shadow: none !important;
   }
 
-  &-primary {
-    @include button-variant($primary-color);
+  // -----------------------------------------------------------------------
+  // TAMAÑOS
+  // -----------------------------------------------------------------------
+
+  // sm — 32px de altura
+  &.btn-sm {
+    height: 32px;
+    padding: 0 $spacing-3; // 0 12px
+    font-size: $font-size-sm; // 13px
+    border-radius: $radius-md;
+    gap: $spacing-1;
   }
 
-  &-secondary {
-    @include button-variant($secondary-color);
+  // md es el default (40px) — no requiere clase extra
+
+  // lg — 48px de altura
+  &.btn-lg {
+    height: 48px;
+    padding: 0 $spacing-6; // 0 24px
+    font-size: $font-size-lg; // 16px
+    border-radius: $radius-md;
+    gap: $spacing-3;
   }
 
-  &-danger {
-    @include button-variant($danger-color);
+  // -----------------------------------------------------------------------
+  // VARIANTE: PRIMARY — fondo $primary-color (#1e293b)
+  // -----------------------------------------------------------------------
+  &.btn-primary {
+    background: $primary-color;
+    border-color: $primary-color;
+    color: $text-inverse;
+
+    &:hover:not(:disabled) {
+      background: $gray-700;
+      border-color: $gray-700;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(30, 41, 59, 0.3);
+    }
   }
 
-  &-success {
-    @include button-variant($success-color);
+  // -----------------------------------------------------------------------
+  // VARIANTE: SECONDARY — azul (#3b82f6)
+  // -----------------------------------------------------------------------
+  &.btn-secondary {
+    background: $secondary-color;
+    border-color: $secondary-color;
+    color: $text-inverse;
+    box-shadow: $shadow-blue-glow;
+
+    &:hover:not(:disabled) {
+      background: darken(#3b82f6, 8%);
+      border-color: darken(#3b82f6, 8%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // VARIANTE: DANGER — rojo (#ef4444)
+  // -----------------------------------------------------------------------
+  &.btn-danger {
+    background: $danger-color;
+    border-color: $danger-color;
+    color: $text-inverse;
+
+    &:hover:not(:disabled) {
+      background: darken(#ef4444, 8%);
+      border-color: darken(#ef4444, 8%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // VARIANTE: SUCCESS — emerald (#10b981)
+  // -----------------------------------------------------------------------
+  &.btn-success {
+    background: $success-color;
+    border-color: $success-color;
+    color: $text-inverse;
+
+    &:hover:not(:disabled) {
+      background: darken(#10b981, 6%);
+      border-color: darken(#10b981, 6%);
+      transform: translateY(-1px);
+      box-shadow: $shadow-emerald-glow;
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // VARIANTE: OUTLINE — borde visible, sin relleno
+  // Nuevo: bordea con el color del acento, fill en hover
+  // -----------------------------------------------------------------------
+  &.btn-outline {
+    background: transparent;
+    border-color: $secondary-color;
+    color: $secondary-color;
+
+    &:hover:not(:disabled) {
+      background: $secondary-color;
+      color: $text-inverse;
+      transform: translateY(-1px);
+      box-shadow: $shadow-blue-glow;
+    }
+
+    // Outline peligro
+    &.btn-outline-danger {
+      border-color: $danger-color;
+      color: $danger-color;
+
+      &:hover:not(:disabled) {
+        background: $danger-color;
+        color: $text-inverse;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // VARIANTE: GHOST — sin borde ni relleno, sólo texto con hover suave
+  // Nuevo: para acciones secundarias en áreas congestionadas
+  // -----------------------------------------------------------------------
+  &.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: $text-secondary;
+
+    &:hover:not(:disabled) {
+      background: $gray-100;
+      color: $primary-color;
+      border-color: transparent;
+    }
+
+    // Ghost peligro
+    &.btn-ghost-danger {
+      color: $danger-color;
+
+      &:hover:not(:disabled) {
+        background: #fee2e2;
+        color: darken(#ef4444, 10%);
+      }
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // ESTADO LOADING (spinner inline)
+  // -----------------------------------------------------------------------
+  &.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.85;
+
+    // Texto se hace transparente, spinner aparece
+    .btn-label { opacity: 0; }
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: btn-spin 0.65s linear infinite;
+    }
+  }
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+// -----------------------------------------------------------------------------
+// ACCESIBILIDAD — prefers-reduced-motion
+// -----------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none !important;
+
+    &:hover { transform: none !important; }
+    &.btn-loading::after { animation: none !important; }
   }
 }

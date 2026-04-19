@@ -17,6 +17,17 @@ export class DrinkManagementComponent implements OnInit {
   pageSize = 10;
   isModalOpen = false;
   selectedDrinkId: string | null = null;
+  searchTerm = '';
+
+  get filteredDrinks(): DrinkResponse[] {
+    if (!this.searchTerm.trim()) return this.drinks;
+    const term = this.searchTerm.toLowerCase();
+    return this.drinks.filter(d => d.name.toLowerCase().includes(term));
+  }
+
+  get alcoholCount(): number {
+    return this.drinks.filter((d: any) => d.alcohol).length;
+  }
 
   constructor(
     private drinkService: DrinkService,
@@ -46,7 +57,7 @@ export class DrinkManagementComponent implements OnInit {
   }
 
   viewDrinkDetail(id: string): void {
-    this.router.navigate(['/inventory/drinks', id]);
+    this.router.navigate(['/admin/inventory/drinks', id]);
   }
 
   loadDrinks(): void {

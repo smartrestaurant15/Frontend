@@ -17,6 +17,13 @@ export class DishManagementComponent implements OnInit {
   pageSize = 10;
   isModalOpen = false;
   selectedDishId: string | null = null;
+  searchTerm = '';
+
+  get filteredDishes(): DishResponse[] {
+    if (!this.searchTerm.trim()) return this.dishes;
+    const term = this.searchTerm.toLowerCase();
+    return this.dishes.filter(d => d.name.toLowerCase().includes(term));
+  }
 
   constructor(
     private dishService: DishService,
@@ -65,7 +72,7 @@ export class DishManagementComponent implements OnInit {
   }
 
   viewDishDetail(id: string): void {
-    this.router.navigate(['/inventory/dishes', id]);
+    this.router.navigate(['/admin/inventory/dishes', id]);
   }
 
   loadDishes(): void {

@@ -12,6 +12,8 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { TermsComponent } from './components/terms/terms.component';
+import { UnlockAccountComponent } from './components/unlock-account/unlock-account.component';
 import { SocialLoginModule, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 
 @NgModule({
@@ -22,7 +24,9 @@ import { SocialLoginModule, GoogleSigninButtonModule } from '@abacritt/angularx-
     ForgotPasswordComponent,
     ResetPasswordComponent,
     ChangePasswordComponent,
-    ProfileComponent
+    ProfileComponent,
+    TermsComponent,
+    UnlockAccountComponent
   ],
   imports: [
     CommonModule,

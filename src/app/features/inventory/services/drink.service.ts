@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClientService } from '@core/services/http-client.service';
-import { 
-  Drink, 
-  CreateDrinkDTO, 
+import {
+  Drink,
+  CreateDrinkDTO,
   UpdateDrinkDTO,
   DrinkResponse,
-  DrinkDetailResponse
+  DrinkDetailResponse,
+  DrinkStockDTO
 } from '../models/drink.model';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -55,5 +56,21 @@ export class DrinkService {
    */
   deleteDrink(id: string): Observable<ApiResponse<string>> {
     return this.httpClient.delete<ApiResponse<string>>(`/drinks/${id}`);
+  }
+
+  /**
+   * Añadir unidades a bebida
+   * PATCH /api/drinks/{id}/add
+   */
+  addStock(id: string, dto: DrinkStockDTO): Observable<ApiResponse<string>> {
+    return this.httpClient.patch<ApiResponse<string>>(`/drinks/${id}/add`, dto);
+  }
+
+  /**
+   * Descontar unidades de bebida
+   * PATCH /api/drinks/{id}/discount
+   */
+  discountStock(id: string, dto: DrinkStockDTO): Observable<ApiResponse<string>> {
+    return this.httpClient.patch<ApiResponse<string>>(`/drinks/${id}/discount`, dto);
   }
 }

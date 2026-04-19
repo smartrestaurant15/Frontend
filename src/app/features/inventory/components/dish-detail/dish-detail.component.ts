@@ -55,9 +55,8 @@ export class DishDetailComponent implements OnInit {
 
   editDish(): void {
     if (this.dish) {
-      // Navegar a la lista de platos con el ID como query param para abrir el modal de edición
-      this.router.navigate(['/inventory/dishes'], { 
-        queryParams: { edit: this.dish.id } 
+      this.router.navigate(['/admin/inventory/dishes'], {
+        queryParams: { edit: this.dish.id }
       });
     }
   }
@@ -81,7 +80,7 @@ export class DishDetailComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/inventory/dishes']);
+    this.router.navigate(['/admin/inventory/dishes']);
   }
 
   onImageError(event: Event): void {

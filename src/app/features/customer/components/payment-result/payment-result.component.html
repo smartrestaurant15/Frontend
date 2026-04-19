@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-[#0e0e0e] flex items-center justify-center px-6">
+  <div class="max-w-sm w-full text-center">
+
+    <!-- Loading -->
+    <div *ngIf="status === 'loading'" class="space-y-4">
+      <div class="w-12 h-12 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin mx-auto"></div>
+      <p class="font-label text-xs uppercase tracking-widest text-[#998f81]">Confirmando pago...</p>
+    </div>
+
+    <!-- Success -->
+    <div *ngIf="status === 'success'" class="space-y-6">
+      <div class="w-16 h-16 bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-3xl text-emerald-400" style="font-variation-settings:'FILL' 1">check_circle</span>
+      </div>
+      <div>
+        <h1 class="font-headline text-2xl text-[#e5e2e1] mb-2">Pago exitoso</h1>
+        <p class="font-body text-sm text-[#998f81]">{{ message }}</p>
+      </div>
+      <button (click)="goToOrders()" class="w-full py-3 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity">
+        Ver mis pedidos
+      </button>
+    </div>
+
+    <!-- Pending -->
+    <div *ngIf="status === 'pending'" class="space-y-6">
+      <div class="w-16 h-16 bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-3xl text-amber-400">hourglass_empty</span>
+      </div>
+      <div>
+        <h1 class="font-headline text-2xl text-[#e5e2e1] mb-2">Pago en proceso</h1>
+        <p class="font-body text-sm text-[#998f81]">{{ message }}</p>
+      </div>
+      <button (click)="goToOrders()" class="w-full py-3 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity">
+        Ver mis pedidos
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="status === 'error'" class="space-y-6">
+      <div class="w-16 h-16 bg-red-400/10 border border-red-400/30 flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-3xl text-red-400">error</span>
+      </div>
+      <div>
+        <h1 class="font-headline text-2xl text-[#e5e2e1] mb-2">Error en el pago</h1>
+        <p class="font-body text-sm text-[#998f81]">{{ message }}</p>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="goToMenu()" class="flex-1 py-3 border border-[#4d463a]/40 font-label text-xs uppercase tracking-wider text-[#998f81] hover:text-[#e5e2e1] transition-colors">
+          Volver al menú
+        </button>
+        <button (click)="goToOrders()" class="flex-1 py-3 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold hover:opacity-90 transition-opacity">
+          Mis pedidos
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,86 +1,135 @@
-<div class="dish-detail-container">
-  <app-loading-spinner *ngIf="loading" size="large"></app-loading-spinner>
+<div class="min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body px-8 py-8">
 
-  <div *ngIf="!loading && dish" class="detail-card">
-    <div class="header">
-      <h1>{{ dish.name }}</h1>
-      <div class="actions">
-        <app-button variant="secondary" (clicked)="editDish()">Editar</app-button>
-        <app-button variant="danger" (clicked)="deleteDish()">Eliminar</app-button>
-        <app-button variant="primary" (clicked)="goBack()">Volver</app-button>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <div class="w-8 h-8 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && dish">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack()"
+                class="flex items-center gap-2 text-[#998f81] hover:text-primary transition-colors font-label text-xs uppercase tracking-widest">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          Platos
+        </button>
+        <div class="h-4 w-px bg-[#4d463a]/40"></div>
+        <h1 class="font-headline text-2xl italic text-primary">{{ dish.name }}</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <button (click)="editDish()"
+                class="flex items-center gap-2 px-5 py-2.5 border border-[#4d463a]/40 text-[#d0c5b5] hover:border-primary/40 hover:text-primary transition-colors font-label text-xs uppercase tracking-widest rounded-sm">
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Editar
+        </button>
+        <button (click)="deleteDish()"
+                class="flex items-center gap-2 px-5 py-2.5 border border-red-900/40 text-red-400 hover:bg-red-900/20 transition-colors font-label text-xs uppercase tracking-widest rounded-sm">
+          <span class="material-symbols-outlined text-sm">delete</span>
+          Eliminar
+        </button>
       </div>
     </div>
 
-    <div class="detail-content">
-      <!-- Galería de fotos -->
-      <div class="photos-section" *ngIf="dish.photos && dish.photos.length > 0">
-        <div class="main-photo">
-          <img 
-            [src]="dish.photos[selectedPhotoIndex]" 
-            [alt]="dish.name"
-            (error)="onImageError($event)">
-        </div>
-        <div class="photo-thumbnails" *ngIf="dish.photos.length > 1">
-          <div 
-            class="thumbnail" 
-            *ngFor="let photo of dish.photos; let i = index"
-            [class.active]="i === selectedPhotoIndex"
-            (click)="selectPhoto(i)">
-            <img [src]="photo" [alt]="dish.name" (error)="onImageError($event)">
+    <!-- Content grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- LEFT: Image gallery -->
+      <div class="space-y-4">
+        <div class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden">
+          <div class="aspect-square">
+            <img *ngIf="dish.photos && dish.photos.length"
+                 [src]="dish.photos[selectedPhotoIndex]"
+                 [alt]="dish.name"
+                 class="w-full h-full object-cover"
+                 (error)="onImageError($event)">
+            <div *ngIf="!dish.photos || !dish.photos.length"
+                 class="w-full h-full flex flex-col items-center justify-center text-[#998f81]/40">
+              <span class="material-symbols-outlined text-5xl mb-2">restaurant</span>
+              <p class="font-label text-[10px] uppercase tracking-widest">Sin imagen</p>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Sin foto -->
-      <div class="no-photo" *ngIf="!dish.photos || dish.photos.length === 0">
-        <div class="placeholder">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
-          <p>Sin imagen</p>
-        </div>
-      </div>
-
-      <!-- Información del plato -->
-      <div class="info-section">
-        <div class="detail-row">
-          <span class="label">Descripción:</span>
-          <span class="value">{{ dish.description }}</span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="label">Precio:</span>
-          <span class="value price">{{ dish.price }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="dish.categoryName">
-          <span class="label">Categoría:</span>
-          <span class="value">{{ dish.categoryName }}</span>
-        </div>
-
-        <!-- Ingredientes -->
-        <div class="detail-row ingredients-section" *ngIf="dish.ingredients && dish.ingredients.length > 0">
-          <span class="label">Ingredientes ({{ dish.ingredients.length }}):</span>
-          <div class="ingredients-list">
-            <div class="ingredient-item" *ngFor="let ingredient of dish.ingredients; let i = index">
-              <span class="ingredient-name">
-                <span class="ingredient-number">{{ i + 1 }}.</span>
-                {{ getIngredientName(ingredient) }}
-              </span>
-              <span class="ingredient-quantity">
-                {{ getIngredientQuantity(ingredient) }} {{ getIngredientUnit(ingredient) }}
-              </span>
+          <div *ngIf="dish.photos && dish.photos.length > 1"
+               class="flex gap-2 p-3 border-t border-[#4d463a]/10">
+            <div *ngFor="let photo of dish.photos; let i = index"
+                 class="w-12 h-12 overflow-hidden cursor-pointer border-2 transition-colors"
+                 [class.border-primary]="i === selectedPhotoIndex"
+                 [class.border-transparent]="i !== selectedPhotoIndex"
+                 (click)="selectPhoto(i)">
+              <img [src]="photo" [alt]="dish.name" class="w-full h-full object-cover">
             </div>
           </div>
         </div>
 
-        <div class="detail-row" *ngIf="!dish.ingredients || dish.ingredients.length === 0">
-          <span class="label">Ingredientes:</span>
-          <span class="value no-data">No hay ingredientes registrados</span>
+        <!-- Category badge -->
+        <div *ngIf="dish.categoryName" class="bg-[#111111] border border-[#4d463a]/15 p-5">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Categoría</p>
+          <span class="inline-flex items-center gap-2 text-[#e5e2e1] font-body text-sm">
+            <span class="material-symbols-outlined text-primary text-base">category</span>
+            {{ dish.categoryName }}
+          </span>
         </div>
       </div>
+
+      <!-- RIGHT: Info + ingredients -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Main info -->
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-8">
+          <div class="flex items-start justify-between mb-6">
+            <h2 class="font-headline text-3xl font-light text-[#e5e2e1]">{{ dish.name }}</h2>
+            <div class="text-right">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Precio</p>
+              <p class="font-headline text-3xl text-primary">
+                {{ dish.price | currency:'COP':'symbol':'1.0-0' }}
+              </p>
+            </div>
+          </div>
+          <p class="font-body text-[#d0c5b5] font-light leading-relaxed">{{ dish.description }}</p>
+        </div>
+
+        <!-- Ingredients -->
+        <div class="bg-[#111111] border border-[#4d463a]/15 p-8">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-headline text-lg italic text-primary">Ingredientes</h3>
+            <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">
+              {{ dish.ingredients ? dish.ingredients.length : 0 }} items
+            </span>
+          </div>
+
+          <div *ngIf="dish.ingredients && dish.ingredients.length > 0" class="space-y-3">
+            <div *ngFor="let ingredient of dish.ingredients; let i = index"
+                 class="flex items-center justify-between py-3 border-b border-[#4d463a]/10 last:border-0">
+              <div class="flex items-center gap-3">
+                <span class="font-label text-[10px] text-[#998f81]/60 w-5">{{ i + 1 }}</span>
+                <span class="font-body text-sm text-[#e5e2e1]">{{ getIngredientName(ingredient) }}</span>
+              </div>
+              <span class="font-body text-sm text-[#d0c5b5]">
+                {{ getIngredientQuantity(ingredient) }} {{ getIngredientUnit(ingredient) }}
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="!dish.ingredients || dish.ingredients.length === 0"
+               class="text-center py-8 text-[#998f81]/40">
+            <span class="material-symbols-outlined text-3xl block mb-2">no_food</span>
+            <p class="font-body text-sm">Sin ingredientes registrados</p>
+          </div>
+        </div>
+
+      </div>
     </div>
+
+  </ng-container>
+
+  <!-- Not found -->
+  <div *ngIf="!loading && !dish" class="flex flex-col items-center justify-center h-64 text-[#998f81]/50">
+    <span class="material-symbols-outlined text-4xl mb-3">restaurant</span>
+    <p class="font-body text-sm">Plato no encontrado</p>
+    <button (click)="goBack()" class="mt-4 text-primary hover:text-[#e6c487] font-label text-xs uppercase tracking-widest transition-colors">
+      Volver a platos
+    </button>
   </div>
+
 </div>

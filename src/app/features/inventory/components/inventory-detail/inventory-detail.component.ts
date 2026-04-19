@@ -55,14 +55,14 @@ export class InventoryDetailComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.notificationService.showError('Error al cargar el producto');
-        this.router.navigate(['/inventory/list']);
+        this.router.navigate(['/admin/inventory/list']);
       }
     });
   }
 
   editProduct(): void {
     if (this.product) {
-      this.router.navigate(['/inventory/edit', this.product.id]);
+      this.router.navigate(['/admin/inventory/edit', this.product.id]);
     }
   }
 
@@ -72,7 +72,7 @@ export class InventoryDetailComponent implements OnInit {
         next: (response) => {
           if (!response.error) {
             this.notificationService.showSuccess('Producto eliminado exitosamente');
-            this.router.navigate(['/inventory/list']);
+            this.router.navigate(['/admin/inventory/list']);
           } else {
             this.notificationService.showError(response.message as string);
           }
@@ -137,7 +137,7 @@ export class InventoryDetailComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/inventory/list']);
+    this.router.navigate(['/admin/inventory/list']);
   }
 
   // Manejar error de imagen

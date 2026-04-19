@@ -1,128 +1,151 @@
-<div class="user-management-container">
+<div class="min-h-screen bg-[#0e0e0e] text-[#e5e2e1] font-body px-8 py-8">
+
   <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <button class="btn-back" (click)="navigateToDashboard()">
-        <i class="fas fa-arrow-left"></i>
-      </button>
-      <h1>Gestión de Usuarios</h1>
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Administración</p>
+      <h1 class="font-headline text-2xl italic text-[#e5e2e1]">Gestión de Usuarios</h1>
     </div>
-    <button class="btn-primary" (click)="openCreateModal()">
-      <i class="fas fa-plus"></i>
+    <button (click)="openCreateModal()"
+            class="btn-metallic text-on-primary font-label text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
+      <span class="material-symbols-outlined text-sm">person_add</span>
       Registrar Usuario
     </button>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-section">
-    <div class="filter-group">
-      <label>Rol:</label>
-      <select [(ngModel)]="selectedRole" (change)="onRoleFilterChange()" class="filter-select">
+  <!-- Filters -->
+  <div class="flex flex-wrap gap-4 mb-6 p-5 bg-[#111111] border border-[#4d463a]/15">
+    <div class="flex flex-col gap-1.5">
+      <label class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Rol</label>
+      <select [(ngModel)]="selectedRole" (change)="onRoleFilterChange()"
+              class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-1.5 px-0 min-w-[160px]">
         <option [ngValue]="null">Todos los roles</option>
         <option *ngFor="let role of roles" [ngValue]="role.value">{{ role.label }}</option>
       </select>
     </div>
-
-    <div class="filter-group">
-      <label>Estado:</label>
-      <select [(ngModel)]="selectedStatus" (change)="onStatusFilterChange()" class="filter-select">
+    <div class="flex flex-col gap-1.5">
+      <label class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Estado</label>
+      <select [(ngModel)]="selectedStatus" (change)="onStatusFilterChange()"
+              class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-1.5 px-0 min-w-[160px]">
         <option [ngValue]="null">Todos los estados</option>
         <option *ngFor="let status of statuses" [ngValue]="status.value">{{ status.label }}</option>
       </select>
     </div>
-
-    <button class="btn-secondary" (click)="clearFilters()">
-      <i class="fas fa-times"></i>
-      Limpiar Filtros
-    </button>
+    <div class="flex items-end">
+      <button (click)="clearFilters()"
+              class="flex items-center gap-2 px-4 py-2 border border-[#4d463a]/30 text-[#998f81] hover:text-primary hover:border-primary/30 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm">
+        <span class="material-symbols-outlined text-sm">filter_alt_off</span>
+        Limpiar
+      </button>
+    </div>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Cargando usuarios...</p>
+  <div *ngIf="loading" class="flex items-center justify-center h-32">
+    <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
   </div>
 
-  <!-- Tabla de usuarios -->
-  <div *ngIf="!loading" class="table-container">
-    <table class="users-table">
+  <!-- Table -->
+  <div *ngIf="!loading" class="bg-[#111111] border border-[#4d463a]/15 overflow-x-auto">
+    <table class="w-full text-left border-collapse min-w-[900px]">
       <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Estado</th>
-          <th>Email Verificado</th>
-          <th>Cambio de Contraseña</th>
-          <th>Fecha de Creación</th>
-          <th>Acciones</th>
+        <tr class="bg-[#0a0a0a] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+          <th class="px-4 py-4 font-medium">Usuario</th>
+          <th class="px-4 py-4 font-medium">Email</th>
+          <th class="px-4 py-4 font-medium">Rol</th>
+          <th class="px-4 py-4 font-medium">Estado</th>
+          <th class="px-4 py-4 font-medium text-center">Verificado</th>
+          <th class="px-4 py-4 font-medium">Creado</th>
+          <th class="px-4 py-4 font-medium text-right">Acciones</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td>{{ user.id }}</td>
-          <td>{{ user.firstName }} {{ user.lastName }}</td>
-          <td>{{ user.email }}</td>
-          <td>
-            <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
+      <tbody class="divide-y divide-[#4d463a]/5">
+        <tr *ngFor="let user of users" class="hover:bg-[#1a1a1a] transition-colors">
+
+          <td class="px-4 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center flex-shrink-0">
+                <span class="font-label text-[10px] text-primary font-bold uppercase">
+                  {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                </span>
+              </div>
+              <p class="font-body text-sm text-[#e5e2e1]">{{ user.firstName }} {{ user.lastName }}</p>
+            </div>
+          </td>
+
+          <td class="px-4 py-4">
+            <span class="font-body text-sm text-[#d0c5b5]">{{ user.email }}</span>
+          </td>
+
+          <td class="px-4 py-4">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full font-label text-[9px] font-bold uppercase tracking-wider"
+                  [ngClass]="getRoleBadgeClass(user.role)">
               {{ user.roleDisplayName }}
             </span>
           </td>
-          <td>
-            <span class="badge" [ngClass]="getStatusBadgeClass(user.status)">
+
+          <td class="px-4 py-4">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full font-label text-[9px] font-bold uppercase tracking-wider"
+                  [ngClass]="getStatusBadgeClass(user.status)">
               {{ user.statusDisplayName }}
             </span>
           </td>
-          <td>
-            <i *ngIf="user.isEmailVerified" class="fas fa-check-circle text-success"></i>
-            <i *ngIf="!user.isEmailVerified" class="fas fa-times-circle text-danger"></i>
+
+          <td class="px-4 py-4 text-center">
+            <span class="material-symbols-outlined text-base"
+                  [class.text-primary]="user.isEmailVerified"
+                  [class.text-[#4d463a]]="!user.isEmailVerified">
+              {{ user.isEmailVerified ? 'verified' : 'cancel' }}
+            </span>
           </td>
-          <td>
-            <span *ngIf="user.requiresPasswordChange" class="badge badge-warning">Requerido</span>
-            <span *ngIf="!user.requiresPasswordChange" class="badge badge-success">No requerido</span>
+
+          <td class="px-4 py-4">
+            <span class="font-body text-xs text-[#998f81]">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
           </td>
-          <td>{{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td class="actions-cell">
-            <button class="btn-action btn-view" (click)="viewUserDetail(user.id)">
-              <i class="fas fa-eye"></i>
-              <span>Ver</span>
-            </button>
-            <button class="btn-action btn-edit" (click)="openEditModal(user.id)">
-              <i class="fas fa-edit"></i>
-              <span>Editar</span>
-            </button>
-            <button class="btn-action btn-role" (click)="openRoleModal(user)">
-              <i class="fas fa-user-tag"></i>
-              <span>Rol</span>
-            </button>
-            <button 
-              *ngIf="user.status === UserStatus.ACTIVE" 
-              class="btn-action btn-deactivate" 
-              (click)="deactivateUser(user.id)">
-              <i class="fas fa-ban"></i>
-              <span>Desactivar</span>
-            </button>
-            <button 
-              *ngIf="user.status === UserStatus.INACTIVE" 
-              class="btn-action btn-activate" 
-              (click)="activateUser(user.id)">
-              <i class="fas fa-check-circle"></i>
-              <span>Activar</span>
-            </button>
+
+          <td class="px-4 py-4 text-right">
+            <div class="flex items-center justify-end gap-2 flex-wrap">
+              <button (click)="viewUserDetail(user.id)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#4d463a]/30 text-[#60a5fa] hover:border-[#60a5fa]/40 transition-colors font-label text-[9px] uppercase tracking-widest rounded-sm">
+                <span class="material-symbols-outlined text-sm">visibility</span>
+                Ver
+              </button>
+              <button (click)="openEditModal(user.id)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#4d463a]/30 text-[#fb923c] hover:border-[#fb923c]/40 transition-colors font-label text-[9px] uppercase tracking-widest rounded-sm">
+                <span class="material-symbols-outlined text-sm">edit</span>
+                Editar
+              </button>
+              <button (click)="openRoleModal(user)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#4d463a]/30 text-[#a78bfa] hover:border-[#a78bfa]/40 transition-colors font-label text-[9px] uppercase tracking-widest rounded-sm">
+                <span class="material-symbols-outlined text-sm">manage_accounts</span>
+                Rol
+              </button>
+              <button *ngIf="user.status === UserStatus.ACTIVE" (click)="deactivateUser(user.id)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#4d463a]/30 text-red-400 hover:border-red-400/40 transition-colors font-label text-[9px] uppercase tracking-widest rounded-sm">
+                <span class="material-symbols-outlined text-sm">block</span>
+                Desactivar
+              </button>
+              <button *ngIf="user.status === UserStatus.INACTIVE" (click)="activateUser(user.id)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#4d463a]/30 text-green-400 hover:border-green-400/40 transition-colors font-label text-[9px] uppercase tracking-widest rounded-sm">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                Activar
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="users.length === 0">
+          <td colspan="7" class="px-4 py-16 text-center text-[#998f81]/50">
+            <span class="material-symbols-outlined text-3xl block mb-2">group</span>
+            <p class="font-body text-sm">No se encontraron usuarios</p>
           </td>
         </tr>
       </tbody>
     </table>
-
-    <div *ngIf="users.length === 0" class="empty-state">
-      <i class="fas fa-users"></i>
-      <p>No se encontraron usuarios</p>
-    </div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Create/Edit Modal -->
 <app-user-form-modal
   *ngIf="isModalOpen"
   [userId]="selectedUserId"
@@ -130,43 +153,35 @@
   (saved)="onUserSaved()">
 </app-user-form-modal>
 
-<!-- Modal de Cambio de Rol -->
-<div *ngIf="isRoleModalOpen" class="modal-overlay" (click)="closeRoleModal()">
-  <div class="modal-content role-modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>Cambiar Rol de Usuario</h2>
-      <button class="btn-close" (click)="closeRoleModal()">
-        <i class="fas fa-times"></i>
+<!-- Role change modal -->
+<div *ngIf="isRoleModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" (click)="closeRoleModal()">
+  <div class="bg-[#1c1b1b] border border-[#4d463a]/30 rounded-sm w-full max-w-md shadow-2xl" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between px-8 py-6 border-b border-[#4d463a]/20">
+      <h3 class="font-headline text-xl font-light italic text-primary">Cambiar Rol</h3>
+      <button (click)="closeRoleModal()" class="text-[#998f81] hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    
-    <div class="modal-body">
-      <div class="user-info">
-        <p><strong>Usuario:</strong> {{ selectedUserForRoleChange?.firstName }} {{ selectedUserForRoleChange?.lastName }}</p>
-        <p><strong>Email:</strong> {{ selectedUserForRoleChange?.email }}</p>
-        <p><strong>Rol actual:</strong> 
-          <span class="badge" [ngClass]="getRoleBadgeClass(selectedUserForRoleChange!.role)">
-            {{ selectedUserForRoleChange?.roleDisplayName }}
-          </span>
-        </p>
+    <div class="px-8 py-6 space-y-5">
+      <div class="bg-[#2a2a2a] p-4 space-y-1">
+        <p class="font-body text-sm text-[#e5e2e1]">{{ selectedUserForRoleChange?.firstName }} {{ selectedUserForRoleChange?.lastName }}</p>
+        <p class="font-body text-xs text-[#998f81]">{{ selectedUserForRoleChange?.email }}</p>
       </div>
-
-      <div class="form-group">
-        <label for="newRole">Nuevo Rol:</label>
-        <select id="newRole" [(ngModel)]="newRole" class="form-control">
-          <option *ngFor="let role of roles" [ngValue]="role.value">
-            {{ role.label }}
-          </option>
+      <div class="flex flex-col gap-2">
+        <label class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Nuevo Rol</label>
+        <select [(ngModel)]="newRole"
+                class="bg-[#1a1a1a] border-0 border-b border-[#4d463a]/40 focus:border-primary focus:ring-0 text-sm text-[#e5e2e1] py-2 px-0">
+          <option *ngFor="let role of roles" [ngValue]="role.value">{{ role.label }}</option>
         </select>
       </div>
     </div>
-
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeRoleModal()">
+    <div class="flex justify-end gap-3 px-8 py-5 border-t border-[#4d463a]/20">
+      <button (click)="closeRoleModal()"
+              class="px-5 py-2.5 border border-[#4d463a]/40 text-[#d0c5b5] hover:border-primary/40 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm">
         Cancelar
       </button>
-      <button class="btn-primary" (click)="changeUserRole()" [disabled]="!newRole">
-        <i class="fas fa-save"></i>
+      <button (click)="changeUserRole()" [disabled]="!newRole"
+              class="btn-metallic text-on-primary px-5 py-2.5 font-label text-[10px] uppercase tracking-widest rounded-sm disabled:opacity-40">
         Cambiar Rol
       </button>
     </div>
