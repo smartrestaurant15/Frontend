@@ -27,6 +27,14 @@
         Nueva Orden
       </button>
 
+      <!-- Perfil -->
+      <a [routerLink]="'/auth/profile'"
+        class="flex items-center gap-1.5 px-3 py-2 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/40 transition-colors text-xs font-label uppercase tracking-wider"
+        title="Ver perfil">
+        <span class="material-symbols-outlined text-base leading-none">account_circle</span>
+        <span class="hidden sm:inline">Perfil</span>
+      </a>
+
       <!-- Logout -->
       <button
         (click)="logout()"
@@ -237,6 +245,126 @@
                 <p *ngIf="item.notes" class="font-body text-[#998f81] text-xs mt-0.5 italic">"{{ item.notes }}"</p>
               </div>
               <span class="font-headline text-[#998f81] text-xs tabular-nums shrink-0">${{ item.totalPrice | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editar notas -->
+        <div *ngIf="orderDetail.status === 'PENDING' || orderDetail.status === 'IN_PROGRESS'">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Notas de la orden</p>
+          <div *ngIf="!editingNotes" class="flex items-start justify-between gap-2">
+            <p class="font-body text-xs text-[#d0c5b5] italic flex-1">
+              {{ orderDetail.notes || 'Sin notas' }}
+            </p>
+            <button (click)="startEditNotes()" class="shrink-0 text-[#998f81] hover:text-[#e6c487] transition-colors">
+              <span class="material-symbols-outlined text-base">edit</span>
+            </button>
+          </div>
+          <div *ngIf="editingNotes" class="space-y-2">
+            <textarea
+              [(ngModel)]="notesText"
+              rows="3"
+              placeholder="Ej: sin cebolla, extra salsa..."
+              class="w-full bg-[#0e0e0e] border border-[#4d463a]/40 focus:border-[#c9a96e] outline-none text-[#e5e2e1] text-xs font-body px-3 py-2 resize-none transition-colors">
+            </textarea>
+            <div class="flex gap-2">
+              <button (click)="saveNotes()" [disabled]="savingNotes"
+                class="flex-1 py-1.5 bg-[#c9a96e]/10 border border-[#c9a96e]/40 text-[#e6c487] font-label text-[10px] uppercase tracking-wider hover:bg-[#c9a96e]/20 transition-colors disabled:opacity-40">
+                {{ savingNotes ? 'Guardando…' : 'Guardar' }}
+              </button>
+              <button (click)="cancelEditNotes()"
+                class="flex-1 py-1.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-wider hover:text-[#d0c5b5] transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editar items (solo PENDING) -->
+        <div *ngIf="orderDetail.status === 'PENDING'" class="border-t border-[#4d463a]/20 pt-4">
+
+          <!-- Cabecera sección -->
+          <div class="flex items-center justify-between mb-3">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Items de la orden</p>
+            <button *ngIf="!editingItems" (click)="startEditItems()"
+              class="flex items-center gap-1 text-[#c9a96e] hover:text-[#e6c487] transition-colors font-label text-[10px] uppercase tracking-wider">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              Editar
+            </button>
+          </div>
+
+          <!-- Modo edición -->
+          <div *ngIf="editingItems" class="space-y-3">
+
+            <!-- Lista de items editables -->
+            <div *ngFor="let item of editItemsList" class="flex items-center gap-2 px-2 py-1.5 bg-[#0e0e0e] border border-[#4d463a]/20">
+              <span class="flex-1 font-body text-xs text-[#d0c5b5] truncate">{{ item.productName }}</span>
+              <div class="flex items-center gap-1 shrink-0">
+                <button (click)="decreaseQty(item)" class="w-5 h-5 flex items-center justify-center border border-[#4d463a]/40 text-[#998f81] hover:text-red-400 hover:border-red-400/40 transition-colors text-xs">−</button>
+                <span class="w-5 text-center font-headline text-xs text-[#e5e2e1] tabular-nums">{{ item.quantity }}</span>
+                <button (click)="increaseQty(item)" class="w-5 h-5 flex items-center justify-center border border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/40 transition-colors text-xs">+</button>
+              </div>
+              <button (click)="removeEditItem(item)" class="text-[#4d463a] hover:text-red-400 transition-colors ml-1">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+
+            <div *ngIf="editItemsList.length === 0" class="text-center py-3">
+              <p class="font-label text-[10px] text-red-400/70 uppercase tracking-wider">Añade al menos un producto</p>
+            </div>
+
+            <!-- Añadir producto -->
+            <div class="border border-[#4d463a]/20">
+              <button (click)="showAddProduct = !showAddProduct"
+                class="w-full flex items-center justify-between px-3 py-2 text-[#998f81] hover:text-[#e6c487] transition-colors">
+                <span class="font-label text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                  Añadir producto
+                </span>
+                <span class="material-symbols-outlined text-sm">{{ showAddProduct ? 'expand_less' : 'expand_more' }}</span>
+              </button>
+
+              <div *ngIf="showAddProduct" class="border-t border-[#4d463a]/20 p-3 space-y-2">
+                <!-- Tabs -->
+                <div class="flex gap-1">
+                  <button *ngFor="let tab of PRODUCT_TABS"
+                    (click)="addProductTab = tab.value"
+                    class="px-2 py-1 font-label text-[10px] uppercase tracking-wider border transition-colors"
+                    [ngClass]="addProductTab === tab.value
+                      ? 'border-[#e6c487]/40 text-[#e6c487] bg-[#e6c487]/5'
+                      : 'border-[#4d463a]/20 text-[#998f81] hover:text-[#d0c5b5]'">
+                    {{ tab.label }}
+                  </button>
+                </div>
+                <!-- Búsqueda -->
+                <input [(ngModel)]="addProductSearch" placeholder="Buscar..."
+                  class="w-full bg-[#0e0e0e] border border-[#4d463a]/30 px-2 py-1.5 text-xs text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/30" />
+                <!-- Lista -->
+                <div class="max-h-36 overflow-y-auto space-y-0.5">
+                  <button *ngFor="let p of filteredProductsForEdit"
+                    (click)="addProductToEdit(p, addProductTab)"
+                    class="w-full flex items-center justify-between px-2 py-1.5 hover:bg-[#1a1a1a] transition-colors text-left">
+                    <span class="font-body text-xs text-[#d0c5b5] truncate">{{ p.name }}</span>
+                    <span class="font-headline text-[10px] text-[#998f81] tabular-nums shrink-0 ml-2">${{ p.price | number:'1.0-0' }}</span>
+                  </button>
+                  <p *ngIf="filteredProductsForEdit.length === 0"
+                    class="text-center py-2 font-label text-[10px] text-[#4d463a] uppercase tracking-wider">
+                    Sin resultados
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex gap-2 pt-1">
+              <button (click)="saveItems()" [disabled]="savingItems || editItemsList.length === 0"
+                class="flex-1 py-1.5 bg-[#c9a96e]/10 border border-[#c9a96e]/40 text-[#e6c487] font-label text-[10px] uppercase tracking-wider hover:bg-[#c9a96e]/20 transition-colors disabled:opacity-40">
+                {{ savingItems ? 'Guardando…' : 'Guardar items' }}
+              </button>
+              <button (click)="cancelEditItems()"
+                class="flex-1 py-1.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-wider hover:text-[#d0c5b5] transition-colors">
+                Cancelar
+              </button>
             </div>
           </div>
         </div>

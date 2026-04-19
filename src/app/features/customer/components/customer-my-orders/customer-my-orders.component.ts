@@ -82,7 +82,10 @@ export class CustomerMyOrdersComponent implements OnInit, OnDestroy {
         next: notif => {
           this.ngZone.run(() => {
             if (notif.type === 'YOUR_ORDER_READY') {
-              this.notification.showSuccess('Tu pedido está listo');
+              this.notification.showSuccess('¡Tu pedido está listo para recoger!');
+              this.loadOrders();
+              if (this.selectedOrder) this.refreshDetail(this.selectedOrder.id);
+            } else if (notif.type === 'ORDER_STATUS_CHANGED') {
               this.loadOrders();
               if (this.selectedOrder) this.refreshDetail(this.selectedOrder.id);
             }

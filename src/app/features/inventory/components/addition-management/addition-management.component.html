@@ -36,7 +36,10 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-[#4d463a]/5">
-          <tr *ngFor="let addition of filteredAdditions" class="hover:bg-[#1a1a1a] transition-colors">
+          <tr *ngFor="let addition of filteredAdditions"
+              class="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+              [class.bg-[#1a1a1a]]="selectedDetail?.id === addition.id"
+              (click)="viewDetail(addition.id)">
             <td class="px-4 py-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-[#2a2a2a] overflow-hidden rounded-sm flex-shrink-0">
@@ -47,13 +50,14 @@
                 </div>
                 <div>
                   <p class="font-headline text-sm font-semibold text-[#e5e2e1]">{{ addition.name }}</p>
+                  <p class="font-label text-[10px] text-[#998f81]">{{ addition.units }} uds</p>
                 </div>
               </div>
             </td>
             <td class="px-4 py-4 text-right">
               <span class="font-body text-sm text-primary">{{ addition.price | currency:'COP':'symbol':'1.0-0' }}</span>
             </td>
-            <td class="px-4 py-4 text-right">
+            <td class="px-4 py-4 text-right" (click)="$event.stopPropagation()">
               <div class="flex items-center justify-end gap-2">
                 <button (click)="openEditModal(addition.id)" class="p-1.5 text-[#998f81] hover:text-primary transition-colors">
                   <span class="material-symbols-outlined text-base">edit</span>
@@ -88,21 +92,120 @@
     </div>
   </section>
 
-  <section class="w-80 bg-[#111111] p-8 flex-shrink-0 flex flex-col gap-6">
-    <div class="border-b border-[#4d463a]/20 pb-4">
-      <h3 class="font-headline text-xl italic text-primary">Adiciones</h3>
-      <p class="font-label text-[10px] text-[#998f81] uppercase tracking-[0.2em] mt-1">Extras del menú</p>
+  <!-- Sidebar: stats or detail -->
+  <section class="w-80 bg-[#111111] flex-shrink-0 flex flex-col overflow-y-auto">
+
+    <!-- Loading detail -->
+    <div *ngIf="loadingDetail" class="flex items-center justify-center flex-1 h-48">
+      <div class="w-6 h-6 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
     </div>
-    <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-5">
-      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total</p>
-      <p class="font-headline text-3xl text-[#e5e2e1]">{{ additions.length }}</p>
-    </div>
-    <div class="mt-auto border-t border-[#4d463a]/15 pt-6">
-      <button (click)="openCreateModal()" class="w-full flex items-center gap-3 p-3 hover:bg-[#1a1a1a] transition-colors rounded-sm group">
-        <span class="material-symbols-outlined text-[#998f81] group-hover:text-primary transition-colors text-[18px]">add_circle</span>
-        <span class="font-body text-sm text-[#d0c5b5]">Nueva adición</span>
-      </button>
-    </div>
+
+    <!-- Detail panel -->
+    <ng-container *ngIf="!loadingDetail && selectedDetail">
+      <!-- Photo -->
+      <div class="w-full aspect-video bg-[#1a1a1a] overflow-hidden relative flex-shrink-0">
+        <img *ngIf="selectedDetail.photos?.length"
+             [src]="selectedDetail.photos[0]" [alt]="selectedDetail.name"
+             class="w-full h-full object-cover"
+             (error)="onImageError($event)">
+        <div *ngIf="!selectedDetail.photos?.length"
+             class="w-full h-full flex flex-col items-center justify-center gap-2 text-[#4d463a]">
+          <span class="material-symbols-outlined text-3xl">add_circle</span>
+          <span class="font-label text-[10px] uppercase tracking-widest">Sin foto</span>
+        </div>
+        <button (click)="clearDetail()"
+          class="absolute top-2 right-2 w-7 h-7 bg-[#0e0e0e]/70 flex items-center justify-center text-[#998f81] hover:text-white transition-colors">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <div class="p-6 flex flex-col gap-5 flex-1">
+        <!-- Name + price -->
+        <div>
+          <h3 class="font-headline text-lg text-[#e5e2e1]">{{ selectedDetail.name }}</h3>
+          <p class="font-body text-sm text-primary mt-0.5">
+            {{ selectedDetail.price | currency:'COP':'symbol':'1.0-0' }}
+          </p>
+          <p *ngIf="selectedDetail.description" class="font-body text-xs text-[#998f81] mt-2 leading-relaxed">
+            {{ selectedDetail.description }}
+          </p>
+        </div>
+
+        <!-- Stock info -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock actual</p>
+            <p class="font-headline text-2xl"
+               [class.text-red-400]="selectedDetail.units <= selectedDetail.minimumStock"
+               [class.text-[#e5e2e1]]="selectedDetail.units > selectedDetail.minimumStock">
+              {{ selectedDetail.units }}
+            </p>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock mínimo</p>
+            <p class="font-headline text-2xl text-[#998f81]">{{ selectedDetail.minimumStock }}</p>
+          </div>
+        </div>
+
+        <!-- Stock adjustment -->
+        <div class="border border-[#4d463a]/20 p-4">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Ajustar stock</p>
+          <div class="flex items-center gap-2 mb-3">
+            <button (click)="stockQty = stockQty > 1 ? stockQty - 1 : 1"
+              class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
+              <span class="material-symbols-outlined text-base">remove</span>
+            </button>
+            <input type="number" [(ngModel)]="stockQty" min="1"
+              class="flex-1 bg-[#1a1a1a] border border-[#4d463a]/30 text-center text-[#e5e2e1] text-sm py-1.5 focus:outline-none focus:border-primary/40">
+            <button (click)="stockQty = stockQty + 1"
+              class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
+              <span class="material-symbols-outlined text-base">add</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button (click)="addStock()" [disabled]="adjustingStock"
+              class="flex items-center justify-center gap-1.5 py-2 bg-emerald-900/20 border border-emerald-900/30 text-emerald-400 font-label text-[10px] uppercase tracking-wider hover:bg-emerald-900/30 transition-colors disabled:opacity-40">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Añadir
+            </button>
+            <button (click)="discountStock()" [disabled]="adjustingStock"
+              class="flex items-center justify-center gap-1.5 py-2 bg-red-900/20 border border-red-900/30 text-red-400 font-label text-[10px] uppercase tracking-wider hover:bg-red-900/30 transition-colors disabled:opacity-40">
+              <span class="material-symbols-outlined text-sm">remove</span>
+              Descontar
+            </button>
+          </div>
+        </div>
+
+        <!-- Edit button -->
+        <button (click)="openEditModal(selectedDetail.id)"
+          class="w-full flex items-center justify-center gap-2 py-2.5 border border-[#4d463a]/40 text-[#998f81] hover:text-primary hover:border-primary/40 transition-colors font-label text-[10px] uppercase tracking-wider mt-auto">
+          <span class="material-symbols-outlined text-base">edit</span>
+          Editar adición
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Default stats (no selection) -->
+    <ng-container *ngIf="!loadingDetail && !selectedDetail">
+      <div class="p-8 flex flex-col gap-6 flex-1">
+        <div class="border-b border-[#4d463a]/20 pb-4">
+          <h3 class="font-headline text-xl italic text-primary">Adiciones</h3>
+          <p class="font-label text-[10px] text-[#998f81] uppercase tracking-[0.2em] mt-1">Extras del menú</p>
+        </div>
+        <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-5">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total</p>
+          <p class="font-headline text-3xl text-[#e5e2e1]">{{ additions.length }}</p>
+        </div>
+        <p class="font-body text-xs text-[#4d463a] text-center mt-4">Haz clic en una adición para ver su detalle</p>
+        <div class="mt-auto border-t border-[#4d463a]/15 pt-6">
+          <button (click)="openCreateModal()" class="w-full flex items-center gap-3 p-3 hover:bg-[#1a1a1a] transition-colors rounded-sm group">
+            <span class="material-symbols-outlined text-[#998f81] group-hover:text-primary transition-colors text-[18px]">add_circle</span>
+            <span class="font-body text-sm text-[#d0c5b5]">Nueva adición</span>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
   </section>
 </div>
 

@@ -13,6 +13,8 @@ export class AdminLayoutComponent {
 
   navItems = [
     { label: 'Dashboard',                icon: 'dashboard',              route: '/admin/dashboard' },
+    { label: 'Órdenes',                  icon: 'receipt_long',           route: '/orders/waiter'   },
+    { label: 'Facturas',                 icon: 'receipt',                route: '/admin/invoices'  },
     { label: 'Inventario',               icon: 'inventory_2',            route: '/admin/inventory/list' },
     { label: 'Proveedores',              icon: 'local_shipping',         route: '/admin/inventory/suppliers' },
     { label: 'Platos',                   icon: 'restaurant',             route: '/admin/inventory/dishes' },

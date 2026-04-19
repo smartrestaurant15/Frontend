@@ -3,8 +3,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
+import { UserRole } from '../../models/user-role.enum';
 import { NotificationService } from '@core/services/notification.service';
 import { StorageService } from '@core/services/storage.service';
+import { RoleRedirectService } from '../../services/role-redirect.service';
 
 @Component({
   selector: 'app-profile',
@@ -22,6 +24,7 @@ export class ProfileComponent implements OnInit {
     private authService: AuthService,
     private notificationService: NotificationService,
     private storageService: StorageService,
+    private roleRedirectService: RoleRedirectService,
     private router: Router
   ) {}
 
@@ -110,6 +113,8 @@ export class ProfileComponent implements OnInit {
   }
 
   navigateToDashboard(): void {
-    this.router.navigate(['/admin/dashboard']);
+    const user = this.storageService.getUser();
+    const role = (user?.role as UserRole) || UserRole.CUSTOMER;
+    this.router.navigate([this.roleRedirectService.getDashboardRoute(role)]);
   }
 }

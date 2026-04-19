@@ -38,6 +38,14 @@
         Actualizar
       </button>
 
+      <!-- Perfil -->
+      <a [routerLink]="'/auth/profile'"
+        class="flex items-center gap-1.5 px-3 py-1.5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/40 transition-colors text-xs font-label uppercase tracking-wider"
+        title="Ver perfil">
+        <span class="material-symbols-outlined text-base leading-none">account_circle</span>
+        Perfil
+      </a>
+
       <!-- Logout -->
       <button
         (click)="logout()"

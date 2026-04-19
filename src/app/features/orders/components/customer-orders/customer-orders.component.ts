@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Subscription, timer } from 'rxjs';
 import { OrderService } from '../../services/order.service';
 import { SseService } from '../../services/sse.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -24,11 +24,15 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
   readonly STEPS: OrderStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
 
   private sseSub?: Subscription;
+  private reconnectSub?: Subscription;
+  private sseRetries = 0;
+  private readonly MAX_SSE_RETRIES = 10;
 
   constructor(
     private orderService: OrderService,
     private sseService: SseService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +42,7 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sseSub?.unsubscribe();
+    this.reconnectSub?.unsubscribe();
   }
 
   loadOrders(): void {
@@ -59,15 +64,33 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
   }
 
   private connectSse(): void {
-    this.sseSub = this.sseService.subscribeCustomer().subscribe({
-      next: notification => {
-        if (notification.type === 'YOUR_ORDER_READY') {
-          this.notification.showSuccess('¡Tu pedido está listo!');
-          this.loadOrders();
-        }
-      },
-      error: () => { /* SSE no disponible — la vista funciona sin tiempo real */ }
+    this.sseSub?.unsubscribe();
+    this.reconnectSub?.unsubscribe();
+    this.ngZone.runOutsideAngular(() => {
+      this.sseSub = this.sseService.subscribeCustomer().subscribe({
+        next: notif => {
+          this.ngZone.run(() => {
+            if (notif.type === 'YOUR_ORDER_READY') {
+              this.notification.showSuccess('¡Tu pedido está listo!');
+              this.loadOrders();
+              if (this.selectedOrder) this.viewDetail(this.selectedOrder.id);
+            } else if (notif.type === 'ORDER_STATUS_CHANGED') {
+              this.loadOrders();
+              if (this.selectedOrder) this.viewDetail(this.selectedOrder.id);
+            }
+          });
+        },
+        error: () => this.ngZone.run(() => this.scheduleReconnect()),
+        complete: () => this.ngZone.run(() => this.scheduleReconnect())
+      });
     });
+  }
+
+  private scheduleReconnect(): void {
+    if (this.sseRetries >= this.MAX_SSE_RETRIES) { return; }
+    const delay = Math.min(2000 * Math.pow(2, this.sseRetries), 60000);
+    this.sseRetries++;
+    this.reconnectSub = timer(delay).subscribe(() => this.connectSse());
   }
 
   viewDetail(id: string): void {

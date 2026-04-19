@@ -83,6 +83,7 @@ export class CustomerHomeComponent implements OnInit, OnDestroy {
   goToMenu(): void    { this.router.navigate(['/customer/menu']); }
   goToOrders(): void  { this.router.navigate(['/customer/my-orders']); }
   goToCart(): void    { this.router.navigate(['/customer/menu'], { fragment: 'cart' }); }
+  goToProfile(): void { this.router.navigate(['/auth/profile']); }
 
   logout(): void {
     this.authService.logout().subscribe({

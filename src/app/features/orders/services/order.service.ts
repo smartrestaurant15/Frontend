@@ -9,6 +9,7 @@ import {
   OrderStatus,
   OrderChannel,
   CreateOrderDTO,
+  CreateOrderItemDTO,
   UpdateOrderDTO
 } from '../models/order.model';
 import { Invoice } from '../models/invoice.model';
@@ -63,5 +64,10 @@ export class OrderService {
   /** GET /api/orders/{id}/invoice */
   getInvoiceByOrder(orderId: string): Observable<ResponseDTO<Invoice>> {
     return this.http.get<ResponseDTO<Invoice>>(`/orders/${orderId}/invoice`);
+  }
+
+  /** PATCH /api/orders/{id}/items */
+  editOrderItems(id: string, items: CreateOrderItemDTO[]): Observable<ResponseDTO<string>> {
+    return this.http.patch<ResponseDTO<string>>(`/orders/${id}/items`, { items });
   }
 }

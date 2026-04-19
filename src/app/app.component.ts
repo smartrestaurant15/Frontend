@@ -59,8 +59,7 @@ export class AppComponent implements OnInit, OnDestroy {
       '/auth/login', '/auth/register', '/auth/verify-account',
       '/auth/forgot-password', '/auth/reset-password',
       '/orders/kitchen',
-      '/orders/waiter',
-      '/customer'
+      '/orders/waiter'
     ];
     return !isLanding && !authRoutes.some(route => this.currentRoute.startsWith(route));
   }

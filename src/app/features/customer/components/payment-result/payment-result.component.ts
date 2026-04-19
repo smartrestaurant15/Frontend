@@ -4,6 +4,7 @@ import { WompiService } from '../../services/wompi.service';
 import { NotificationService } from '@core/services/notification.service';
 import { StorageService } from '@core/services/storage.service';
 import { CartService } from '../../services/cart.service';
+import { OrderService } from '@features/orders/services/order.service';
 
 @Component({
   selector: 'app-payment-result',
@@ -14,6 +15,7 @@ export class PaymentResultComponent implements OnInit {
 
   status: 'loading' | 'success' | 'error' | 'pending' = 'loading';
   message = '';
+  private orderId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -21,19 +23,22 @@ export class PaymentResultComponent implements OnInit {
     private wompiService: WompiService,
     private notification: NotificationService,
     private storageService: StorageService,
-    private cartService: CartService
+    private cartService: CartService,
+    private orderService: OrderService
   ) {}
 
   ngOnInit(): void {
     // Wompi redirige con ?id=TRANSACTION_ID en la URL
     const transactionId = this.route.snapshot.queryParamMap.get('id');
-    const orderId       = this.route.snapshot.queryParamMap.get('orderId');
+    this.orderId        = this.route.snapshot.queryParamMap.get('orderId');
 
-    if (!transactionId || !orderId) {
+    if (!transactionId || !this.orderId) {
       this.status  = 'error';
       this.message = 'No se recibió información del pago.';
       return;
     }
+
+    const orderId = this.orderId;
 
     const user = this.storageService.getUser();
 
@@ -61,8 +66,20 @@ export class PaymentResultComponent implements OnInit {
       },
       error: () => {
         this.status  = 'error';
-        this.message = 'El pago fue procesado pero hubo un error al confirmarlo. Contacta soporte.';
+        this.message = 'Hubo un error al confirmar el pago. Puedes intentarlo de nuevo o abandonar el pedido.';
+        this.abandonOrder();
       }
+    });
+  }
+
+  abandonOrder(): void {
+    if (!this.orderId) { return; }
+    this.orderService.abandonOrder(this.orderId).subscribe({
+      next: () => {
+        sessionStorage.removeItem('pendingOrderId');
+        this.orderId = null;
+      },
+      error: () => { /* La orden será limpiada automáticamente por el scheduler */ }
     });
   }
 
