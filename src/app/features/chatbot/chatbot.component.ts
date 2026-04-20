@@ -40,6 +40,7 @@ export class ChatbotComponent implements AfterViewChecked {
   ];
 
   conversationHistory: { role: 'user' | 'assistant'; content: string }[] = [];
+  sessionId: string = crypto.randomUUID();
 
   private n8nUrl = environment.n8nWebhookUrl;
   private http: HttpClient;
@@ -86,7 +87,7 @@ export class ChatbotComponent implements AfterViewChecked {
 
     this.http.post<N8nResponse>(
       this.n8nUrl,
-      { message: userMessage, history: this.conversationHistory },
+      { message: userMessage, history: this.conversationHistory, sessionId: this.sessionId },
       { headers: this.headers }
     ).subscribe({
       next: (res) => {
