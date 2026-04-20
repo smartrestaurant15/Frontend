@@ -41,7 +41,8 @@ export class ChatbotComponent implements AfterViewChecked {
 
   conversationHistory: { role: 'user' | 'assistant'; content: string }[] = [];
 
-  private n8nUrl = environment.n8nWebhookUrl;
+  private sessionId = crypto.randomUUID();
+  private n8nUrl = 'https://chatbot-smartrestaurant.onrender.com/webhook/chat';
   private http: HttpClient;
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
@@ -84,9 +85,15 @@ export class ChatbotComponent implements AfterViewChecked {
 
     this.conversationHistory.push({ role: 'user', content: userMessage });
 
+    const body = {
+      message: userMessage,
+      history: this.conversationHistory,
+      sessionId: this.sessionId
+    };
+
     this.http.post<N8nResponse>(
       this.n8nUrl,
-      { message: userMessage, history: this.conversationHistory },
+      body,
       { headers: this.headers }
     ).subscribe({
       next: (res) => {
