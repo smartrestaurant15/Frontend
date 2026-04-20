@@ -3,7 +3,7 @@ import { HttpClient, HttpBackend, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
 
 interface N8nResponse {
-  text: string;
+  output: string;
   dishes?: any[];
   ingredients?: string[];
   suggestions?: string[];
@@ -83,20 +83,20 @@ export class ChatbotComponent implements AfterViewChecked {
     const loadingMsg: ChatMessage = { from: 'bot', text: '', loading: true };
     this.messages.push(loadingMsg);
 
-    this.conversationHistory.push({ role: 'user', content: userMessage });
-
-    this.http.post<N8nResponse>(
+    this.http.post<N8nResponse | N8nResponse[]>(
       this.n8nUrl,
       { message: userMessage, history: this.conversationHistory, sessionId: this.sessionId },
       { headers: this.headers }
     ).subscribe({
-      next: (res) => {
-        this.conversationHistory.push({ role: 'assistant', content: res.text });
+      next: (raw) => {
+        const res: N8nResponse = Array.isArray(raw) ? raw[0] : raw;
+        this.conversationHistory.push({ role: 'user', content: userMessage });
+        this.conversationHistory.push({ role: 'assistant', content: res.output });
         const idx = this.messages.lastIndexOf(loadingMsg);
         if (idx !== -1) this.messages.splice(idx, 1);
         this.messages.push({
           from: 'bot',
-          text: res.text,
+          text: res.output,
           dishes: res.dishes,
           ingredients: res.ingredients,
           suggestions: res.suggestions
