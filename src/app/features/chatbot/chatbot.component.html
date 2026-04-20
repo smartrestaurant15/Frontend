@@ -62,10 +62,7 @@
       type="text"
       [(ngModel)]="inputText"
       (keydown.enter)="sendMessage()"
-      [placeholder]="currentIntent === 'awaiting_search' ? 'Escribe el nombre del plato…' :
-                     currentIntent === 'awaiting_category' ? 'Escribe la categoría…' :
-                     currentIntent === 'awaiting_ingredients' ? 'Escribe el nombre del plato…' :
-                     'Escribe aquí…'"
+      placeholder="Escribe aquí…"
       [disabled]="loading"
     />
     <button (click)="sendMessage()" [disabled]="loading || !inputText.trim()">
