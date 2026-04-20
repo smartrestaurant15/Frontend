@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-import { HttpClient, HttpBackend, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpBackend, HttpParams, HttpHeaders } from '@angular/common/http';
 import { environment } from '@environments/environment';
 
 type Intent = 'none' | 'awaiting_search' | 'awaiting_category' | 'awaiting_ingredients';
@@ -37,6 +37,7 @@ export class ChatbotComponent implements AfterViewChecked {
 
   private apiUrl = environment.apiUrl;
   private http: HttpClient;
+  private headers = new HttpHeaders({ 'X-Chatbot-API-Key': environment.chatbotApiKey });
 
   constructor(handler: HttpBackend) {
     this.http = new HttpClient(handler);
@@ -91,7 +92,7 @@ export class ChatbotComponent implements AfterViewChecked {
     this.messages.push(loadingMsg);
     this.loading = true;
 
-    this.http.get<any>(`${this.apiUrl}/chatbot/dishes/${dish.id}/ingredients`).subscribe({
+    this.http.get<any>(`${this.apiUrl}/chatbot/dishes/${dish.id}/ingredients`, { headers: this.headers }).subscribe({
       next: (res) => {
         const idx = this.messages.lastIndexOf(loadingMsg);
         if (idx !== -1) this.messages.splice(idx, 1);
@@ -137,7 +138,7 @@ export class ChatbotComponent implements AfterViewChecked {
   private async searchDishes(query: string): Promise<ChatMessage> {
     try {
       const params = new HttpParams().set('q', query);
-      const dishes = await this.http.get<any[]>(`${this.apiUrl}/chatbot/dishes/search`, { params }).toPromise();
+      const dishes = await this.http.get<any[]>(`${this.apiUrl}/chatbot/dishes/search`, { params, headers: this.headers }).toPromise();
       if (dishes && dishes.length > 0) {
         return {
           from: 'bot',
@@ -159,7 +160,7 @@ export class ChatbotComponent implements AfterViewChecked {
   private async searchByCategory(category: string): Promise<ChatMessage> {
     try {
       const dishes = await this.http.get<any[]>(
-        `${this.apiUrl}/chatbot/categories/${encodeURIComponent(category)}/dishes`
+        `${this.apiUrl}/chatbot/categories/${encodeURIComponent(category)}/dishes`, { headers: this.headers }
       ).toPromise();
       if (dishes && dishes.length > 0) {
         return {
@@ -182,7 +183,7 @@ export class ChatbotComponent implements AfterViewChecked {
   private async searchDishForIngredients(dishName: string): Promise<ChatMessage> {
     try {
       const params = new HttpParams().set('q', dishName);
-      const dishes = await this.http.get<any[]>(`${this.apiUrl}/chatbot/dishes/search`, { params }).toPromise();
+      const dishes = await this.http.get<any[]>(`${this.apiUrl}/chatbot/dishes/search`, { params, headers: this.headers }).toPromise();
       if (!dishes || dishes.length === 0) {
         return {
           from: 'bot',
@@ -191,7 +192,7 @@ export class ChatbotComponent implements AfterViewChecked {
         };
       }
       const dish = dishes[0];
-      const detail = await this.http.get<any>(`${this.apiUrl}/chatbot/dishes/${dish.id}/ingredients`).toPromise();
+      const detail = await this.http.get<any>(`${this.apiUrl}/chatbot/dishes/${dish.id}/ingredients`, { headers: this.headers }).toPromise();
       const ings: string[] = (detail?.ingredients ?? []).map((i: any) => i.product_name ?? i.name ?? i);
       return {
         from: 'bot',
