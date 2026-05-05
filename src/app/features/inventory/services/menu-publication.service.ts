@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClientService } from '@core/services/http-client.service';
-import { ApiResponse } from '../models/api-response.model';
+import { ApiResponse, PaginatedResponse } from '../models/api-response.model';
 import {
   AdjustPortionsRequest,
   AddPublicationSectionRequest,
@@ -19,8 +19,8 @@ export class MenuPublicationService {
 
   // ── Publicaciones ───────────────────────────────────────────────────────────
 
-  getAll(page: number): Observable<ApiResponse<MenuPublicationSummaryDTO[]>> {
-    return this.http.get<ApiResponse<MenuPublicationSummaryDTO[]>>(`/menu/publications/${page}/page`);
+  getAll(page: number): Observable<ApiResponse<PaginatedResponse<MenuPublicationSummaryDTO>>> {
+    return this.http.get<ApiResponse<PaginatedResponse<MenuPublicationSummaryDTO>>>(`/menu/publications/${page}/page`);
   }
 
   getById(id: string): Observable<ApiResponse<MenuPublicationDTO>> {

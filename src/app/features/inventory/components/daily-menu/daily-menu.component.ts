@@ -9,6 +9,7 @@ import {
   MenuPublicationSummaryDTO, MenuTemplateDTO,
   MenuStatus, MenuTimeSlot, CreateMenuPublicationRequest
 } from '../../models/menu.model';
+import { ApiResponse, PaginatedResponse } from '../../models/api-response.model';
 
 @Component({
   selector: 'app-daily-menu',
@@ -27,6 +28,7 @@ export class DailyMenuComponent implements OnInit {
   saving = false;
   createForm!: FormGroup;
   filteredPublications: MenuPublicationSummaryDTO[] = [];
+  private loadSeq = 0; // Contador de secuencia para evitar race conditions
 
   readonly statusFilters: { label: string; value: MenuStatus | 'ALL' }[] = [
     { label: 'Todos',      value: 'ALL'       },
@@ -74,15 +76,19 @@ export class DailyMenuComponent implements OnInit {
 
   loadPublications(): void {
     this.loading = true;
+    const seq = ++this.loadSeq;
     this.publicationService.getAll(this.currentPage).subscribe({
       next: (res) => {
-        this.publications = Array.isArray(res.message) ? res.message : [];
-        this.hasMorePages = this.publications.length >= this.pageSize;
+        if (seq !== this.loadSeq) return; // Ignorar respuesta obsoleta
+        const paginated: PaginatedResponse<MenuPublicationSummaryDTO> = res.message;
+        this.publications = paginated.content;
+        this.hasMorePages = paginated.number < paginated.totalPages - 1;
         this.updateFilteredPublications();
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: () => {
+        if (seq !== this.loadSeq) return;
         this.loading = false;
         this.notificationService.showError('Error al cargar las publicaciones');
       }
@@ -99,8 +105,8 @@ export class DailyMenuComponent implements OnInit {
 
   setStatusFilter(status: MenuStatus | 'ALL'): void {
     this.statusFilter = status;
-    this.currentPage = 0;  // Resetear a la primera página
-    this.loadPublications();
+    this.updateFilteredPublications();
+    this.cdr.detectChanges();
   }
 
   private loadTemplates(): void {

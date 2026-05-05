@@ -54,10 +54,10 @@
           <!-- Fecha -->
           <div class="w-16 flex-shrink-0 text-center">
             <p class="font-headline text-2xl text-[#e5e2e1] leading-none capitalize">
-              {{ pub.date | date:'d' }}
+              {{ pub.date + 'T12:00:00' | date:'d' }}
             </p>
             <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mt-0.5">
-              {{ pub.date | date:'LLL':'':'es-CO' }}
+              {{ pub.date + 'T12:00:00' | date:'LLL':'':'es-CO' }}
             </p>
           </div>
 
