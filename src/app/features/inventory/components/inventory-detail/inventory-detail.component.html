@@ -75,6 +75,15 @@
               <input type="number" formControlName="weight" min="1" placeholder="0"
                      class="w-full bg-transparent border-0 border-b border-[#4d463a] focus:border-primary focus:ring-0 transition-colors text-[#e5e2e1] py-2 px-0 font-body text-sm">
             </div>
+            <div>
+              <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">
+                Precio por gramo ($/g) <span class="text-red-400">*</span>
+              </label>
+              <input type="number" formControlName="unitPrice" min="0.01" step="0.01" placeholder="0.00"
+                     class="w-full bg-transparent border-0 border-b border-[#4d463a] focus:border-primary focus:ring-0 transition-colors text-[#e5e2e1] py-2 px-0 font-body text-sm">
+              <p *ngIf="stockForm.get('unitPrice')?.invalid && stockForm.get('unitPrice')?.touched"
+                 class="text-red-400 font-label text-[9px] mt-1">Ingresa el costo por gramo para actualizar el valor del inventario</p>
+            </div>
             <div class="flex gap-3">
               <button type="button"
                       [disabled]="stockForm.invalid || processingStock"
@@ -84,7 +93,7 @@
                 Agregar
               </button>
               <button type="button"
-                      [disabled]="stockForm.invalid || processingStock"
+                      [disabled]="stockForm.get('weight')?.invalid || processingStock"
                       (click)="discountStock()"
                       class="flex-1 py-3 bg-red-900/10 border border-red-900/30 text-red-400 hover:bg-red-900/20 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm disabled:opacity-40 flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined text-sm">remove</span>
@@ -112,9 +121,15 @@
                 {{ product.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
               </span>
             </div>
-            <div class="text-right">
-              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Precio</p>
-              <p class="font-headline text-3xl text-primary">{{ product.price | currency:'COP':'symbol':'1.0-0' }}</p>
+            <div class="text-right space-y-3">
+              <div>
+                <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Precio por gramo</p>
+                <p class="font-headline text-xl text-[#d0c5b5]">{{ product.price | currency:'COP':'symbol':'1.0-2' }}/g</p>
+              </div>
+              <div>
+                <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Valor total inventario</p>
+                <p class="font-headline text-3xl text-primary">{{ product.totalInventoryValue | currency:'COP':'symbol':'1.0-0' }}</p>
+              </div>
             </div>
           </div>
 
@@ -122,19 +137,35 @@
 
           <div class="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6 border-t border-[#4d463a]/15">
             <div>
-              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Peso</p>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Peso total en inventario</p>
               <p class="font-body text-[#e5e2e1]">{{ product.weight }} g</p>
             </div>
             <div>
-              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock Mínimo</p>
-              <p class="font-body text-[#e5e2e1]">{{ product.minimumStock }}</p>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock mínimo</p>
+              <p class="font-body text-[#e5e2e1]">{{ product.minimumStock }} g</p>
+            </div>
+            <div *ngIf="product.criticalStock !== undefined">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock crítico</p>
+              <p class="font-body text-red-400">{{ product.criticalStock }} g</p>
             </div>
             <div *ngIf="product.currentWeight !== undefined">
-              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock Actual</p>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Stock total</p>
               <p class="font-body font-semibold"
                  [class.text-red-400]="product.currentWeight <= product.minimumStock"
                  [class.text-primary]="product.currentWeight > product.minimumStock">
                 {{ product.currentWeight }} g
+              </p>
+            </div>
+            <div *ngIf="product.reservedWeight !== undefined">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Reservado</p>
+              <p class="font-body text-amber-400">{{ product.reservedWeight }} g</p>
+            </div>
+            <div *ngIf="product.availableWeight !== undefined">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Disponible</p>
+              <p class="font-body font-semibold"
+                 [class.text-emerald-400]="product.availableWeight > 0"
+                 [class.text-red-400]="product.availableWeight <= 0">
+                {{ product.availableWeight }} g
               </p>
             </div>
           </div>

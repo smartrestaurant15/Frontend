@@ -68,7 +68,17 @@ export class PermissionService {
       'daily_menu:read',
       'stock_alert:read'
     ]),
-    
+
+    [UserRole.CASHIER]: new Set([
+      'dish:read',
+      'drink:read',
+      'addition:read',
+      'daily_menu:read',
+      'order:read',
+      'payment:read',
+      'payment:write'
+    ]),
+
     [UserRole.CUSTOMER]: new Set([])
   };
 
@@ -162,9 +172,10 @@ export class PermissionService {
    */
   isStaff(): boolean {
     const userRole = this.getUserRole();
-    return userRole === UserRole.ADMIN || 
-           userRole === UserRole.KITCHEN || 
-           userRole === UserRole.WAITER;
+    return userRole === UserRole.ADMIN ||
+           userRole === UserRole.KITCHEN ||
+           userRole === UserRole.WAITER ||
+           userRole === UserRole.CASHIER;
   }
 
   /**
@@ -194,9 +205,10 @@ export class PermissionService {
   getPrivilegeLevel(): number {
     const userRole = this.getUserRole();
     const levels: Record<UserRole, number> = {
-      [UserRole.ADMIN]: 4,
-      [UserRole.KITCHEN]: 3,
-      [UserRole.WAITER]: 2,
+      [UserRole.ADMIN]:    4,
+      [UserRole.KITCHEN]:  3,
+      [UserRole.WAITER]:   2,
+      [UserRole.CASHIER]:  2,
       [UserRole.CUSTOMER]: 1
     };
     return userRole ? levels[userRole] : 0;

@@ -140,55 +140,29 @@
   </div>
 </section>
 
-<!-- ─── ESPECIALIDADES ────────────────────────────────────────── -->
+<!-- ─── MENÚ DEL DÍA ────────────────────────────────────────── -->
 <section class="py-32 px-6 md:px-12 bg-[#0e0e0e]" id="menu">
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-6xl mx-auto">
 
     <div class="text-center mb-20">
       <span class="font-label text-[10px] uppercase tracking-[0.3em] text-primary mb-4 block">Selección de Autor</span>
-      <h2 class="font-headline text-4xl md:text-5xl font-light text-[#e5e2e1]">Especialidades del Día</h2>
+      <h2 class="font-headline text-4xl md:text-5xl font-light text-[#e5e2e1]">Menú del Día</h2>
+      <p class="font-body text-[#d0c5b5]/70 text-sm mt-4">
+        Descubre nuestra propuesta gastronómica del día, cuidadosamente elaborada por nuestro chef
+      </p>
     </div>
 
-    <div *ngIf="loadingMenu" class="flex justify-center py-16">
-      <div class="w-8 h-8 border border-primary/30 border-t-primary rounded-full animate-spin"></div>
-    </div>
-
-    <div *ngIf="!loadingMenu && dailyMenuDishes.length === 0"
-         class="text-center py-16 text-[#d0c5b5]/50">
-      <span class="material-symbols-outlined text-4xl mb-4 block">restaurant_menu</span>
-      <p class="font-body text-sm">No hay especialidades disponibles hoy.</p>
-    </div>
-
-    <div *ngIf="!loadingMenu && dailyMenuDishes.length > 0" class="space-y-14">
-      <div *ngFor="let dish of dailyMenuDishes"
-           class="flex flex-col md:flex-row items-center gap-8 group cursor-default">
-
-        <div class="w-28 h-28 flex-shrink-0 overflow-hidden rounded-full border border-[#4d463a]/30">
-          <img
-            [src]="dish.photo || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'"
-            [alt]="dish.name"
-            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-        </div>
-
-        <div class="flex-grow flex flex-col w-full">
-          <div class="flex items-end w-full mb-2">
-            <h3 class="font-headline text-2xl text-[#e5e2e1] group-hover:text-primary transition-colors">
-              {{ dish.name }}
-            </h3>
-            <div class="flex-grow border-b border-dotted border-[#4d463a]/40 mx-3 mb-1.5"></div>
-            <span class="font-headline text-xl text-primary tracking-tight">
-              ${{ dish.price | number:'1.0-0' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-active-menu-display 
+      [menu]="activeMenu" 
+      [loading]="loadingMenu"
+      [showAddToCart]="false">
+    </app-active-menu-display>
 
     <div class="text-center mt-16">
       <button
         class="border border-[#4d463a]/40 text-primary px-10 py-4 rounded-md font-label text-xs uppercase tracking-widest hover:bg-[#201f1f] transition-colors"
         (click)="goToLogin()">
-        Ver Menú Completo
+        Iniciar Sesión para Ordenar
       </button>
     </div>
   </div>

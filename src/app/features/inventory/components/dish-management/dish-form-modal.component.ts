@@ -206,7 +206,7 @@ export class DishFormModalComponent implements OnInit, OnChanges {
 
       if (this.isEditMode && this.dishId) {
         // Actualizar plato
-        this.dishService.updateDish(this.dishId, formData).subscribe({
+        this.dishService.updateDish(this.dishId, { ...formData, categoryId }).subscribe({
           next: (response) => {
             this.loading = false;
             if (!response.error) {

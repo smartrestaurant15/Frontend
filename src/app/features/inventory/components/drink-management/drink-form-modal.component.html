@@ -1,5 +1,6 @@
 <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
   <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+
     <div class="modal-header">
       <h2>{{ isEditMode ? 'Editar Bebida' : 'Nueva Bebida' }}</h2>
       <button class="close-button" (click)="close()" type="button">
@@ -15,15 +16,44 @@
         <app-loading-spinner *ngIf="loading" size="medium"></app-loading-spinner>
 
         <div *ngIf="!loading">
+
+          <!-- ═══ TIPO DE BEBIDA ═══ -->
+          <div class="form-group" *ngIf="!isEditMode">
+            <label>Tipo de bebida <span class="required">*</span></label>
+            <div class="drink-type-selector">
+              <label class="type-option" [class.active]="!isPrepared">
+                <input type="radio" formControlName="drinkType" value="SIMPLE">
+                <div class="type-option-content">
+                  <span class="type-icon">🥤</span>
+                  <span class="type-label">Bebida simple</span>
+                  <span class="type-desc">Gaseosas, cervezas, agua embotellada. Maneja stock de unidades.</span>
+                </div>
+              </label>
+              <label class="type-option" [class.active]="isPrepared">
+                <input type="radio" formControlName="drinkType" value="PREPARED">
+                <div class="type-option-content">
+                  <span class="type-icon">🍹</span>
+                  <span class="type-label">Bebida preparada</span>
+                  <span class="type-desc">Jugos, cócteles, granizados. Se prepara con ingredientes del inventario.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Indicador de tipo en modo edición -->
+          <div class="type-badge-row" *ngIf="isEditMode">
+            <span class="type-badge" [class.simple]="!isPrepared" [class.prepared]="isPrepared">
+              {{ isPrepared ? '🍹 Bebida preparada' : '🥤 Bebida simple' }}
+            </span>
+            <span class="type-badge-hint">El tipo no puede modificarse</span>
+          </div>
+
+          <!-- ═══ DATOS GENERALES ═══ -->
           <div class="form-group">
             <label for="name">Nombre <span class="required">*</span></label>
-            <input
-              type="text"
-              id="name"
-              formControlName="name"
-              placeholder="Ej: Coca Cola, Jugo de Naranja"
-              [class.error]="name?.invalid && name?.touched"
-            />
+            <input type="text" id="name" formControlName="name"
+                   placeholder="Ej: Coca Cola, Jugo de Naranja, Mojito"
+                   [class.error]="name?.invalid && name?.touched" />
             <div class="error-message" *ngIf="name?.invalid && name?.touched">
               <span *ngIf="name?.errors?.['required']">El nombre es requerido</span>
               <span *ngIf="name?.errors?.['maxlength']">Máximo 50 caracteres</span>
@@ -32,13 +62,9 @@
 
           <div class="form-group">
             <label for="description">Descripción <span class="required">*</span></label>
-            <textarea
-              id="description"
-              formControlName="description"
-              rows="3"
-              placeholder="Describe la bebida (mínimo 10 caracteres)"
-              [class.error]="description?.invalid && description?.touched"
-            ></textarea>
+            <textarea id="description" formControlName="description" rows="3"
+                      placeholder="Describe la bebida (mínimo 10 caracteres)"
+                      [class.error]="description?.invalid && description?.touched"></textarea>
             <div class="error-message" *ngIf="description?.invalid && description?.touched">
               <span *ngIf="description?.errors?.['required']">La descripción es requerida</span>
               <span *ngIf="description?.errors?.['minlength']">Mínimo 10 caracteres</span>
@@ -50,14 +76,9 @@
           <div class="form-row">
             <div class="form-group">
               <label for="mililiters">Mililitros <span class="required">*</span></label>
-              <input
-                type="number"
-                id="mililiters"
-                formControlName="mililiters"
-                placeholder="350"
-                min="1"
-                [class.error]="mililiters?.invalid && mililiters?.touched"
-              />
+              <input type="number" id="mililiters" formControlName="mililiters"
+                     placeholder="350" min="1"
+                     [class.error]="mililiters?.invalid && mililiters?.touched" />
               <div class="error-message" *ngIf="mililiters?.invalid && mililiters?.touched">
                 <span *ngIf="mililiters?.errors?.['required']">Los mililitros son requeridos</span>
                 <span *ngIf="mililiters?.errors?.['min']">Debe ser mayor a 0</span>
@@ -65,46 +86,9 @@
             </div>
 
             <div class="form-group">
-              <label for="units">Unidades en Stock <span class="required">*</span></label>
-              <input
-                type="number"
-                id="units"
-                formControlName="units"
-                placeholder="24"
-                min="1"
-                [class.error]="units?.invalid && units?.touched"
-              />
-              <div class="error-message" *ngIf="units?.invalid && units?.touched">
-                <span *ngIf="units?.errors?.['required']">Las unidades son requeridas</span>
-                <span *ngIf="units?.errors?.['min']">Debe ser mayor a 0</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="minimumStock">Stock Mínimo <span class="required">*</span></label>
-            <input
-              type="number"
-              id="minimumStock"
-              formControlName="minimumStock"
-              placeholder="5"
-              min="0"
-              [class.error]="minimumStock?.invalid && minimumStock?.touched"
-            />
-            <div class="error-message" *ngIf="minimumStock?.invalid && minimumStock?.touched">
-              <span *ngIf="minimumStock?.errors?.['required']">El stock mínimo es requerido</span>
-              <span *ngIf="minimumStock?.errors?.['min']">Debe ser 0 o mayor</span>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
               <label for="categoryId">Categoría <span class="required">*</span></label>
-              <select
-                id="categoryId"
-                formControlName="categoryId"
-                [class.error]="categoryId?.invalid && categoryId?.touched"
-              >
+              <select id="categoryId" formControlName="categoryId"
+                      [class.error]="categoryId?.invalid && categoryId?.touched">
                 <option value="">Seleccione una categoría</option>
                 <option *ngFor="let category of categories" [value]="category.id">
                   {{ category.name }}
@@ -114,33 +98,163 @@
                 <span *ngIf="categoryId?.errors?.['required']">La categoría es requerida</span>
               </div>
             </div>
+          </div>
+
+          <!-- ═══ PRECIOS ═══ -->
+          <div class="section-divider">
+            <span>Precios</span>
+          </div>
+
+          <div class="form-row">
+            <!-- Precio de compra: solo bebidas SIMPLE -->
+            <div class="form-group" *ngIf="!isPrepared">
+              <label for="purchasePrice">
+                Precio de compra
+                <span class="required">*</span>
+                <span class="field-hint">Costo por unidad al proveedor</span>
+              </label>
+              <input type="number" id="purchasePrice" formControlName="purchasePrice"
+                     placeholder="1500" min="0.01" step="0.01"
+                     [class.error]="purchasePrice?.invalid && purchasePrice?.touched" />
+              <div class="error-message" *ngIf="purchasePrice?.invalid && purchasePrice?.touched">
+                <span *ngIf="purchasePrice?.errors?.['required']">El precio de compra es requerido</span>
+                <span *ngIf="purchasePrice?.errors?.['min']">Debe ser mayor a 0</span>
+              </div>
+            </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  formControlName="alcohol"
-                />
-                <span>Contiene alcohol</span>
+              <label for="salePrice">
+                Precio de venta
+                <span class="required">*</span>
+                <span class="field-hint">Precio que paga el cliente</span>
               </label>
+              <input type="number" id="salePrice" formControlName="salePrice"
+                     placeholder="5000" min="0.01" step="0.01"
+                     [class.error]="salePrice?.invalid && salePrice?.touched" />
+              <div class="error-message" *ngIf="salePrice?.invalid && salePrice?.touched">
+                <span *ngIf="salePrice?.errors?.['required']">El precio de venta es requerido</span>
+                <span *ngIf="salePrice?.errors?.['min']">Debe ser mayor a 0</span>
+              </div>
             </div>
           </div>
 
-          <!-- Sección de Fotos -->
+          <!-- ═══ STOCK (solo bebidas SIMPLE) ═══ -->
+          <ng-container *ngIf="!isPrepared">
+            <div class="section-divider">
+              <span>Inventario</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="units">Unidades en stock <span class="required">*</span></label>
+                <input type="number" id="units" formControlName="units"
+                       placeholder="24" min="1"
+                       [class.error]="units?.invalid && units?.touched" />
+                <div class="error-message" *ngIf="units?.invalid && units?.touched">
+                  <span *ngIf="units?.errors?.['required']">Las unidades son requeridas</span>
+                  <span *ngIf="units?.errors?.['min']">Debe ser mayor a 0</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="minimumStock">Stock mínimo <span class="required">*</span></label>
+                <input type="number" id="minimumStock" formControlName="minimumStock"
+                       placeholder="5" min="0"
+                       [class.error]="minimumStock?.invalid && minimumStock?.touched" />
+                <div class="error-message" *ngIf="minimumStock?.invalid && minimumStock?.touched">
+                  <span *ngIf="minimumStock?.errors?.['required']">El stock mínimo es requerido</span>
+                  <span *ngIf="minimumStock?.errors?.['min']">Debe ser 0 o mayor</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- ═══ RECETA (solo bebidas PREPARED) ═══ -->
+          <ng-container *ngIf="isPrepared">
+            <div class="section-divider">
+              <span>Receta de preparación</span>
+            </div>
+
+            <div class="recipe-info-banner">
+              <span class="material-symbols-outlined">info</span>
+              <span>Los ingredientes se descontarán del inventario al procesar cada pedido.</span>
+            </div>
+
+            <div formArrayName="recipes">
+              <div *ngFor="let recipe of recipes.controls; let i = index"
+                   [formGroupName]="i" class="recipe-row">
+
+                <div class="recipe-row-index">{{ i + 1 }}</div>
+
+                <div class="form-group recipe-ingredient">
+                  <label>Ingrediente <span class="required">*</span></label>
+                  <select formControlName="productId"
+                          [class.error]="getRecipeControl(i, 'productId').invalid && getRecipeControl(i, 'productId').touched">
+                    <option value="">Seleccionar...</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                      {{ product.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-group recipe-weight">
+                  <label>Cantidad <span class="required">*</span></label>
+                  <input type="number" formControlName="weight"
+                         placeholder="150" min="0.01" step="0.01"
+                         [class.error]="getRecipeControl(i, 'weight').invalid && getRecipeControl(i, 'weight').touched" />
+                </div>
+
+                <div class="form-group recipe-unit">
+                  <label>Unidad <span class="required">*</span></label>
+                  <select formControlName="unit">
+                    <option *ngFor="let u of UNITS_OPTIONS" [value]="u">{{ u }}</option>
+                  </select>
+                </div>
+
+                <button type="button" class="recipe-remove-btn" (click)="removeRecipe(i)"
+                        title="Eliminar ingrediente">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <button type="button" class="add-recipe-btn" (click)="addRecipe()">
+              <span class="material-symbols-outlined">add_circle</span>
+              Agregar ingrediente
+            </button>
+
+            <div class="error-message" *ngIf="isPrepared && recipes.length === 0">
+              Las bebidas preparadas requieren al menos un ingrediente
+            </div>
+          </ng-container>
+
+          <!-- ═══ OPCIONES ADICIONALES ═══ -->
+          <div class="section-divider">
+            <span>Opciones</span>
+          </div>
+
           <div class="form-group">
-            <label>Fotos de la Bebida <span class="required">*</span></label>
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="alcohol" />
+              <span>Contiene alcohol</span>
+            </label>
+          </div>
+
+          <!-- ═══ FOTOS ═══ -->
+          <div class="section-divider">
+            <span>Fotos</span>
+          </div>
+
+          <div class="form-group">
+            <label>Fotos de la bebida <span class="required">*</span></label>
             <div class="photos-section">
-              <!-- Input para seleccionar archivos -->
               <div class="upload-area">
-                <input 
-                  type="file" 
-                  id="photoInput" 
-                  accept="image/*"
-                  (change)="onFileSelected($event)"
-                  [disabled]="uploadingImage || uploadedPhotos.length >= 3"
-                  #fileInput
-                >
-                <label for="photoInput" class="upload-label" [class.disabled]="uploadingImage || uploadedPhotos.length >= 3">
+                <input type="file" id="photoInput" accept="image/*"
+                       (change)="onFileSelected($event)"
+                       [disabled]="uploadingImage || uploadedPhotos.length >= 3"
+                       #fileInput>
+                <label for="photoInput" class="upload-label"
+                       [class.disabled]="uploadingImage || uploadedPhotos.length >= 3">
                   <span *ngIf="uploadingImage">Subiendo...</span>
                   <span *ngIf="!uploadingImage">
                     {{ uploadedPhotos.length >= 3 ? 'Máximo 3 fotos' : 'Seleccionar imagen' }}
@@ -149,37 +263,28 @@
                 <small class="help-text">Máximo 3 fotos (JPG, PNG, WEBP)</small>
               </div>
 
-              <!-- Grid de fotos subidas -->
               <div class="photos-grid" *ngIf="uploadedPhotos.length > 0">
                 <div class="photo-item" *ngFor="let photo of uploadedPhotos; let i = index">
                   <img [src]="photo" alt="Foto de la bebida" class="photo-preview">
-                  <button type="button" class="remove-photo" (click)="removePhoto(i)" title="Eliminar foto">
-                    ×
-                  </button>
+                  <button type="button" class="remove-photo" (click)="removePhoto(i)" title="Eliminar foto">×</button>
                 </div>
               </div>
 
-              <!-- Mensaje si no hay fotos -->
               <div class="no-photos" *ngIf="uploadedPhotos.length === 0 && !uploadingImage">
                 <p>No hay fotos agregadas. Selecciona al menos una imagen.</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+
+        </div><!-- /!loading -->
+      </div><!-- /modal-body -->
 
       <div class="modal-footer">
-        <app-button 
-          variant="secondary" 
-          type="button"
-          (clicked)="close()"
-          [disabled]="loading">
+        <app-button variant="secondary" type="button" (clicked)="close()" [disabled]="loading">
           Cancelar
         </app-button>
-        <app-button 
-          variant="primary" 
-          type="submit"
-          [disabled]="loading || drinkForm.invalid || uploadedPhotos.length === 0">
+        <app-button variant="primary" type="submit"
+          [disabled]="loading || drinkForm.invalid || uploadedPhotos.length === 0 || (isPrepared && recipes.length === 0)">
           {{ isEditMode ? 'Actualizar' : 'Crear' }}
         </app-button>
       </div>

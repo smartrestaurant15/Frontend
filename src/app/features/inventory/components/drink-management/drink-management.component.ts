@@ -26,7 +26,15 @@ export class DrinkManagementComponent implements OnInit {
   }
 
   get alcoholCount(): number {
-    return this.drinks.filter((d: any) => d.alcohol).length;
+    return this.drinks.filter(d => d.alcohol).length;
+  }
+
+  get preparedCount(): number {
+    return this.drinks.filter(d => d.drinkType === 'PREPARED').length;
+  }
+
+  get simpleCount(): number {
+    return this.drinks.filter(d => d.drinkType !== 'PREPARED').length;
   }
 
   constructor(

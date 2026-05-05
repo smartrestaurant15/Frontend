@@ -19,6 +19,7 @@ import { LoadingSpinnerComponent } from './components/ui/loading-spinner/loading
 import { ToastComponent } from './components/ui/toast/toast.component';
 import { AccessibilityComponent } from './components/ui/accessibility/accessibility.component';
 import { AccessDeniedComponent } from './components/access-denied/access-denied.component';
+import { ActiveMenuDisplayComponent } from './components/active-menu-display/active-menu-display.component';
 
 // Directives
 import { HasRoleDirective } from './directives/has-role.directive';
@@ -45,6 +46,7 @@ import { CurrencyFormatPipe } from './pipes/currency-format.pipe';
     ToastComponent,
     AccessibilityComponent,
     AccessDeniedComponent,
+    ActiveMenuDisplayComponent,
 
     // Directives
     HasRoleDirective,
@@ -79,6 +81,7 @@ import { CurrencyFormatPipe } from './pipes/currency-format.pipe';
     ToastComponent,
     AccessibilityComponent,
     AccessDeniedComponent,
+    ActiveMenuDisplayComponent,
 
     // Directives
     HasRoleDirective,

@@ -1,0 +1,462 @@
+<div *ngIf="loading" class="flex items-center justify-center h-screen bg-[#0a0a0a]">
+  <div class="w-8 h-8 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+</div>
+
+<div *ngIf="!loading && publication" class="flex h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body">
+
+  <!-- LEFT: Secciones y opciones -->
+  <section class="flex flex-col flex-1 border-r border-[#4d463a]/10">
+
+    <!-- Header -->
+    <div class="px-8 py-6 border-b border-[#4d463a]/10 flex justify-between items-center flex-shrink-0 bg-[#0a0a0a] z-10">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack()" class="text-[#998f81] hover:text-primary transition-colors">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-0.5 capitalize">
+            {{ formatDate(publication.date) }}
+          </p>
+          <div class="flex items-center gap-2">
+            <h2 class="font-headline text-xl italic text-[#e5e2e1]">{{ getTimeSlotLabel(publication.timeSlot) }}</h2>
+            <span class="px-2 py-0.5 font-label text-[9px] uppercase tracking-widest rounded-sm"
+                  [ngClass]="getStatusClass(publication.status)">
+              {{ getStatusLabel(publication.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción según estado -->
+      <div class="flex items-center gap-2">
+        <button *ngIf="canPublish()" (click)="publish()" [disabled]="saving"
+                class="btn-metallic text-on-primary font-label text-[10px] uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all disabled:opacity-40">
+          <span class="material-symbols-outlined text-sm">publish</span>Publicar
+        </button>
+        <button *ngIf="canPublish()" (click)="deletePublication()"
+                class="flex items-center gap-2 px-4 py-2.5 border border-red-900/30 text-red-400 hover:bg-red-900/10 font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors">
+          <span class="material-symbols-outlined text-sm">delete</span>Eliminar
+        </button>
+        <button *ngIf="canAdjustPortions()" (click)="openAdjustPortions()"
+                class="flex items-center gap-2 px-4 py-2.5 border border-[#4d463a]/30 text-[#998f81] hover:text-[#e5e2e1] font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors">
+          <span class="material-symbols-outlined text-sm">tune</span>Porciones
+        </button>
+        <button *ngIf="canClose()" (click)="closeMenu()" [disabled]="saving"
+                class="flex items-center gap-2 px-4 py-2.5 border border-[#4d463a]/30 text-[#998f81] hover:text-[#e5e2e1] font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors disabled:opacity-40">
+          <span class="material-symbols-outlined text-sm">stop_circle</span>Cerrar
+        </button>
+      </div>
+    </div>
+
+    <!-- Secciones -->
+    <div class="flex-1 overflow-y-auto p-8 space-y-6">
+
+      <!-- Empty state -->
+      <div *ngIf="publication.sections.length === 0"
+           class="flex flex-col items-center justify-center py-16 text-[#998f81]/50">
+        <span class="material-symbols-outlined text-4xl mb-3">view_list</span>
+        <p class="font-body text-sm">No hay secciones. Agrega la primera.</p>
+      </div>
+
+      <!-- Sección card -->
+      <div *ngFor="let section of publication.sections"
+           class="border border-[#4d463a]/15 bg-[#111111]">
+
+        <!-- Sección header -->
+        <div class="px-6 py-4 flex items-center justify-between border-b border-[#4d463a]/10">
+          <div class="flex items-center gap-3">
+            <span class="font-headline text-base text-[#e5e2e1]">{{ section.name }}</span>
+            <span *ngIf="section.required"
+                  class="px-2 py-0.5 bg-amber-900/20 text-amber-400 font-label text-[9px] uppercase tracking-widest rounded-sm">
+              Obligatoria
+            </span>
+            <span *ngIf="!section.required"
+                  class="px-2 py-0.5 bg-[#2a2a2a] text-[#4d463a] font-label text-[9px] uppercase tracking-widest rounded-sm">
+              Opcional
+            </span>
+            <span class="font-label text-[9px] text-[#998f81]">
+              Elige {{ section.maxSelections }}
+            </span>
+            <span *ngIf="!section.includedInBasePrice"
+                  class="font-label text-[9px] text-red-400">costo adicional</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button *ngIf="canAddOptions()" (click)="openAddOption(section.id)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 border border-[#4d463a]/30 text-[#998f81] hover:text-primary hover:border-primary/30 font-label text-[9px] uppercase tracking-widest rounded-sm transition-colors">
+              <span class="material-symbols-outlined text-sm">add</span>Opción
+            </button>
+            <button *ngIf="canModifyStructure()" (click)="deleteSection(section.id)"
+                    class="p-1.5 text-[#4d463a] hover:text-red-400 transition-colors">
+              <span class="material-symbols-outlined text-base">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Descripción de sección -->
+        <p *ngIf="section.description"
+           class="px-6 py-2 font-body text-xs text-[#998f81] border-b border-[#4d463a]/10">
+          {{ section.description }}
+        </p>
+
+        <!-- Opciones vacías -->
+        <div *ngIf="section.options.length === 0"
+             class="px-6 py-6 text-center text-[#4d463a]/60">
+          <p class="font-body text-xs">Sin opciones. Agrega al menos una.</p>
+        </div>
+
+        <!-- Lista de opciones -->
+        <div class="divide-y divide-[#4d463a]/10">
+          <div *ngFor="let opt of section.options"
+               class="px-6 py-3 flex items-center gap-4 transition-colors"
+               [ngClass]="opt.active ? '' : 'opacity-40'">
+
+            <!-- Foto -->
+            <div class="w-10 h-10 bg-[#1a1a1a] rounded-sm overflow-hidden flex-shrink-0">
+              <img *ngIf="opt.itemPhoto" [src]="opt.itemPhoto" [alt]="opt.itemName"
+                   class="w-full h-full object-cover">
+              <div *ngIf="!opt.itemPhoto"
+                   class="w-full h-full flex items-center justify-center text-[#4d463a]">
+                <span class="material-symbols-outlined text-sm">restaurant</span>
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <p class="font-body text-sm text-[#e5e2e1] truncate">{{ opt.itemName }}</p>
+                <span class="px-1.5 py-0.5 font-label text-[8px] uppercase tracking-wider rounded-sm flex-shrink-0"
+                      [ngClass]="getItemTypeClass(opt.itemType)">
+                  {{ getItemTypeLabel(opt.itemType) }}
+                </span>
+              </div>
+              <div class="flex items-center gap-3 mt-0.5">
+                <span *ngIf="opt.additionalCost > 0"
+                      class="font-label text-[10px] text-amber-400">
+                  +{{ opt.additionalCost | currency:'COP':'symbol':'1.0-0' }}
+                </span>
+                <span *ngIf="opt.additionalCost === 0"
+                      class="font-label text-[10px] text-[#4d463a]">Incluida</span>
+                <span *ngIf="opt.maxPortions !== null"
+                      class="font-label text-[10px] text-[#998f81]">
+                  {{ opt.availablePortions }}/{{ opt.maxPortions }} porciones
+                </span>
+              </div>
+            </div>
+
+            <!-- Acciones opción -->
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button *ngIf="publication.status !== 'CLOSED'" (click)="toggleOption(section.id, opt.id)"
+                      class="p-1.5 transition-colors"
+                      [ngClass]="opt.active ? 'text-green-400 hover:text-[#998f81]' : 'text-[#4d463a] hover:text-green-400'">
+                <span class="material-symbols-outlined text-base">
+                  {{ opt.active ? 'toggle_on' : 'toggle_off' }}
+                </span>
+              </button>
+              <button *ngIf="canAddOptions()" (click)="deleteOption(section.id, opt.id)"
+                      class="p-1.5 text-[#4d463a] hover:text-red-400 transition-colors">
+                <span class="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón agregar sección -->
+      <button *ngIf="canModifyStructure()" (click)="openAddSection()"
+              class="w-full py-4 border border-dashed border-[#4d463a]/30 text-[#998f81] hover:text-primary hover:border-primary/30 font-label text-[10px] uppercase tracking-widest transition-colors flex items-center justify-center gap-2 rounded-sm">
+        <span class="material-symbols-outlined text-sm">add</span>Agregar Sección
+      </button>
+
+    </div>
+  </section>
+
+  <!-- RIGHT: Sidebar info -->
+  <section class="w-72 bg-[#111111] p-8 flex-shrink-0 flex flex-col gap-5 overflow-y-auto">
+
+    <div class="border-b border-[#4d463a]/20 pb-4">
+      <h3 class="font-headline text-lg italic text-primary">Detalles</h3>
+    </div>
+
+    <!-- Info cards -->
+    <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-4 space-y-3">
+      <div class="flex justify-between">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Precio base</p>
+        <p class="font-headline text-sm text-primary">{{ publication.basePrice | currency:'COP':'symbol':'1.0-0' }}</p>
+      </div>
+      <div class="flex justify-between">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Secciones</p>
+        <p class="font-headline text-sm text-[#e5e2e1]">{{ publication.sections.length }}</p>
+      </div>
+      <div *ngIf="publication.templateName" class="flex justify-between">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Plantilla</p>
+        <p class="font-body text-xs text-[#e5e2e1] text-right max-w-[120px] truncate">{{ publication.templateName }}</p>
+      </div>
+    </div>
+
+    <!-- Porciones -->
+    <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-4">
+      <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Porciones</p>
+      <div class="flex justify-between items-baseline mb-2">
+        <span class="font-headline text-2xl text-[#e5e2e1]">{{ publication.availablePortions }}</span>
+        <span class="font-label text-[10px] text-[#998f81]">de {{ publication.totalPortions }}</span>
+      </div>
+      <div class="w-full h-1.5 bg-[#2a2a2a] rounded-full overflow-hidden">
+        <div class="h-full rounded-full transition-all"
+             [ngClass]="portionsPercent() > 50 ? 'bg-green-500/60' : portionsPercent() > 20 ? 'bg-amber-500/60' : 'bg-red-500/60'"
+             [style.width.%]="portionsPercent()"></div>
+      </div>
+      <p class="font-label text-[9px] text-[#998f81] mt-1.5 text-right">{{ portionsPercent() }}% disponibles</p>
+    </div>
+
+    <!-- Estado timeline -->
+    <div class="space-y-2">
+      <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81]">Ciclo de Vida</p>
+      <div class="flex items-center gap-2">
+        <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+             [ngClass]="publication.status === 'DRAFT' ? 'bg-primary' : 'bg-[#2a2a2a]'"></div>
+        <span class="font-label text-[10px] uppercase tracking-wider"
+              [ngClass]="publication.status === 'DRAFT' ? 'text-[#e5e2e1]' : 'text-[#4d463a]'">
+          Borrador
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+             [ngClass]="publication.status === 'PUBLISHED' ? 'bg-primary' : 'bg-[#2a2a2a]'"></div>
+        <span class="font-label text-[10px] uppercase tracking-wider"
+              [ngClass]="publication.status === 'PUBLISHED' ? 'text-[#e5e2e1]' : 'text-[#4d463a]'">
+          Publicado
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+             [ngClass]="publication.status === 'SOLD_OUT' ? 'bg-primary' : 'bg-[#2a2a2a]'"></div>
+        <span class="font-label text-[10px] uppercase tracking-wider"
+              [ngClass]="publication.status === 'SOLD_OUT' ? 'text-[#e5e2e1]' : 'text-[#4d463a]'">
+          Agotado
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+             [ngClass]="publication.status === 'CLOSED' ? 'bg-primary' : 'bg-[#2a2a2a]'"></div>
+        <span class="font-label text-[10px] uppercase tracking-wider"
+              [ngClass]="publication.status === 'CLOSED' ? 'text-[#e5e2e1]' : 'text-[#4d463a]'">
+          Cerrado
+        </span>
+      </div>
+    </div>
+
+    <!-- Hint según estado -->
+    <div *ngIf="publication.status === 'DRAFT'"
+         class="bg-[#998f81]/5 border border-[#998f81]/15 p-3 rounded-sm">
+      <p class="font-body text-xs text-[#998f81]">
+        Configura las secciones y opciones antes de publicar. Al publicar se validarán todas las secciones obligatorias.
+      </p>
+    </div>
+    <div *ngIf="publication.status === 'SOLD_OUT'"
+         class="bg-red-900/10 border border-red-900/20 p-3 rounded-sm">
+      <p class="font-body text-xs text-red-400">
+        El menú está agotado. Puedes aumentar las porciones o reactivar opciones.
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- Modal: Agregar sección -->
+<div *ngIf="isAddSectionOpen"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+     (click)="isAddSectionOpen = false">
+  <div class="bg-[#1c1b1b] border border-[#4d463a]/30 rounded-sm w-full max-w-md shadow-2xl"
+       (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between px-8 py-5 border-b border-[#4d463a]/20">
+      <h3 class="font-headline text-lg font-light text-[#e5e2e1]">Nueva Sección</h3>
+      <button (click)="isAddSectionOpen = false" class="text-[#998f81] hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form [formGroup]="sectionForm" (ngSubmit)="submitAddSection()" class="px-8 py-6 space-y-4">
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Nombre *</label>
+        <input type="text" formControlName="name"
+               class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none"
+               placeholder="ej: Plato Principal">
+      </div>
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Descripción</label>
+        <input type="text" formControlName="description"
+               class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none"
+               placeholder="Descripción opcional">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Selecciones máx.</label>
+          <input type="number" formControlName="maxSelections" min="1"
+                 class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Orden</label>
+          <input type="number" formControlName="displayOrder" min="0"
+                 class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none">
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="required" class="accent-primary w-3 h-3">
+          <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Obligatoria</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" formControlName="includedInBasePrice" class="accent-primary w-3 h-3">
+          <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Incluida en precio</span>
+        </label>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="isAddSectionOpen = false"
+                class="flex-1 py-2.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors hover:text-[#e5e2e1]">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="saving"
+                class="flex-1 btn-metallic text-on-primary font-label text-[10px] uppercase tracking-widest py-2.5 rounded-sm disabled:opacity-40 hover:opacity-90 flex items-center justify-center gap-2">
+          <div *ngIf="saving" class="w-3 h-3 border-2 border-on-primary/40 border-t-on-primary rounded-full animate-spin"></div>
+          {{ saving ? 'Guardando...' : 'Agregar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Agregar opción -->
+<div *ngIf="isAddOptionOpen"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+     (click)="isAddOptionOpen = false">
+  <div class="bg-[#1c1b1b] border border-[#4d463a]/30 rounded-sm w-full max-w-lg shadow-2xl"
+       (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between px-8 py-5 border-b border-[#4d463a]/20">
+      <h3 class="font-headline text-lg font-light text-[#e5e2e1]">Nueva Opción</h3>
+      <button (click)="isAddOptionOpen = false" class="text-[#998f81] hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form [formGroup]="optionForm" (ngSubmit)="submitAddOption()" class="px-8 py-6 space-y-4">
+
+      <!-- Tipo de ítem -->
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Tipo</label>
+        <div class="grid grid-cols-3 gap-2">
+          <label *ngFor="let t of [['DISH','Plato'],['DRINK','Bebida'],['ADDITION','Adición']]"
+                 class="flex items-center justify-center py-2 border rounded-sm cursor-pointer transition-all"
+                 [ngClass]="optionForm.value.itemType === t[0]
+                   ? 'border-primary/50 bg-primary/8 text-primary'
+                   : 'border-[#4d463a]/25 text-[#998f81] hover:border-[#4d463a]/50'">
+            <input type="radio" formControlName="itemType" [value]="t[0]" class="hidden"
+                   (change)="onItemTypeChange()">
+            <span class="font-label text-[9px] uppercase tracking-wider">{{ t[1] }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Buscador de catálogo -->
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">
+          Seleccionar ítem
+          <span *ngIf="selectedItem" class="ml-1 text-primary normal-case tracking-normal">— {{ selectedItem.name }}</span>
+        </label>
+        <div class="relative mb-2">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#998f81] text-sm">search</span>
+          <input type="text" [(ngModel)]="catalogSearch" [ngModelOptions]="{standalone: true}"
+                 class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 pl-9 pr-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none"
+                 placeholder="Buscar...">
+        </div>
+        <div class="max-h-44 overflow-y-auto border border-[#4d463a]/15 rounded-sm">
+          <div *ngIf="loadingCatalog" class="flex items-center justify-center py-6">
+            <div class="w-5 h-5 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+          </div>
+          <div *ngIf="!loadingCatalog && filteredCatalog.length === 0"
+               class="py-4 text-center text-[#4d463a] font-body text-xs">Sin resultados</div>
+          <div *ngFor="let item of filteredCatalog"
+               (click)="selectItem(item)"
+               class="flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors"
+               [ngClass]="selectedItem?.id === item.id
+                 ? 'bg-primary/10 border-l-2 border-primary'
+                 : 'hover:bg-[#1a1a1a]'">
+            <div class="w-8 h-8 bg-[#1a1a1a] rounded-sm overflow-hidden flex-shrink-0">
+              <img *ngIf="item.photo" [src]="item.photo" [alt]="item.name" class="w-full h-full object-cover">
+              <div *ngIf="!item.photo" class="w-full h-full flex items-center justify-center text-[#4d463a]">
+                <span class="material-symbols-outlined text-xs">restaurant</span>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body text-xs text-[#e5e2e1] truncate">{{ item.name }}</p>
+              <p class="font-label text-[9px] text-[#998f81]">{{ item.price | currency:'COP':'symbol':'1.0-0' }}</p>
+            </div>
+            <span *ngIf="selectedItem?.id === item.id" class="material-symbols-outlined text-primary text-sm">check</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Porciones y costo adicional -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">
+            Porciones máx. <span class="text-[#4d463a] normal-case tracking-normal">(opcional)</span>
+          </label>
+          <input type="number" formControlName="maxPortions" min="1"
+                 class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none"
+                 placeholder="Sin límite">
+        </div>
+        <div>
+          <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Costo adicional (COP)</label>
+          <input type="number" formControlName="additionalCost" min="0"
+                 class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none"
+                 placeholder="0">
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="isAddOptionOpen = false"
+                class="flex-1 py-2.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors hover:text-[#e5e2e1]">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="saving || !selectedItem"
+                class="flex-1 btn-metallic text-on-primary font-label text-[10px] uppercase tracking-widest py-2.5 rounded-sm disabled:opacity-40 hover:opacity-90 flex items-center justify-center gap-2">
+          <div *ngIf="saving" class="w-3 h-3 border-2 border-on-primary/40 border-t-on-primary rounded-full animate-spin"></div>
+          {{ saving ? 'Guardando...' : 'Agregar Opción' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Ajustar porciones -->
+<div *ngIf="isAdjustPortionsOpen"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+     (click)="isAdjustPortionsOpen = false">
+  <div class="bg-[#1c1b1b] border border-[#4d463a]/30 rounded-sm w-full max-w-sm shadow-2xl"
+       (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between px-8 py-5 border-b border-[#4d463a]/20">
+      <h3 class="font-headline text-lg font-light text-[#e5e2e1]">Ajustar Porciones</h3>
+      <button (click)="isAdjustPortionsOpen = false" class="text-[#998f81] hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form [formGroup]="portionsForm" (ngSubmit)="submitAdjustPortions()" class="px-8 py-6 space-y-4">
+      <p class="font-body text-xs text-[#998f81]">
+        Actualmente: {{ publication?.availablePortions }} disponibles de {{ publication?.totalPortions }} totales.
+      </p>
+      <div>
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">Nuevo total de porciones</label>
+        <input type="number" formControlName="totalPortions" min="1"
+               class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none">
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="button" (click)="isAdjustPortionsOpen = false"
+                class="flex-1 py-2.5 border border-[#4d463a]/30 text-[#998f81] font-label text-[10px] uppercase tracking-widest rounded-sm hover:text-[#e5e2e1] transition-colors">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="saving"
+                class="flex-1 btn-metallic text-on-primary font-label text-[10px] uppercase tracking-widest py-2.5 rounded-sm disabled:opacity-40 hover:opacity-90 flex items-center justify-center gap-2">
+          <div *ngIf="saving" class="w-3 h-3 border-2 border-on-primary/40 border-t-on-primary rounded-full animate-spin"></div>
+          {{ saving ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

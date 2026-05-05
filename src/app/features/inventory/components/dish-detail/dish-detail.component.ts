@@ -13,6 +13,7 @@ export class DishDetailComponent implements OnInit {
   dish: DishDetailResponse | null = null;
   loading = false;
   selectedPhotoIndex = 0;
+  Math = Math;
 
   constructor(
     private route: ActivatedRoute,

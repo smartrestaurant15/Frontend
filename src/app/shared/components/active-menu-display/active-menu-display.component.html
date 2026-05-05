@@ -1,0 +1,123 @@
+<!-- Loading State -->
+<div *ngIf="loading" class="flex items-center justify-center py-16">
+  <div class="w-8 h-8 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+</div>
+
+<!-- No Menu Available -->
+<div *ngIf="!loading && !menu" class="text-center py-16">
+  <span class="material-symbols-outlined text-5xl text-[#4d463a] mb-4 block">restaurant_menu</span>
+  <h3 class="font-headline text-xl text-[#998f81] mb-2">No hay menú disponible</h3>
+  <p class="font-body text-sm text-[#4d463a]">
+    En este momento no tenemos menú del día publicado para esta franja horaria.
+  </p>
+</div>
+
+<!-- Menu Display -->
+<div *ngIf="!loading && menu" class="space-y-6">
+  
+  <!-- Menu Header -->
+  <div class="bg-[#111111] border border-[#4d463a]/15 p-6 rounded-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-primary text-2xl">{{ getTimeSlotIcon(menu.timeSlot) }}</span>
+        <div>
+          <h2 class="font-headline text-2xl text-[#e5e2e1]">Menú del Día</h2>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] capitalize">
+            {{ formatDate(menu.date) }} • {{ getTimeSlotLabel(menu.timeSlot) }}
+          </p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Precio Base</p>
+        <p class="font-headline text-3xl text-primary">{{ menu.basePrice | currency:'COP':'symbol':'1.0-0' }}</p>
+      </div>
+    </div>
+    
+    <div *ngIf="menu.availablePortions > 0" class="flex items-center gap-2 text-sm">
+      <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
+      <span class="font-body text-[#d0c5b5]">{{ menu.availablePortions }} porciones disponibles</span>
+    </div>
+    <div *ngIf="menu.availablePortions === 0" class="flex items-center gap-2 text-sm">
+      <span class="material-symbols-outlined text-red-400 text-base">cancel</span>
+      <span class="font-body text-red-400">Agotado</span>
+    </div>
+  </div>
+
+  <!-- Sections -->
+  <div class="space-y-4">
+    <div *ngFor="let section of menu.sections" class="bg-[#111111] border border-[#4d463a]/15 rounded-sm overflow-hidden">
+      
+      <!-- Section Header -->
+      <div class="px-6 py-4 border-b border-[#4d463a]/10 bg-[#0a0a0a]">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <h3 class="font-headline text-lg text-[#e5e2e1]">{{ section.name }}</h3>
+            <span *ngIf="section.required" 
+                  class="px-2 py-0.5 bg-amber-900/20 text-amber-400 font-label text-[9px] uppercase tracking-widest rounded-sm">
+              Obligatoria
+            </span>
+            <span *ngIf="!section.required"
+                  class="px-2 py-0.5 bg-[#2a2a2a] text-[#4d463a] font-label text-[9px] uppercase tracking-widest rounded-sm">
+              Opcional
+            </span>
+          </div>
+          <span class="font-label text-[10px] text-[#998f81]">
+            Elige {{ section.maxSelections }}
+          </span>
+        </div>
+        <p *ngIf="section.description" class="font-body text-xs text-[#998f81] mt-2">
+          {{ section.description }}
+        </p>
+      </div>
+
+      <!-- Options -->
+      <div class="divide-y divide-[#4d463a]/10">
+        <div *ngFor="let option of section.options" 
+             class="px-6 py-4 flex items-center gap-4 transition-colors"
+             [class.opacity-40]="!option.active || (option.maxPortions !== null && option.availablePortions === 0)">
+          
+          <!-- Photo -->
+          <div class="w-16 h-16 bg-[#1a1a1a] rounded-sm overflow-hidden flex-shrink-0">
+            <img *ngIf="option.itemPhoto" [src]="option.itemPhoto" [alt]="option.itemName"
+                 class="w-full h-full object-cover">
+            <div *ngIf="!option.itemPhoto"
+                 class="w-full h-full flex items-center justify-center text-[#4d463a]">
+              <span class="material-symbols-outlined text-xl">restaurant</span>
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <h4 class="font-body text-base text-[#e5e2e1] mb-1">{{ option.itemName }}</h4>
+            <div class="flex items-center gap-3 flex-wrap">
+              <span *ngIf="option.additionalCost > 0"
+                    class="font-label text-[10px] text-amber-400">
+                +{{ option.additionalCost | currency:'COP':'symbol':'1.0-0' }}
+              </span>
+              <span *ngIf="option.additionalCost === 0"
+                    class="font-label text-[10px] text-green-400">
+                Incluido
+              </span>
+              <span *ngIf="option.maxPortions !== null"
+                    class="font-label text-[10px] text-[#998f81]">
+                {{ option.availablePortions }}/{{ option.maxPortions }} disponibles
+              </span>
+              <span *ngIf="!option.active"
+                    class="font-label text-[10px] text-red-400">
+                No disponible
+              </span>
+            </div>
+          </div>
+
+          <!-- Add to Cart Button (if enabled) -->
+          <button *ngIf="showAddToCart && option.active && (option.maxPortions === null || option.availablePortions! > 0)"
+                  (click)="onAddToCart(option)"
+                  class="px-4 py-2 bg-primary hover:bg-primary/90 text-on-primary font-label text-[10px] uppercase tracking-widest rounded-sm transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+            Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

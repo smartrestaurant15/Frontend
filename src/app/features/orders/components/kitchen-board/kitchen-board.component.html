@@ -60,7 +60,7 @@
   <div class="flex gap-3 mb-8 flex-wrap">
     <div class="px-4 py-2 bg-[#1a1a1a] border border-[#4d463a]/20 flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-      <span class="font-label text-xs text-[#d0c5b5]">Pendientes</span>
+      <span class="font-label text-xs text-[#d0c5b5]">Enviados</span>
       <span class="font-headline text-sm text-[#e6c487]">{{ pendingOrders.length }}</span>
     </div>
     <div class="px-4 py-2 bg-[#1a1a1a] border border-[#4d463a]/20 flex items-center gap-2">
@@ -83,10 +83,10 @@
   <!-- Kanban board -->
   <div *ngIf="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-    <!-- ── PENDIENTES ───────────────────────────────────────── -->
+    <!-- ── ENVIADOS ──────────────────────────────────────────── -->
     <section class="kitchen-col">
       <div class="col-header border-l-2 border-amber-400 pl-3 mb-4 flex items-center justify-between">
-        <h2 class="font-headline text-base text-[#e5e2e1] uppercase tracking-wider">Pendientes</h2>
+        <h2 class="font-headline text-base text-[#e5e2e1] uppercase tracking-wider">Enviados</h2>
         <span class="bg-amber-400/10 text-amber-400 font-label text-xs px-2 py-0.5">
           {{ pendingOrders.length }}
         </span>
@@ -94,7 +94,7 @@
 
       <div *ngIf="pendingOrders.length === 0" class="empty-state">
         <span class="material-symbols-outlined text-3xl text-[#4d463a] mb-2">done_all</span>
-        <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin pedidos pendientes</p>
+        <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin pedidos enviados</p>
       </div>
 
       <div

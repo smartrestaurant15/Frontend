@@ -24,10 +24,11 @@ export class UserFormModalComponent implements OnInit {
   currentUser: User | null = null;
 
   roles = [
-    { value: UserRole.ADMIN, label: 'Administrador' },
-    { value: UserRole.KITCHEN, label: 'Cocina' },
-    { value: UserRole.WAITER, label: 'Mesero' },
-    { value: UserRole.CUSTOMER, label: 'Cliente' }
+    { value: UserRole.ADMIN,    label: 'Administrador' },
+    { value: UserRole.KITCHEN,  label: 'Cocina'        },
+    { value: UserRole.WAITER,   label: 'Mesero'        },
+    { value: UserRole.CASHIER,  label: 'Cajero'        },
+    { value: UserRole.CUSTOMER, label: 'Cliente'       }
   ];
 
   constructor(

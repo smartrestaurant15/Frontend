@@ -97,7 +97,8 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
       });
     };
 
-    this.orderService.getOrders(0, 'PENDING').subscribe({
+    // Columna 1: órdenes enviadas a cocina (SENT)
+    this.orderService.getOrders(0, 'SENT').subscribe({
       next: res => {
         this.pendingOrders = this.asArray(res.data);
         refreshDetail(this.pendingOrders);
@@ -106,6 +107,7 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
       error: () => { this.pendingOrders = []; this.loading = false; }
     });
 
+    // Columna 2: en preparación (IN_PROGRESS)
     this.orderService.getOrders(0, 'IN_PROGRESS').subscribe({
       next: res => {
         this.inProgressOrders = this.asArray(res.data);
@@ -114,6 +116,7 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
       error: () => { this.inProgressOrders = []; }
     });
 
+    // Columna 3: listos para entregar (COMPLETED)
     this.orderService.getOrders(0, 'COMPLETED').subscribe({
       next: res => { this.completedOrders = this.asArray(res.data); },
       error: () => { this.completedOrders = []; }
@@ -213,6 +216,7 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
   // ─── Actions ───────────────────────────────────────────────────────────────
 
   startOrder(order: Order): void {
+    // SENT → IN_PROGRESS
     this.orderService.updateOrder(order.id, { status: 'IN_PROGRESS' }).subscribe({
       next: () => {
         this.notification.showSuccess(`Orden #${order.id.slice(-6).toUpperCase()} iniciada`);
@@ -238,6 +242,7 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
 
   private confirmComplete(order: Order): void {
     this.confirmingId = null;
+    // IN_PROGRESS → COMPLETED
     this.orderService.updateOrder(order.id, { status: 'COMPLETED' }).subscribe({
       next: () => {
         this.notification.showSuccess(`Orden #${order.id.slice(-6).toUpperCase()} lista`);

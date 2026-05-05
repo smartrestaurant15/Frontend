@@ -5,6 +5,7 @@ import { RoleGuard } from '@core/guards/role.guard';
 import { KitchenBoardComponent } from './components/kitchen-board/kitchen-board.component';
 import { WaiterOrdersComponent } from './components/waiter-orders/waiter-orders.component';
 import { CustomerOrdersComponent } from './components/customer-orders/customer-orders.component';
+import { CashierComponent } from './components/cashier/cashier.component';
 
 const routes: Routes = [
   {
@@ -22,6 +23,12 @@ const routes: Routes = [
         component: WaiterOrdersComponent,
         canActivate: [RoleGuard],
         data: { roles: ['WAITER', 'ADMIN'] }
+      },
+      {
+        path: 'cashier',
+        component: CashierComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['CASHIER', 'ADMIN'] }
       },
       {
         path: 'my-orders',

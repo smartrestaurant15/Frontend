@@ -69,8 +69,8 @@
         <h3 class="font-headline text-base font-semibold text-[#e5e2e1] mb-3 truncate">{{ product.name }}</h3>
         <div class="flex items-center justify-between">
           <div>
-            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-0.5">Precio</p>
-            <p class="font-headline text-lg text-primary">{{ product.price | currency:'COP':'symbol':'1.0-0' }}</p>
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-0.5">Valor inventario</p>
+            <p class="font-headline text-lg text-primary">{{ product.totalInventoryValue | currency:'COP':'symbol':'1.0-0' }}</p>
           </div>
           <div class="text-right">
             <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-0.5">Stock mín.</p>

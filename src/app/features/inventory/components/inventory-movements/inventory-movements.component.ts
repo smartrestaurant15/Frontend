@@ -73,6 +73,23 @@ export class InventoryMovementsComponent implements OnInit {
     return type === 'ENTRY' ? 'badge-entry' : 'badge-exit';
   }
 
+  getCategoryLabel(category: string | null): string {
+    switch (category) {
+      case 'DRINK':    return 'Bebida';
+      case 'ADDITION': return 'Adición';
+      default:         return 'Insumo';
+    }
+  }
+
+  getQuantityLabel(movement: any): string {
+    if (movement.itemCategory === 'DRINK' || movement.itemCategory === 'ADDITION') {
+      const sign = movement.type === 'ENTRY' ? '+' : '-';
+      return `${sign}${movement.weight} uds`;
+    }
+    const sign = movement.type === 'ENTRY' ? '+' : '-';
+    return `${sign}${movement.weight}g`;
+  }
+
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleString('es-CO', {

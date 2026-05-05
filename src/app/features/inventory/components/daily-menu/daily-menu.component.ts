@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { DailyMenuService } from '../../services/daily-menu.service';
-import { DishService } from '../../services/dish.service';
-import { DailyMenuDish } from '../../models/daily-menu.model';
-import { DishResponse } from '../../models/dish.model';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { MenuPublicationService } from '../../services/menu-publication.service';
+import { MenuTemplateService } from '../../services/menu-template.service';
 import { NotificationService } from '@core/services/notification.service';
+import {
+  MenuPublicationSummaryDTO, MenuTemplateDTO,
+  MenuStatus, MenuTimeSlot, CreateMenuPublicationRequest
+} from '../../models/menu.model';
 
 @Component({
   selector: 'app-daily-menu',
@@ -12,155 +16,158 @@ import { NotificationService } from '@core/services/notification.service';
   styleUrls: ['./daily-menu.component.scss']
 })
 export class DailyMenuComponent implements OnInit {
-  dailyMenuDishes: DailyMenuDish[] = [];
-  availableDishes: DishResponse[] = [];
+  publications: MenuPublicationSummaryDTO[] = [];
+  templates: MenuTemplateDTO[] = [];
   loading = false;
-  loadingAvailable = false;
-  currentPage = 1;
+  currentPage = 0;
   hasMorePages = true;
   pageSize = 10;
-  isAddModalOpen = false;
+  statusFilter: MenuStatus | 'ALL' = 'ALL';
+  isCreateModalOpen = false;
+  saving = false;
+  createForm!: FormGroup;
+  filteredPublications: MenuPublicationSummaryDTO[] = [];
+
+  readonly statusFilters: { label: string; value: MenuStatus | 'ALL' }[] = [
+    { label: 'Todos',      value: 'ALL'       },
+    { label: 'Borrador',   value: 'DRAFT'     },
+    { label: 'Publicados', value: 'PUBLISHED' },
+    { label: 'Agotados',   value: 'SOLD_OUT'  },
+    { label: 'Cerrados',   value: 'CLOSED'    },
+  ];
 
   constructor(
-    private dailyMenuService: DailyMenuService,
-    private dishService: DishService,
+    private fb: FormBuilder,
+    private publicationService: MenuPublicationService,
+    private templateService: MenuTemplateService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.loadDailyMenu();
+    this.initForm();
+    this.loadPublications();
+    this.loadTemplates();
+    
+    // Recargar cuando volvemos a esta ruta
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      if (event.url.includes('/inventory/daily-menu') && !event.url.includes('/inventory/daily-menu/')) {
+        this.loadPublications();
+      }
+    });
   }
 
-  navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+  private initForm(): void {
+    const today = new Date().toISOString().split('T')[0];
+    this.createForm = this.fb.group({
+      date:          [today,   Validators.required],
+      timeSlot:      ['LUNCH', Validators.required],
+      basePrice:     [0,       [Validators.required, Validators.min(1)]],
+      totalPortions: [20,      [Validators.required, Validators.min(1)]],
+      templateId:    [null]
+    });
   }
 
-  loadDailyMenu(): void {
+  loadPublications(): void {
     this.loading = true;
-    this.dailyMenuService.getDailyMenuDishes(this.currentPage - 1).subscribe({
-      next: (response: any) => {
-        console.log('📦 [DAILY MENU] Respuesta completa:', response);
-        console.log('📦 [DAILY MENU] Claves del objeto:', Object.keys(response));
-        console.log('📦 [DAILY MENU] response.data:', response.data);
-        console.log('📦 [DAILY MENU] response.message:', response.message);
-        
-        // Intentar con ambos formatos: data o message
-        const dishes = response.data || response.message;
-        console.log('📦 [DAILY MENU] dishes:', dishes);
-        console.log('📦 [DAILY MENU] Es array?:', Array.isArray(dishes));
-        
-        if (!response.error && Array.isArray(dishes)) {
-          this.dailyMenuDishes = dishes;
-          this.hasMorePages = dishes.length >= this.pageSize;
-          console.log('✅ [DAILY MENU] Platos cargados:', this.dailyMenuDishes.length);
-        } else {
-          this.dailyMenuDishes = [];
-          this.hasMorePages = false;
-          console.log('⚠️ [DAILY MENU] No hay platos o formato incorrecto');
-        }
+    this.publicationService.getAll(this.currentPage).subscribe({
+      next: (res) => {
+        this.publications = Array.isArray(res.message) ? res.message : [];
+        this.hasMorePages = this.publications.length >= this.pageSize;
+        this.updateFilteredPublications();
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('❌ [DAILY MENU] Error:', err);
+      error: () => {
         this.loading = false;
-        this.dailyMenuDishes = [];
-        this.hasMorePages = false;
+        this.notificationService.showError('Error al cargar las publicaciones');
       }
     });
   }
 
-  loadAvailableDishes(): void {
-    this.loadingAvailable = true;
-    this.dishService.getDishes(0).subscribe({
-      next: (response) => {
-        console.log('📦 [AVAILABLE DISHES] Respuesta completa:', response);
-        console.log('📦 [AVAILABLE DISHES] response.message:', response.message);
-        
-        if (!response.error && Array.isArray(response.message)) {
-          this.availableDishes = response.message;
-          console.log('✅ [AVAILABLE DISHES] Platos disponibles:', this.availableDishes.length);
-        } else {
-          this.availableDishes = [];
-          console.log('⚠️ [AVAILABLE DISHES] No hay platos disponibles');
-        }
-        this.loadingAvailable = false;
+  updateFilteredPublications(): void {
+    if (this.statusFilter === 'ALL') {
+      this.filteredPublications = [...this.publications];
+    } else {
+      this.filteredPublications = this.publications.filter(p => p.status === this.statusFilter);
+    }
+  }
+
+  setStatusFilter(status: MenuStatus | 'ALL'): void {
+    this.statusFilter = status;
+    this.currentPage = 0;  // Resetear a la primera página
+    this.loadPublications();
+  }
+
+  private loadTemplates(): void {
+    this.templateService.getAll().subscribe({
+      next: (res) => { this.templates = Array.isArray(res.message) ? res.message : []; }
+    });
+  }
+
+  openCreateModal(): void { this.initForm(); this.isCreateModalOpen = true; }
+  closeCreateModal(): void { this.isCreateModalOpen = false; this.saving = false; }
+
+  submitCreate(): void {
+    if (this.createForm.invalid) { this.createForm.markAllAsTouched(); return; }
+    this.saving = true;
+    const v = this.createForm.value;
+    const request: CreateMenuPublicationRequest = {
+      date: v.date, timeSlot: v.timeSlot,
+      basePrice: v.basePrice, totalPortions: v.totalPortions,
+      templateId: v.templateId || undefined
+    };
+    this.publicationService.create(request).subscribe({
+      next: (res) => {
+        if (!res.error) {
+          this.notificationService.showSuccess('Publicación creada en borrador');
+          this.closeCreateModal();
+          this.currentPage = 0;
+          this.loadPublications();
+        } else { this.notificationService.showError(res.message as string); this.saving = false; }
       },
-      error: (err) => {
-        console.error('❌ [AVAILABLE DISHES] Error:', err);
-        this.loadingAvailable = false;
-        this.availableDishes = [];
-      }
+      error: () => { this.notificationService.showError('Error al crear'); this.saving = false; }
     });
   }
 
-  openAddModal(): void {
-    this.loadAvailableDishes();
-    this.isAddModalOpen = true;
+  goToDetail(id: string): void { this.router.navigate([id], { relativeTo: this.route }); }
+  goToTemplates(): void { this.router.navigate(['../menu-templates'], { relativeTo: this.route }); }
+
+  nextPage(): void { this.currentPage++; this.loadPublications(); }
+  previousPage(): void { if (this.currentPage > 0) { this.currentPage--; this.loadPublications(); } }
+
+  getStatusLabel(status: MenuStatus): string {
+    return { DRAFT: 'Borrador', PUBLISHED: 'Publicado', SOLD_OUT: 'Agotado', CLOSED: 'Cerrado' }[status];
   }
 
-  closeAddModal(): void {
-    this.isAddModalOpen = false;
+  getStatusClass(status: MenuStatus): string {
+    return {
+      DRAFT:     'bg-[#998f81]/10 text-[#998f81] border border-[#998f81]/20',
+      PUBLISHED: 'bg-green-900/20 text-green-400 border border-green-900/30',
+      SOLD_OUT:  'bg-red-900/20 text-red-400 border border-red-900/30',
+      CLOSED:    'bg-[#2a2a2a] text-[#4d463a] border border-[#4d463a]/20'
+    }[status];
   }
 
-  addDishToMenu(dishId: string): void {
-    console.log('➕ [ADD DISH] Agregando plato con ID:', dishId);
-    this.dailyMenuService.addDishToMenu(dishId).subscribe({
-      next: (response) => {
-        console.log('✅ [ADD DISH] Respuesta:', response);
-        if (!response.error) {
-          this.notificationService.showSuccess('Plato agregado al menú diario');
-          this.loadDailyMenu();
-          this.closeAddModal();
-        } else {
-          this.notificationService.showError(response.data as string);
-        }
-      },
-      error: (err) => {
-        console.error('❌ [ADD DISH] Error:', err);
-        this.notificationService.showError('Error al agregar plato al menú');
-      }
+  getTimeSlotLabel(slot: MenuTimeSlot): string {
+    return { LUNCH: 'Almuerzo', DINNER: 'Cena', ALL_DAY: 'Todo el día' }[slot];
+  }
+
+  getTimeSlotIcon(slot: MenuTimeSlot): string {
+    return { LUNCH: 'wb_sunny', DINNER: 'nights_stay', ALL_DAY: 'schedule' }[slot];
+  }
+
+  portionsPercent(pub: MenuPublicationSummaryDTO): number {
+    return pub.totalPortions ? Math.round((pub.availablePortions / pub.totalPortions) * 100) : 0;
+  }
+
+  formatDate(dateStr: string): string {
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es-CO', {
+      weekday: 'long', day: 'numeric', month: 'long'
     });
-  }
-
-  removeDishFromMenu(dishId: string): void {
-    if (confirm('¿Está seguro de eliminar este plato del menú diario?')) {
-      this.dailyMenuService.removeDishFromMenu(dishId).subscribe({
-        next: (response) => {
-          if (!response.error) {
-            this.notificationService.showSuccess('Plato eliminado del menú diario');
-            this.loadDailyMenu();
-          } else {
-            this.notificationService.showError(response.data as string);
-          }
-        },
-        error: () => {
-          this.notificationService.showError('Error al eliminar plato del menú');
-        }
-      });
-    }
-  }
-
-  nextPage(): void {
-    this.currentPage++;
-    this.loadDailyMenu();
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.loadDailyMenu();
-    }
-  }
-
-  onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    if (!img.src.includes('placeholder')) {
-      img.src = 'https://via.placeholder.com/150?text=Sin+Imagen';
-    }
-  }
-
-  viewDishDetail(dishId: string): void {
-    this.router.navigate(['/inventory/dishes', dishId]);
   }
 }

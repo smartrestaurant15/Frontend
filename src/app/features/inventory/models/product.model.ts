@@ -5,10 +5,14 @@ export interface Product {
   description: string;
   price: number;
   weight: number;
+  totalInventoryValue: number;
   photos: string[];
   state: 'ACTIVE' | 'INACTIVE';
   minimumStock: number;
-  currentWeight?: number; // Stock actual del producto
+  criticalStock?: number;
+  currentWeight?: number;
+  reservedWeight?: number;
+  availableWeight?: number;
   suplier?: Suplier;
 }
 
@@ -20,6 +24,7 @@ export interface CreateProductDTO {
   weight: number;
   photos: string[];
   minimumStock: number;
+  criticalStock: number;
 }
 
 // DTO para actualizar producto
@@ -30,11 +35,14 @@ export interface UpdateProductDTO {
   weight: number;
   photos: string[];
   minimumStock: number;
+  criticalStock: number;
+  suplier_id: string;
 }
 
 // DTO para movimiento de stock
 export interface StockMovementDTO {
   weight: number;
+  unitPrice?: number;
   reason?: string;
 }
 
@@ -54,7 +62,11 @@ export interface ProductListResponse {
   name: string;
   price: number;
   weight: number;
+  totalInventoryValue: number;
   photo: string;
   minimumStock: number;
+  criticalStock?: number;
+  reservedWeight?: number;
+  availableWeight?: number;
   state: string;
 }

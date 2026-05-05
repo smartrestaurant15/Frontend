@@ -1,0 +1,329 @@
+<div class="min-h-screen bg-[#0a0a0a] text-[#e5e2e1] font-body px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Finanzas</p>
+    <h1 class="font-headline text-2xl italic text-[#e5e2e1]">Resumen Contable</h1>
+  </div>
+
+  <!-- Date range filter -->
+  <div class="flex flex-col sm:flex-row items-end gap-4 mb-8 bg-[#111111] border border-[#4d463a]/15 p-6">
+    <div class="flex-1">
+      <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Desde</label>
+      <input type="date" [(ngModel)]="fromDate"
+             class="w-full bg-transparent border-0 border-b border-[#4d463a] focus:border-primary focus:ring-0 text-[#e5e2e1] py-2 px-0 font-body text-sm">
+    </div>
+    <div class="flex-1">
+      <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Hasta</label>
+      <input type="date" [(ngModel)]="toDate"
+             class="w-full bg-transparent border-0 border-b border-[#4d463a] focus:border-primary focus:ring-0 text-[#e5e2e1] py-2 px-0 font-body text-sm">
+    </div>
+    <button (click)="onApply()" [disabled]="loading"
+            class="px-6 py-2.5 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors font-label text-[10px] uppercase tracking-widest rounded-sm disabled:opacity-40 flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">search</span>
+      Consultar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-[#4d463a] border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && summary">
+
+    <!-- Fila 1: Flujo de caja -->
+    <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Flujo del periodo</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
+
+      <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-green-400 text-xl">payments</span>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Ingresos</p>
+        </div>
+        <p class="font-headline text-2xl text-green-400">{{ formatCurrency(summary.totalRevenue) }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">Facturas pagadas en el periodo</p>
+      </div>
+
+      <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-red-400 text-xl">trending_down</span>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Gastos en insumos</p>
+        </div>
+        <p class="font-headline text-2xl text-red-400">{{ formatCurrency(summary.totalExpenses) }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">Entradas de inventario, bebidas y adiciones</p>
+      </div>
+
+      <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-xl"
+                [class.text-green-400]="summary.estimatedProfit >= 0"
+                [class.text-red-400]="summary.estimatedProfit < 0">
+            {{ summary.estimatedProfit >= 0 ? 'trending_up' : 'trending_down' }}
+          </span>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Utilidad estimada</p>
+        </div>
+        <p class="font-headline text-2xl"
+           [class.text-green-400]="summary.estimatedProfit >= 0"
+           [class.text-red-400]="summary.estimatedProfit < 0">
+          {{ formatCurrency(summary.estimatedProfit) }}
+        </p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">Ingresos − gastos del periodo</p>
+      </div>
+
+    </div>
+
+    <!-- Fila 2: Capital en inventario -->
+    <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Capital en inventario hoy</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+
+      <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-amber-400 text-xl">warehouse</span>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Insumos / Ingredientes</p>
+        </div>
+        <p class="font-headline text-2xl text-amber-400">{{ formatCurrency(summary.inventoryCapital) }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">Σ peso × precio por gramo</p>
+      </div>
+
+      <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-sky-400 text-xl">local_bar</span>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Bebidas simples</p>
+        </div>
+        <p class="font-headline text-2xl text-sky-400">{{ formatCurrency(summary.drinkCapital) }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">Σ unidades × precio de compra</p>
+      </div>
+
+      <div class="bg-[#111111] border border-[#4d463a]/15 p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-purple-400 text-xl">add_circle</span>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Adiciones simples</p>
+        </div>
+        <p class="font-headline text-2xl text-purple-400">{{ formatCurrency(summary.additionCapital) }}</p>
+        <p class="font-label text-[10px] text-[#998f81] mt-1">Σ unidades × precio de compra</p>
+      </div>
+
+    </div>
+
+    <!-- Tabla de platos -->
+    <div class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden mb-6">
+      <div class="px-6 py-5 border-b border-[#4d463a]/10 flex items-center justify-between">
+        <h2 class="font-headline text-lg italic text-primary">Costo y Margen por Plato</h2>
+        <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">
+          {{ summary.dishCosts?.length ?? 0 }} platos
+        </span>
+      </div>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-[#0a0a0a] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+            <th class="px-5 py-4 font-medium">Plato</th>
+            <th class="px-5 py-4 font-medium text-right">Precio venta</th>
+            <th class="px-5 py-4 font-medium text-right">Costo producción</th>
+            <th class="px-5 py-4 font-medium text-right">Margen</th>
+            <th class="px-5 py-4 font-medium text-center">% Margen</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#4d463a]/5">
+          <tr *ngFor="let dish of sortedDishes()" class="hover:bg-[#1a1a1a] transition-colors">
+            <td class="px-5 py-4">
+              <p class="font-body text-sm text-[#e5e2e1]">{{ dish.dishName }}</p>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm text-primary">{{ formatCurrency(dish.dishPrice) }}</span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm text-amber-400">{{ formatCurrency(dish.estimatedCost) }}</span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm font-semibold"
+                    [class.text-green-400]="dish.margin >= 0"
+                    [class.text-red-400]="dish.margin < 0">
+                {{ formatCurrency(dish.margin) }}
+              </span>
+            </td>
+            <td class="px-5 py-4">
+              <div class="flex items-center gap-2 justify-center">
+                <div class="w-16 h-1.5 bg-[#4d463a]/20 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                       [class.bg-green-500]="marginPercent(dish) >= 30"
+                       [class.bg-amber-500]="marginPercent(dish) >= 10 && marginPercent(dish) < 30"
+                       [class.bg-red-500]="marginPercent(dish) < 10"
+                       [style.width.%]="Math.min(Math.max(marginPercent(dish), 0), 100)"></div>
+                </div>
+                <span class="font-label text-[10px] w-10 text-right"
+                      [class.text-green-400]="marginPercent(dish) >= 30"
+                      [class.text-amber-400]="marginPercent(dish) >= 10 && marginPercent(dish) < 30"
+                      [class.text-red-400]="marginPercent(dish) < 10">
+                  {{ marginPercent(dish) }}%
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!summary.dishCosts?.length">
+            <td colspan="5" class="px-5 py-16 text-center text-[#998f81]/50">
+              <span class="material-symbols-outlined text-3xl block mb-2">restaurant_menu</span>
+              <p class="font-body text-sm">No hay platos registrados</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tabla de bebidas -->
+    <div class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden mb-6">
+      <div class="px-6 py-5 border-b border-[#4d463a]/10 flex items-center justify-between">
+        <h2 class="font-headline text-lg italic text-sky-400">Costo y Margen por Bebida</h2>
+        <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">
+          {{ summary.drinkCosts?.length ?? 0 }} bebidas
+        </span>
+      </div>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-[#0a0a0a] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+            <th class="px-5 py-4 font-medium">Bebida</th>
+            <th class="px-5 py-4 font-medium text-center">Tipo</th>
+            <th class="px-5 py-4 font-medium text-right">Precio venta</th>
+            <th class="px-5 py-4 font-medium text-right">Costo unitario</th>
+            <th class="px-5 py-4 font-medium text-right">Margen</th>
+            <th class="px-5 py-4 font-medium text-center">% Margen</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#4d463a]/5">
+          <tr *ngFor="let drink of sortedDrinks()" class="hover:bg-[#1a1a1a] transition-colors">
+            <td class="px-5 py-4">
+              <p class="font-body text-sm text-[#e5e2e1]">{{ drink.drinkName }}</p>
+              <p *ngIf="drink.drinkType === 'SIMPLE'" class="font-label text-[10px] text-[#998f81]">
+                {{ drink.units }} uds disponibles
+              </p>
+            </td>
+            <td class="px-5 py-4 text-center">
+              <span class="inline-block px-2 py-0.5 text-[9px] font-label uppercase tracking-widest rounded-sm"
+                    [ngClass]="drink.drinkType === 'SIMPLE' ? 'bg-sky-500/10 text-sky-400' : 'bg-teal-500/10 text-teal-400'">
+                {{ drink.drinkType === 'SIMPLE' ? 'Simple' : 'Preparada' }}
+              </span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm text-primary">{{ formatCurrency(drink.salePrice) }}</span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm text-amber-400">{{ formatCurrency(drink.estimatedCost) }}</span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm font-semibold"
+                    [class.text-green-400]="drink.margin >= 0"
+                    [class.text-red-400]="drink.margin < 0">
+                {{ formatCurrency(drink.margin) }}
+              </span>
+            </td>
+            <td class="px-5 py-4">
+              <div class="flex items-center gap-2 justify-center">
+                <div class="w-16 h-1.5 bg-[#4d463a]/20 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                       [class.bg-green-500]="drinkMarginPercent(drink) >= 30"
+                       [class.bg-amber-500]="drinkMarginPercent(drink) >= 10 && drinkMarginPercent(drink) < 30"
+                       [class.bg-red-500]="drinkMarginPercent(drink) < 10"
+                       [style.width.%]="Math.min(Math.max(drinkMarginPercent(drink), 0), 100)"></div>
+                </div>
+                <span class="font-label text-[10px] w-10 text-right"
+                      [class.text-green-400]="drinkMarginPercent(drink) >= 30"
+                      [class.text-amber-400]="drinkMarginPercent(drink) >= 10 && drinkMarginPercent(drink) < 30"
+                      [class.text-red-400]="drinkMarginPercent(drink) < 10">
+                  {{ drinkMarginPercent(drink) }}%
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!summary.drinkCosts?.length">
+            <td colspan="6" class="px-5 py-16 text-center text-[#998f81]/50">
+              <span class="material-symbols-outlined text-3xl block mb-2">local_bar</span>
+              <p class="font-body text-sm">No hay bebidas registradas</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tabla de adiciones -->
+    <div class="bg-[#111111] border border-[#4d463a]/15 overflow-hidden">
+      <div class="px-6 py-5 border-b border-[#4d463a]/10 flex items-center justify-between">
+        <h2 class="font-headline text-lg italic text-purple-400">Costo y Margen por Adición</h2>
+        <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">
+          {{ summary.additionCosts?.length ?? 0 }} adiciones
+        </span>
+      </div>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-[#0a0a0a] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
+            <th class="px-5 py-4 font-medium">Adición</th>
+            <th class="px-5 py-4 font-medium text-center">Tipo</th>
+            <th class="px-5 py-4 font-medium text-right">Precio venta</th>
+            <th class="px-5 py-4 font-medium text-right">Costo unitario</th>
+            <th class="px-5 py-4 font-medium text-right">Margen</th>
+            <th class="px-5 py-4 font-medium text-center">% Margen</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#4d463a]/5">
+          <tr *ngFor="let addition of sortedAdditions()" class="hover:bg-[#1a1a1a] transition-colors">
+            <td class="px-5 py-4">
+              <p class="font-body text-sm text-[#e5e2e1]">{{ addition.additionName }}</p>
+              <p *ngIf="addition.additionType === 'SIMPLE'" class="font-label text-[10px] text-[#998f81]">
+                {{ addition.units }} uds disponibles
+              </p>
+            </td>
+            <td class="px-5 py-4 text-center">
+              <span class="inline-block px-2 py-0.5 text-[9px] font-label uppercase tracking-widest rounded-sm"
+                    [ngClass]="addition.additionType === 'SIMPLE' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'">
+                {{ addition.additionType === 'SIMPLE' ? 'Simple' : 'Preparada' }}
+              </span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm text-primary">{{ formatCurrency(addition.salePrice) }}</span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm text-amber-400">{{ formatCurrency(addition.estimatedCost) }}</span>
+            </td>
+            <td class="px-5 py-4 text-right">
+              <span class="font-body text-sm font-semibold"
+                    [class.text-green-400]="addition.margin >= 0"
+                    [class.text-red-400]="addition.margin < 0">
+                {{ formatCurrency(addition.margin) }}
+              </span>
+            </td>
+            <td class="px-5 py-4">
+              <div class="flex items-center gap-2 justify-center">
+                <div class="w-16 h-1.5 bg-[#4d463a]/20 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                       [class.bg-green-500]="additionMarginPercent(addition) >= 30"
+                       [class.bg-amber-500]="additionMarginPercent(addition) >= 10 && additionMarginPercent(addition) < 30"
+                       [class.bg-red-500]="additionMarginPercent(addition) < 10"
+                       [style.width.%]="Math.min(Math.max(additionMarginPercent(addition), 0), 100)"></div>
+                </div>
+                <span class="font-label text-[10px] w-10 text-right"
+                      [class.text-green-400]="additionMarginPercent(addition) >= 30"
+                      [class.text-amber-400]="additionMarginPercent(addition) >= 10 && additionMarginPercent(addition) < 30"
+                      [class.text-red-400]="additionMarginPercent(addition) < 10">
+                  {{ additionMarginPercent(addition) }}%
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!summary.additionCosts?.length">
+            <td colspan="6" class="px-5 py-16 text-center text-[#998f81]/50">
+              <span class="material-symbols-outlined text-3xl block mb-2">add_circle</span>
+              <p class="font-body text-sm">No hay adiciones registradas</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+
+  <!-- Sin datos -->
+  <div *ngIf="!loading && !summary" class="flex flex-col items-center justify-center h-48 text-[#998f81]/50">
+    <span class="material-symbols-outlined text-4xl mb-3">account_balance</span>
+    <p class="font-body text-sm">Selecciona un rango de fechas y presiona Consultar</p>
+  </div>
+
+</div>

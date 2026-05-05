@@ -3,11 +3,11 @@
 export interface DailyMenuDish {
   id: string;
   name: string;
-  price: string;
+  price: number;
   photo: string;
 }
 
 export interface DailyMenuResponse {
-  data: DailyMenuDish[] | string;
+  message: DailyMenuDish[] | string;
   error: boolean;
 }

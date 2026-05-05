@@ -48,12 +48,22 @@
       </div>
 
       <!-- Loading -->
-      <div *ngIf="loading" class="flex justify-center py-16">
+      <div *ngIf="loading || loadingMenu" class="flex justify-center py-16">
         <div class="w-7 h-7 border-2 border-[#4d463a] border-t-[#e6c487] rounded-full animate-spin"></div>
       </div>
 
+      <!-- Daily Menu Tab -->
+      <div *ngIf="!loadingMenu && activeTab === 'DAILY_MENU'" class="px-6 md:px-10 pb-10">
+        <app-active-menu-display 
+          [menu]="activeMenu" 
+          [loading]="loadingMenu"
+          [showAddToCart]="true"
+          (addToCart)="addMenuOptionToCart($event)">
+        </app-active-menu-display>
+      </div>
+
       <!-- Products grid -->
-      <div *ngIf="!loading" class="px-6 md:px-10 pb-10">
+      <div *ngIf="!loading && activeTab !== 'DAILY_MENU'" class="px-6 md:px-10 pb-10">
         <div *ngIf="currentProducts.length === 0" class="flex flex-col items-center py-20 gap-3">
           <span class="material-symbols-outlined text-4xl text-[#4d463a]">search_off</span>
           <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">Sin resultados</p>
@@ -84,7 +94,7 @@
             <div class="p-4 flex flex-col flex-1">
               <h3 class="font-body text-[#e5e2e1] text-sm leading-tight mb-1 flex-1">{{ product.name }}</h3>
               <div class="flex items-center justify-between mt-3">
-                <span class="font-headline text-[#e6c487] text-base">${{ product.price | number:'1.0-0' }}</span>
+                <span class="font-headline text-[#e6c487] text-base">${{ (product.salePrice ?? product.price) | number:'1.0-0' }}</span>
                 <button
                   (click)="addToCart(product)"
                   class="flex items-center gap-1 px-3 py-1.5 bg-[#e6c487]/10 border border-[#e6c487]/20 text-[#e6c487] font-label text-[10px] uppercase tracking-wider hover:bg-[#e6c487]/20 transition-colors">

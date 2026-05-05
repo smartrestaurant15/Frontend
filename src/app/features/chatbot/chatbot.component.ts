@@ -4,6 +4,7 @@ import { environment } from '@environments/environment';
 
 interface N8nResponse {
   text: string;
+  intent?: string;
   dishes?: any[];
   ingredients?: string[];
   suggestions?: string[];
@@ -30,6 +31,7 @@ export class ChatbotComponent implements AfterViewChecked {
   isOpen   = false;
   inputText = '';
   loading  = false;
+  currentIntent: string = '';
 
   messages: ChatMessage[] = [
     {
@@ -98,6 +100,7 @@ export class ChatbotComponent implements AfterViewChecked {
     ).subscribe({
       next: (res) => {
         this.conversationHistory.push({ role: 'assistant', content: res.text });
+        if (res.intent !== undefined) this.currentIntent = res.intent;
         const idx = this.messages.lastIndexOf(loadingMsg);
         if (idx !== -1) this.messages.splice(idx, 1);
         this.messages.push({

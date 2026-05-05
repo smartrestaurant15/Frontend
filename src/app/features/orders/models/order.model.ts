@@ -1,22 +1,38 @@
-export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'DELIVERED' | 'CANCELLED';
+/**
+ * Estados del ciclo de vida de una orden — deben coincidir exactamente
+ * con el enum OrderStatus del backend.
+ *
+ * Flujo: PENDING → SENT → IN_PROGRESS → COMPLETED → DELIVERED
+ *                                                  ↘ CANCELLED (desde PENDING, SENT o IN_PROGRESS)
+ */
+export type OrderStatus =
+  | 'PENDING'      // Borrador: el mesero está construyendo el pedido
+  | 'SENT'         // Enviado a cocina
+  | 'IN_PROGRESS'  // Cocina inició la preparación
+  | 'COMPLETED'    // Cocina terminó, listo para entregar
+  | 'DELIVERED'    // Entregado al cliente
+  | 'CANCELLED';   // Cancelado
+
 export type OrderChannel = 'PRESENTIAL' | 'ONLINE';
 export type OrderPaymentStatus = 'PENDING' | 'CONFIRMED' | 'NOT_REQUIRED';
 export type ProductType = 'DISH' | 'DRINK' | 'ADDITION';
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  PENDING:     'Pendiente',
+  PENDING:     'Borrador',
+  SENT:        'Enviado',
   IN_PROGRESS: 'En preparación',
   COMPLETED:   'Listo',
   DELIVERED:   'Entregado',
-  CANCELLED:   'Cancelado'
+  CANCELLED:   'Cancelado',
 };
 
 export const ORDER_STATUS_CLASS: Record<OrderStatus, string> = {
   PENDING:     'status-pending',
+  SENT:        'status-sent',
   IN_PROGRESS: 'status-in-progress',
   COMPLETED:   'status-completed',
   DELIVERED:   'status-delivered',
-  CANCELLED:   'status-cancelled'
+  CANCELLED:   'status-cancelled',
 };
 
 export interface OrderItem {
@@ -39,6 +55,7 @@ export interface Order {
   createdAt: string;
   itemCount: number;
   totalAmount: number;
+  paymentStatus: OrderPaymentStatus;
 }
 
 export interface OrderTable {
@@ -86,6 +103,7 @@ export interface CreateOrderDTO {
   customerId?: number;
   waiterId?: number;
   tableId?: string;       // ID real de RestaurantTable (presencial)
+  notes?: string;
   items: CreateOrderItemDTO[];
 }
 

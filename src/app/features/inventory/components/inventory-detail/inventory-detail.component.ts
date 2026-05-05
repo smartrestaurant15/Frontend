@@ -36,7 +36,8 @@ export class InventoryDetailComponent implements OnInit {
 
   initStockForm(): void {
     this.stockForm = this.fb.group({
-      weight: [1, [Validators.required, Validators.min(1)]]
+      weight: [1, [Validators.required, Validators.min(1)]],
+      unitPrice: [null, [Validators.required, Validators.min(0.01)]]
     });
   }
 
@@ -87,15 +88,15 @@ export class InventoryDetailComponent implements OnInit {
   addStock(): void {
     if (this.stockForm.valid && this.product) {
       this.processingStock = true;
-      const weight = this.stockForm.get('weight')?.value;
+      const { weight, unitPrice } = this.stockForm.value;
 
-      this.productService.addStock(this.product.id, { weight }).subscribe({
+      this.productService.addStock(this.product.id, { weight, unitPrice }).subscribe({
         next: (response) => {
           this.processingStock = false;
           if (!response.error) {
             this.notificationService.showSuccess('Stock agregado exitosamente');
             this.loadProduct(this.product!.id);
-            this.stockForm.reset({ weight: 1 });
+            this.stockForm.reset({ weight: 1, unitPrice: null });
           } else {
             this.notificationService.showError(response.message as string);
           }
@@ -109,7 +110,7 @@ export class InventoryDetailComponent implements OnInit {
   }
 
   discountStock(): void {
-    if (this.stockForm.valid && this.product) {
+    if (this.stockForm.get('weight')?.valid && this.product) {
       this.processingStock = true;
       const weight = this.stockForm.get('weight')?.value;
 
@@ -119,7 +120,7 @@ export class InventoryDetailComponent implements OnInit {
           if (!response.error) {
             this.notificationService.showSuccess('Stock descontado exitosamente');
             this.loadProduct(this.product!.id);
-            this.stockForm.reset({ weight: 1 });
+            this.stockForm.reset({ weight: 1, unitPrice: null });
           } else {
             this.notificationService.showError(response.message as string);
           }

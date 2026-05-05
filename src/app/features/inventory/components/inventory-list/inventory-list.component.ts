@@ -48,7 +48,8 @@ export class InventoryListComponent implements OnInit {
       description:  ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       price:        [null, [Validators.required, Validators.min(0.01)]],
       weight:       [null, [Validators.required, Validators.min(0.01)]],
-      minimumStock: [null, [Validators.required, Validators.min(0.01)]],
+      minimumStock: [null, [Validators.required, Validators.min(0)]],
+      criticalStock:[null, [Validators.required, Validators.min(0)]],
       supplierId:   ['', Validators.required]
     });
   }
@@ -97,7 +98,7 @@ export class InventoryListComponent implements OnInit {
     const photos = this.uploadedImageUrl
       ? [this.uploadedImageUrl]
       : ['https://via.placeholder.com/150'];
-    const dto = { ...rest, photos };
+    const dto = { ...rest, photos, criticalStock: rest.criticalStock ?? 0 };
 
     this.productService.createProduct(supplierId, dto).subscribe({
       next: () => {

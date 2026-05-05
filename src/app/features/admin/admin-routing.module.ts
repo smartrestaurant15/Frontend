@@ -7,6 +7,7 @@ import { UserDetailComponent } from './components/user-detail/user-detail.compon
 import { AuditLogsComponent } from './components/audit-logs/audit-logs.component';
 import { TablesComponent } from './components/tables/tables.component';
 import { AdminInvoicesComponent } from './components/invoices/admin-invoices.component';
+import { AccountingComponent } from './components/accounting/accounting.component';
 
 const routes: Routes = [
   {
@@ -19,9 +20,14 @@ const routes: Routes = [
       { path: 'audit-logs', component: AuditLogsComponent },
       { path: 'tables',     component: TablesComponent },
       { path: 'invoices',   component: AdminInvoicesComponent },
+      { path: 'accounting', component: AccountingComponent },
       {
         path: 'inventory',
         loadChildren: () => import('../inventory/inventory.module').then(m => m.InventoryModule)
+      },
+      {
+        path: 'orders',
+        loadChildren: () => import('../orders/orders.module').then(m => m.OrdersModule)
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

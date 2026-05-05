@@ -75,7 +75,7 @@ export class CustomerHomeComponent implements OnInit, OnDestroy {
       productId:   drink.id,
       productName: drink.name,
       productType: 'DRINK',
-      unitPrice:   0,
+      unitPrice:   drink.salePrice,
       photo:       drink.photo
     });
   }

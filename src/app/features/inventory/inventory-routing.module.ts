@@ -17,6 +17,8 @@ import { AdditionManagementComponent } from './components/addition-management/ad
 import { DailyMenuComponent } from './components/daily-menu/daily-menu.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InventoryMovementsComponent } from './components/inventory-movements/inventory-movements.component';
+import { MenuTemplatesComponent } from './components/menu-templates/menu-templates.component';
+import { MenuPublicationDetailComponent } from './components/menu-publication-detail/menu-publication-detail.component';
 
 const routes: Routes = [
   {
@@ -108,6 +110,18 @@ const routes: Routes = [
       {
         path: 'daily-menu',
         component: DailyMenuComponent,
+        canActivate: [RoleGuard],
+        data: { permissions: ['daily_menu:read'] }
+      },
+      {
+        path: 'daily-menu/:id',
+        component: MenuPublicationDetailComponent,
+        canActivate: [RoleGuard],
+        data: { permissions: ['daily_menu:read'] }
+      },
+      {
+        path: 'menu-templates',
+        component: MenuTemplatesComponent,
         canActivate: [RoleGuard],
         data: { permissions: ['daily_menu:read'] }
       },
