@@ -13,7 +13,7 @@ export class AdminLayoutComponent {
 
   navItems = [
     { label: 'Dashboard',                icon: 'dashboard',              route: '/admin/dashboard' },
-    { label: 'Órdenes',                  icon: 'receipt_long',           route: '/orders/waiter'   },
+    { label: 'Órdenes',                  icon: 'receipt_long',           route: '/admin/orders/waiter'   },
     { label: 'Facturas',                 icon: 'receipt',                route: '/admin/invoices'  },
     { label: 'Inventario',               icon: 'inventory_2',            route: '/admin/inventory/list' },
     { label: 'Proveedores',              icon: 'local_shipping',         route: '/admin/inventory/suppliers' },
@@ -24,6 +24,7 @@ export class AdminLayoutComponent {
     { label: 'Categorías',              icon: 'category',               route: '/admin/inventory/categories' },
     { label: 'Alertas de stock',         icon: 'notification_important', route: '/admin/inventory/alerts' },
     { label: 'Movimientos de inventario',icon: 'swap_horiz',             route: '/admin/inventory/movements' },
+    { label: 'Contabilidad',             icon: 'account_balance',        route: '/admin/accounting' },
   ];
 
   configItems = [

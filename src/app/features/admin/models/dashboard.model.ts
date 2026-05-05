@@ -39,4 +39,7 @@ export interface DashboardData {
   cancellation: CancellationMetric;
   lowStockProducts: LowStockProduct[];
   customers: CustomerMetric;
+  inventoryCapital: number;
+  monthlyExpenses: number;
+  estimatedProfit: number;
 }

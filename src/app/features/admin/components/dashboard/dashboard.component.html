@@ -88,6 +88,60 @@
 
     </div>
 
+    <!-- Financial KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
+
+      <!-- Capital en inventario -->
+      <div class="bg-[#201f1f] border border-[#4d463a]/15 p-7 flex flex-col justify-between hover:bg-[#2a2a2a] transition-colors">
+        <div class="flex justify-between items-start mb-5">
+          <span class="material-symbols-outlined text-amber-400">warehouse</span>
+          <span class="font-label text-[10px] font-bold text-[#e5e2e1] bg-[#353534] px-2 py-1">AHORA</span>
+        </div>
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Capital en Inventario</p>
+          <h3 class="font-headline text-2xl text-[#e5e2e1]">{{ formatCurrency(data?.inventoryCapital ?? 0) }}</h3>
+          <p class="font-label text-[10px] text-[#998f81] mt-1">Valor actual en bodega</p>
+        </div>
+      </div>
+
+      <!-- Gastos del mes -->
+      <div class="bg-[#201f1f] border border-[#4d463a]/15 p-7 flex flex-col justify-between hover:bg-[#2a2a2a] transition-colors">
+        <div class="flex justify-between items-start mb-5">
+          <span class="material-symbols-outlined text-red-400">trending_down</span>
+          <span class="font-label text-[10px] font-bold text-[#e5e2e1] bg-[#353534] px-2 py-1">30D</span>
+        </div>
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Gastos en Insumos</p>
+          <h3 class="font-headline text-2xl text-red-400">{{ formatCurrency(data?.monthlyExpenses ?? 0) }}</h3>
+          <p class="font-label text-[10px] text-[#998f81] mt-1">Compras de inventario</p>
+        </div>
+      </div>
+
+      <!-- Utilidad estimada -->
+      <div class="bg-[#201f1f] border border-[#4d463a]/15 p-7 flex flex-col justify-between hover:bg-[#2a2a2a] transition-colors">
+        <div class="flex justify-between items-start mb-5">
+          <span class="material-symbols-outlined" [class.text-green-400]="(data?.estimatedProfit ?? 0) >= 0" [class.text-red-400]="(data?.estimatedProfit ?? 0) < 0">trending_up</span>
+          <span class="font-label text-[10px] font-bold px-2 py-1"
+                [class.text-green-400]="(data?.estimatedProfit ?? 0) >= 0"
+                [class.bg-green-900]="(data?.estimatedProfit ?? 0) >= 0"
+                [class.text-red-400]="(data?.estimatedProfit ?? 0) < 0"
+                [class.bg-red-900]="(data?.estimatedProfit ?? 0) < 0">
+            {{ (data?.estimatedProfit ?? 0) >= 0 ? 'GANANCIA' : 'PÉRDIDA' }}
+          </span>
+        </div>
+        <div>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Utilidad Estimada</p>
+          <h3 class="font-headline text-2xl"
+              [class.text-green-400]="(data?.estimatedProfit ?? 0) >= 0"
+              [class.text-red-400]="(data?.estimatedProfit ?? 0) < 0">
+            {{ formatCurrency(data?.estimatedProfit ?? 0) }}
+          </h3>
+          <p class="font-label text-[10px] text-[#998f81] mt-1">Ingresos − gastos (30 días)</p>
+        </div>
+      </div>
+
+    </div>
+
     <!-- Main grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -247,6 +301,11 @@
                class="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] transition-colors cursor-pointer rounded-sm group">
               <span class="material-symbols-outlined text-[#998f81] group-hover:text-primary transition-colors text-[18px]">group</span>
               <span class="font-body text-sm text-[#d0c5b5]">Gestión de usuarios</span>
+            </a>
+            <a routerLink="/admin/accounting"
+               class="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] transition-colors cursor-pointer rounded-sm group">
+              <span class="material-symbols-outlined text-[#998f81] group-hover:text-primary transition-colors text-[18px]">account_balance</span>
+              <span class="font-body text-sm text-[#d0c5b5]">Contabilidad</span>
             </a>
             <a routerLink="/admin/audit-logs"
                class="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] transition-colors cursor-pointer rounded-sm group">

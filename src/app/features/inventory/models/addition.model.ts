@@ -1,46 +1,62 @@
-// Modelo de Adición/Extra según especificación del backend
-export interface Addition {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  photos: string[];
-  createdAt: string;
-  state: 'ACTIVE' | 'INACTIVE';
-  units: number;
-  minimumStock: number;
+export type AdditionType = 'SIMPLE' | 'PREPARED';
+
+export interface AdditionRecipeItem {
+  productId: string;
+  productName: string;
+  weight: number;
+  unit: string;
+}
+
+export interface CreateAdditionRecipeDTO {
+  productId: string;
+  weight: number;
+  unit: string;
 }
 
 // DTO para crear adición
 export interface CreateAdditionDTO {
   name: string;
   description: string;
-  price: number;
-  units: number;
-  minimumStock: number;
+  additionType: AdditionType;
+  salePrice: number;
+  photos?: string[];
+  // SIMPLE only
+  purchasePrice?: number;
+  units?: number;
+  minimumStock?: number;
+  // PREPARED only
+  recipes?: CreateAdditionRecipeDTO[];
 }
 
 // DTO para actualizar adición
 export interface UpdateAdditionDTO {
   name: string;
   description: string;
-  price: number;
-  units: number;
-  minimumStock: number;
+  salePrice: number;
+  photos?: string[];
+  // SIMPLE only
+  units?: number;
+  minimumStock?: number;
+  // PREPARED only
+  recipes?: CreateAdditionRecipeDTO[];
 }
 
-// DTO para ajuste manual de stock de adición
-export interface AdditionStockDTO {
+// DTO para reabastecimiento de adición simple
+export interface AdditionRestockDTO {
   unit: number;
+  purchasePrice: number;
 }
 
-// Respuesta de adición
+// Respuesta de lista de adiciones
 export interface AdditionResponse {
   id: string;
   name: string;
   photo: string;
-  price: number;
+  additionType: AdditionType;
+  salePrice: number;
   units: number;
+  availableUnits: number;
+  state: string;
 }
 
 // Detalle de adición
@@ -49,7 +65,15 @@ export interface AdditionDetailResponse {
   name: string;
   description: string;
   photos: string[];
-  price: number;
+  additionType: AdditionType;
+  purchasePrice?: number;
+  salePrice: number;
+  estimatedCost?: number;
+  margin?: number;
   units: number;
+  reservedUnits: number;
+  availableUnits: number;
   minimumStock: number;
+  state: string;
+  recipes?: AdditionRecipeItem[];
 }

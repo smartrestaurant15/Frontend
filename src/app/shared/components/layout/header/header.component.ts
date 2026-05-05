@@ -42,9 +42,10 @@ export class HeaderComponent implements OnInit {
 
   getRoleDisplayName(role: string): string {
     const roleNames: Record<string, string> = {
-      'ADMIN': 'Administrador',
-      'KITCHEN': 'Cocina',
-      'WAITER': 'Mesero',
+      'ADMIN':    'Administrador',
+      'KITCHEN':  'Cocina',
+      'WAITER':   'Mesero',
+      'CASHIER':  'Cajero',
       'CUSTOMER': 'Cliente'
     };
     return roleNames[role] || role;

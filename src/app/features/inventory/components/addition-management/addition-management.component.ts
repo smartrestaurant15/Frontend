@@ -21,13 +21,28 @@ export class AdditionManagementComponent implements OnInit {
 
   selectedDetail: AdditionDetailResponse | null = null;
   loadingDetail = false;
-  stockQty = 1;
-  adjustingStock = false;
+
+  // Restock state (SIMPLE only)
+  restockUnits = 1;
+  restockPrice = 0;
+  restocking = false;
 
   get filteredAdditions(): AdditionResponse[] {
     if (!this.searchTerm.trim()) return this.additions;
     const term = this.searchTerm.toLowerCase();
     return this.additions.filter(a => a.name.toLowerCase().includes(term));
+  }
+
+  get simpleCount(): number {
+    return this.additions.filter(a => a.additionType === 'SIMPLE').length;
+  }
+
+  get preparedCount(): number {
+    return this.additions.filter(a => a.additionType === 'PREPARED').length;
+  }
+
+  get isSelectedPrepared(): boolean {
+    return this.selectedDetail?.additionType === 'PREPARED';
   }
 
   constructor(
@@ -110,7 +125,8 @@ export class AdditionManagementComponent implements OnInit {
     this.additionService.getAdditionById(id).subscribe({
       next: (res) => {
         this.selectedDetail = res.message as unknown as AdditionDetailResponse;
-        this.stockQty = 1;
+        this.restockUnits = 1;
+        this.restockPrice = this.selectedDetail?.purchasePrice ?? 0;
         this.loadingDetail = false;
       },
       error: () => { this.loadingDetail = false; }
@@ -121,31 +137,29 @@ export class AdditionManagementComponent implements OnInit {
     this.selectedDetail = null;
   }
 
-  addStock(): void {
-    if (!this.selectedDetail || this.adjustingStock || this.stockQty < 1) return;
-    this.adjustingStock = true;
-    this.additionService.addStock(this.selectedDetail.id, { unit: this.stockQty }).subscribe({
-      next: () => {
-        this.notificationService.showSuccess(`+${this.stockQty} unidades añadidas`);
-        this.adjustingStock = false;
-        this.loadAdditions();
-        this.viewDetail(this.selectedDetail!.id);
-      },
-      error: () => { this.adjustingStock = false; }
-    });
-  }
+  restock(): void {
+    if (!this.selectedDetail || this.restocking) return;
+    if (this.restockUnits < 1) {
+      this.notificationService.showError('Las unidades deben ser mayor a 0');
+      return;
+    }
+    if (this.restockPrice <= 0) {
+      this.notificationService.showError('El precio de compra debe ser mayor a 0');
+      return;
+    }
 
-  discountStock(): void {
-    if (!this.selectedDetail || this.adjustingStock || this.stockQty < 1) return;
-    this.adjustingStock = true;
-    this.additionService.discountStock(this.selectedDetail.id, { unit: this.stockQty }).subscribe({
+    this.restocking = true;
+    this.additionService.addStock(this.selectedDetail.id, {
+      unit: this.restockUnits,
+      purchasePrice: this.restockPrice
+    }).subscribe({
       next: () => {
-        this.notificationService.showSuccess(`-${this.stockQty} unidades descontadas`);
-        this.adjustingStock = false;
+        this.notificationService.showSuccess(`+${this.restockUnits} unidades añadidas`);
+        this.restocking = false;
         this.loadAdditions();
         this.viewDetail(this.selectedDetail!.id);
       },
-      error: () => { this.adjustingStock = false; }
+      error: () => { this.restocking = false; }
     });
   }
 
@@ -155,6 +169,7 @@ export class AdditionManagementComponent implements OnInit {
         next: (response) => {
           if (!response.error) {
             this.notificationService.showSuccess('Adición eliminada exitosamente');
+            if (this.selectedDetail?.id === id) this.selectedDetail = null;
             this.loadAdditions();
           } else {
             this.notificationService.showError(response.message as string);

@@ -89,6 +89,39 @@
           <p class="font-body text-[#d0c5b5] font-light leading-relaxed">{{ dish.description }}</p>
         </div>
 
+        <!-- Costo y margen -->
+        <div *ngIf="dish.estimatedCost !== undefined" class="bg-[#111111] border border-[#4d463a]/15 p-8">
+          <h3 class="font-headline text-lg italic text-primary mb-5">Análisis de Rentabilidad</h3>
+          <div class="grid grid-cols-3 gap-6">
+            <div class="bg-[#0a0a0a] border border-[#4d463a]/10 p-4 text-center">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Precio de venta</p>
+              <p class="font-headline text-xl text-primary">{{ dish.price | currency:'COP':'symbol':'1.0-0' }}</p>
+            </div>
+            <div class="bg-[#0a0a0a] border border-[#4d463a]/10 p-4 text-center">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Costo estimado</p>
+              <p class="font-headline text-xl text-amber-400">{{ dish.estimatedCost | currency:'COP':'symbol':'1.0-0' }}</p>
+            </div>
+            <div class="bg-[#0a0a0a] border border-[#4d463a]/10 p-4 text-center">
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Margen</p>
+              <p class="font-headline text-xl"
+                 [class.text-green-400]="dish.margin >= 0"
+                 [class.text-red-400]="dish.margin < 0">
+                {{ dish.margin | currency:'COP':'symbol':'1.0-0' }}
+              </p>
+            </div>
+          </div>
+          <div *ngIf="+dish.price > 0" class="mt-4">
+            <div class="flex justify-between font-label text-[10px] text-[#998f81] mb-1">
+              <span>Costo</span>
+              <span>{{ ((dish.estimatedCost / +dish.price) * 100) | number:'1.0-0' }}% del precio</span>
+            </div>
+            <div class="h-1.5 bg-[#4d463a]/20 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500/70 rounded-full transition-all duration-700"
+                   [style.width.%]="Math.min((dish.estimatedCost / +dish.price) * 100, 100)"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Ingredients -->
         <div class="bg-[#111111] border border-[#4d463a]/15 p-8">
           <div class="flex items-center justify-between mb-6">

@@ -12,20 +12,26 @@
       </app-form-field>
 
       <div class="form-row">
-        <app-form-field label="Precio" [required]="true">
+        <app-form-field label="Precio estimado ($/g o $/unidad)" [required]="true">
           <input type="number" formControlName="price" placeholder="0.00" step="0.01">
         </app-form-field>
 
-        <app-form-field label="Peso/Cantidad" [required]="true">
+        <app-form-field label="Peso inicial (g)" [required]="true">
           <input type="number" formControlName="weight" placeholder="0" step="1">
         </app-form-field>
       </div>
 
       <div class="form-row">
         <app-form-field label="Stock Mínimo" [required]="true">
-          <input type="number" formControlName="minimumStock" placeholder="0.00" step="0.01">
+          <input type="number" formControlName="minimumStock" placeholder="0" step="1" min="0">
         </app-form-field>
 
+        <app-form-field label="Stock Crítico" [required]="true">
+          <input type="number" formControlName="criticalStock" placeholder="0" step="1" min="0">
+        </app-form-field>
+      </div>
+
+      <div class="form-row">
         <app-form-field label="Proveedor" [required]="true">
           <select formControlName="suplierId">
             <option value="">Seleccionar proveedor</option>

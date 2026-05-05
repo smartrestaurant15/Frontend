@@ -31,10 +31,11 @@ export class UserManagementComponent implements OnInit {
   UserStatus = UserStatus;
   
   roles = [
-    { value: UserRole.ADMIN, label: 'Administrador' },
-    { value: UserRole.KITCHEN, label: 'Cocina' },
-    { value: UserRole.WAITER, label: 'Mesero' },
-    { value: UserRole.CUSTOMER, label: 'Cliente' }
+    { value: UserRole.ADMIN,    label: 'Administrador' },
+    { value: UserRole.KITCHEN,  label: 'Cocina'        },
+    { value: UserRole.WAITER,   label: 'Mesero'        },
+    { value: UserRole.CASHIER,  label: 'Cajero'        },
+    { value: UserRole.CUSTOMER, label: 'Cliente'       }
   ];
   
   statuses = [
@@ -179,9 +180,10 @@ export class UserManagementComponent implements OnInit {
 
   getRoleBadgeClass(role: UserRole): string {
     const classes: { [key in UserRole]: string } = {
-      [UserRole.ADMIN]: 'badge-admin',
-      [UserRole.KITCHEN]: 'badge-kitchen',
-      [UserRole.WAITER]: 'badge-waiter',
+      [UserRole.ADMIN]:    'badge-admin',
+      [UserRole.KITCHEN]:  'badge-kitchen',
+      [UserRole.WAITER]:   'badge-waiter',
+      [UserRole.CASHIER]:  'badge-cashier',
       [UserRole.CUSTOMER]: 'badge-customer'
     };
     return classes[role] || '';

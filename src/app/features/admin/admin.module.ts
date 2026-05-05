@@ -12,6 +12,7 @@ import { UserDetailComponent } from './components/user-detail/user-detail.compon
 import { AuditLogsComponent } from './components/audit-logs/audit-logs.component';
 import { TablesComponent } from './components/tables/tables.component';
 import { AdminInvoicesComponent } from './components/invoices/admin-invoices.component';
+import { AccountingComponent } from './components/accounting/accounting.component';
 
 import { AdminService } from './services/admin.service';
 import { AuditService } from './services/audit.service';
@@ -27,7 +28,8 @@ import { TableService } from './services/table.service';
     UserDetailComponent,
     AuditLogsComponent,
     TablesComponent,
-    AdminInvoicesComponent
+    AdminInvoicesComponent,
+    AccountingComponent
   ],
   imports: [
     CommonModule,

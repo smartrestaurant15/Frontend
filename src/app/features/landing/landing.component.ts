@@ -1,21 +1,10 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { HttpClientService } from '@core/services/http-client.service';
 import { RestaurantInfoService, RestaurantInfo } from '@core/services/restaurant-info.service';
+import { MenuPublicationService } from '@features/inventory/services/menu-publication.service';
+import { ActiveMenuDTO } from '@features/inventory/models/menu.model';
 import { catchError, of } from 'rxjs';
-
-interface DishDTO {
-  id: string;
-  name: string;
-  price: number;
-  photo: string;
-}
-
-interface ApiResponse<T> {
-  data: T;
-  error: boolean;
-}
 
 @Component({
   selector: 'app-landing',
@@ -25,7 +14,7 @@ interface ApiResponse<T> {
 export class LandingComponent implements OnInit {
   mobileMenuOpen = false;
   navScrolled = false;
-  dailyMenuDishes: DishDTO[] = [];
+  activeMenu: ActiveMenuDTO | null = null;
   loadingMenu = true;
   restaurantInfo: RestaurantInfo | null = null;
 
@@ -33,8 +22,8 @@ export class LandingComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private http: HttpClientService,
     private restaurantInfoService: RestaurantInfoService,
+    private menuPublicationService: MenuPublicationService,
     private sanitizer: DomSanitizer
   ) {
     this.mapUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
@@ -43,7 +32,7 @@ export class LandingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadDailyMenu();
+    this.loadActiveMenu();
     this.loadRestaurantInfo();
   }
 
@@ -52,13 +41,12 @@ export class LandingComponent implements OnInit {
     this.navScrolled = window.scrollY > 50;
   }
 
-  loadDailyMenu(): void {
-    this.http.get<any>('/dailyMenus/0/page')
-      .pipe(catchError(() => of({ message: [], error: true })))
+  loadActiveMenu(): void {
+    this.loadingMenu = true;
+    this.menuPublicationService.getActive()
+      .pipe(catchError(() => of({ message: null, error: true })))
       .subscribe(res => {
-        // El inventory ResponseDTO usa "message", el restaurant usa "data"
-        const dishes = res.message ?? res.data ?? [];
-        this.dailyMenuDishes = (dishes as DishDTO[]).slice(0, 3);
+        this.activeMenu = res.message;
         this.loadingMenu = false;
       });
   }

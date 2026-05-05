@@ -1,1 +1,218 @@
 :host { display: block; }
+
+/* ═══ Selector de tipo de bebida ═══ */
+.drink-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.type-option {
+  cursor: pointer;
+  border: 1px solid #4d463a33;
+  border-radius: 4px;
+  padding: 14px;
+  transition: border-color 0.2s, background 0.2s;
+  display: block;
+
+  input[type="radio"] {
+    display: none;
+  }
+
+  &.active {
+    border-color: var(--color-primary, #c8a97e);
+    background: rgba(200, 169, 126, 0.06);
+  }
+
+  &:hover:not(.active) {
+    border-color: #4d463a66;
+    background: rgba(255,255,255,0.02);
+  }
+}
+
+.type-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.type-icon {
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.type-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e5e2e1;
+}
+
+.type-desc {
+  font-size: 11px;
+  color: #998f81;
+  line-height: 1.4;
+}
+
+/* ═══ Badge de tipo en modo edición ═══ */
+.type-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.simple {
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  &.prepared {
+    background: rgba(168, 85, 247, 0.12);
+    color: #d8b4fe;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+  }
+}
+
+.type-badge-hint {
+  font-size: 11px;
+  color: #998f81;
+  font-style: italic;
+}
+
+/* ═══ Separadores de sección ═══ */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 14px;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #4d463a22;
+  }
+
+  span {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #998f81;
+    white-space: nowrap;
+  }
+}
+
+/* ═══ Hints en labels ═══ */
+.field-hint {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: #998f81;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 1px;
+}
+
+/* ═══ Banner informativo receta ═══ */
+.recipe-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 4px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #d8b4fe;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+}
+
+/* ═══ Filas de receta ═══ */
+.recipe-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #4d463a22;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.recipe-row-index {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: #4d463a33;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #998f81;
+  margin-bottom: 4px;
+}
+
+.recipe-ingredient { flex: 2; margin-bottom: 0 !important; }
+.recipe-weight     { flex: 1; margin-bottom: 0 !important; }
+.recipe-unit       { flex: 1; margin-bottom: 0 !important; }
+
+.recipe-remove-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #998f81;
+  padding: 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+  margin-bottom: 4px;
+
+  &:hover {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+  }
+
+  .material-symbols-outlined { font-size: 18px; }
+}
+
+.add-recipe-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px dashed #4d463a55;
+  border-radius: 4px;
+  color: #998f81;
+  font-size: 13px;
+  padding: 8px 14px;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+  transition: color 0.2s, border-color 0.2s;
+  margin-top: 4px;
+
+  &:hover {
+    color: var(--color-primary, #c8a97e);
+    border-color: var(--color-primary, #c8a97e);
+  }
+
+  .material-symbols-outlined { font-size: 18px; }
+}

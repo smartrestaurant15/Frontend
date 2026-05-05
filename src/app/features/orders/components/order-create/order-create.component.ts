@@ -40,6 +40,9 @@ export class OrderCreateComponent implements OnInit {
   itemNotes: Record<string, string> = {};
   editingNoteKey: string | null = null;
 
+  // Notas generales del pedido
+  orderNotes = '';
+
   loading    = false;
   submitting = false;
 
@@ -187,6 +190,7 @@ export class OrderCreateComponent implements OnInit {
       channel: 'PRESENTIAL',
       waiterId: user?.id ?? undefined,
       tableId:  this.selectedTableId || undefined,
+      notes:    this.orderNotes.trim() || undefined,
       items: this.cart.map(i => ({
         productId:   i.productId,
         productType: i.productType,
@@ -221,6 +225,7 @@ export class OrderCreateComponent implements OnInit {
   private reset(): void {
     this.cart = [];
     this.itemNotes = {};
+    this.orderNotes = '';
     this.selectedTableId    = '';
     this.selectedTableLabel = '';
     this.tableSearch        = '';

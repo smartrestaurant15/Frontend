@@ -117,6 +117,19 @@
         </button>
       </div>
 
+      <!-- Notas del pedido -->
+      <div class="border-t border-[#4d463a]/20 pt-4">
+        <label class="font-label text-[10px] uppercase tracking-widest text-[#998f81] block mb-1">
+          Notas del pedido <span class="normal-case tracking-normal font-body text-[#4d463a]">(opcional)</span>
+        </label>
+        <textarea
+          [(ngModel)]="orderNotes"
+          rows="2"
+          placeholder="Ej: cliente alérgico al gluten, mesa de cumpleaños..."
+          class="w-full bg-[#1a1a1a] border border-[#4d463a]/30 px-3 py-2 text-sm text-[#e5e2e1] placeholder-[#998f81]/50 focus:outline-none focus:border-[#e6c487]/50 resize-none transition-colors">
+        </textarea>
+      </div>
+
       <!-- Carrito -->
       <div *ngIf="cart.length > 0" class="border-t border-[#4d463a]/20 pt-4">
         <div class="flex items-center justify-between mb-3">

@@ -10,13 +10,15 @@ import { KitchenBoardComponent } from './components/kitchen-board/kitchen-board.
 import { WaiterOrdersComponent } from './components/waiter-orders/waiter-orders.component';
 import { OrderCreateComponent } from './components/order-create/order-create.component';
 import { CustomerOrdersComponent } from './components/customer-orders/customer-orders.component';
+import { CashierComponent } from './components/cashier/cashier.component';
 
 @NgModule({
   declarations: [
     KitchenBoardComponent,
     WaiterOrdersComponent,
     OrderCreateComponent,
-    CustomerOrdersComponent
+    CustomerOrdersComponent,
+    CashierComponent
   ],
   imports: [
     CommonModule,

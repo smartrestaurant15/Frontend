@@ -68,12 +68,13 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
   readonly STATUS_LABEL = ORDER_STATUS_LABEL;
 
   readonly STATUS_OPTIONS: { value: OrderStatus | undefined; label: string; icon: string }[] = [
-    { value: undefined,     label: 'Todas',         icon: 'list'            },
-    { value: 'PENDING',     label: 'Pendientes',     icon: 'hourglass_empty' },
-    { value: 'IN_PROGRESS', label: 'En preparacion', icon: 'soup_kitchen'    },
-    { value: 'COMPLETED',   label: 'Listas',         icon: 'check_circle'    },
-    { value: 'DELIVERED',   label: 'Entregadas',     icon: 'done_all'        },
-    { value: 'CANCELLED',   label: 'Canceladas',     icon: 'cancel'          },
+    { value: undefined,     label: 'Todas',           icon: 'list'            },
+    { value: 'PENDING',     label: 'Borrador',         icon: 'draft'           },
+    { value: 'SENT',        label: 'Enviadas',         icon: 'send'            },
+    { value: 'IN_PROGRESS', label: 'En preparación',   icon: 'soup_kitchen'    },
+    { value: 'COMPLETED',   label: 'Listas',           icon: 'check_circle'    },
+    { value: 'DELIVERED',   label: 'Entregadas',       icon: 'done_all'        },
+    { value: 'CANCELLED',   label: 'Canceladas',       icon: 'cancel'          },
   ];
 
   readonly PAYMENT_METHODS: { value: PaymentMethodType; label: string; icon: string }[] = [
@@ -83,9 +84,10 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
   ];
 
   readonly statusBadge: Record<string, string> = {
-    PENDING:     'bg-amber-400/10 text-amber-400 border-amber-400/20',
+    PENDING:     'bg-gray-400/10 text-gray-400 border-gray-400/20',
+    SENT:        'bg-sky-400/10 text-sky-400 border-sky-400/20',
     IN_PROGRESS: 'bg-blue-400/10 text-blue-400 border-blue-400/20',
-    COMPLETED:   'bg-yellow-400/10 text-yellow-400 border-yellow-400/20',
+    COMPLETED:   'bg-[#e6c487]/10 text-[#e6c487] border-[#e6c487]/20',
     DELIVERED:   'bg-emerald-400/10 text-emerald-400 border-emerald-400/20',
     CANCELLED:   'bg-red-400/10 text-red-400 border-red-400/20',
   };
@@ -235,7 +237,22 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
     });
   }
 
+  sendToKitchen(order: Order): void {
+    // PENDING → SENT
+    this.orderService.updateOrder(order.id, { status: 'SENT' }).subscribe({
+      next: () => {
+        this.notification.showSuccess('Orden enviada a cocina');
+        if (this.selectedOrder?.id === order.id) { this.closeDetail(); }
+        this.loadOrders();
+      },
+      error: () => {
+        // El interceptor ya muestra el mensaje del backend (ej: stock insuficiente)
+      }
+    });
+  }
+
   deliverOrder(order: Order): void {
+    // COMPLETED → DELIVERED
     this.orderService.updateOrder(order.id, { status: 'DELIVERED' }).subscribe({
       next: () => {
         this.notification.showSuccess('Orden entregada');
@@ -244,6 +261,12 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
       },
       error: () => this.notification.showError('Error al actualizar la orden')
     });
+  }
+
+  closeOrder(order: Order): void {
+    // DELIVERED es el estado final en el backend — no existe CLOSED.
+    // Este método queda como no-op para no romper el template mientras se actualiza el HTML.
+    this.notification.showError('El estado CLOSED no existe. El flujo termina en DELIVERED.');
   }
 
   requestCancel(order: Order): void {
@@ -410,9 +433,17 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
 
   private asAny(val: any): any[] { return Array.isArray(val) ? val : []; }
 
-  canDeliver(o: Order): boolean { return o.status === 'COMPLETED'; }
-  canCancel(o: Order): boolean  { return o.status === 'PENDING' || o.status === 'IN_PROGRESS'; }
-  canPay(o: Order): boolean     { return o.status === 'COMPLETED'; }
+  // ── Guards de estado — alineados con VALID_TRANSITIONS del backend ──────────
+  // PENDING → SENT (enviar a cocina)
+  canSendToKitchen(o: Order): boolean { return o.status === 'PENDING'; }
+  // COMPLETED → DELIVERED (mesero entrega el pedido)
+  canDeliver(o: Order): boolean       { return o.status === 'COMPLETED'; }
+  // El pago lo gestiona el cajero — el mesero no cobra
+  canPay(o: Order): boolean           { return false; }
+  // DELIVERED no tiene más transiciones — closeOrder ya no aplica
+  canClose(o: Order): boolean         { return false; }
+  // Cancelable desde PENDING, SENT o IN_PROGRESS (con advertencia de desperdicio)
+  canCancel(o: Order): boolean        { return o.status === 'PENDING' || o.status === 'SENT' || o.status === 'IN_PROGRESS'; }
 
   itemTypeIcon(type: string): string {
     if (type === 'DISH')     { return 'restaurant_menu'; }

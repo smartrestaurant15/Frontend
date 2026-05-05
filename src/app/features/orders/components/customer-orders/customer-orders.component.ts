@@ -21,7 +21,7 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
 
   readonly STATUS_LABEL = ORDER_STATUS_LABEL;
   readonly STATUS_CLASS  = ORDER_STATUS_CLASS;
-  readonly STEPS: OrderStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
+  readonly STEPS: OrderStatus[] = ['PENDING', 'SENT', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
 
   private sseSub?: Subscription;
   private reconnectSub?: Subscription;
@@ -125,8 +125,8 @@ export class CustomerOrdersComponent implements OnInit, OnDestroy {
 
   /** Devuelve true si el estado actual es igual o posterior al paso dado */
   isStepDone(current: string, step: string): boolean {
-    const order = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
-    return order.indexOf(current) >= order.indexOf(step);
+    const order: OrderStatus[] = ['PENDING', 'SENT', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
+    return order.indexOf(current as OrderStatus) >= order.indexOf(step as OrderStatus);
   }
 
   trackById(_: number, order: Order): string {

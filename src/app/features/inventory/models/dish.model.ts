@@ -27,6 +27,7 @@ export interface UpdateDishDTO {
   price: number;
   photos: string[];
   ingredients: CreateRecipeDTO[];
+  categoryId: string;
 }
 
 // Ingrediente de receta (GetRecipeDTO del backend)
@@ -61,5 +62,8 @@ export interface DishDetailResponse {
   price: string;
   photos: string[];
   ingredients: Recipe[];
+  categoryId: string;
   categoryName: string;
+  estimatedCost: number;
+  margin: number;
 }

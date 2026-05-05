@@ -8,6 +8,7 @@ export interface InventoryMovement {
   timeAt: string;
   userName: string;
   reason: string;
+  orderId: string | null;
 }
 
 // Tipo de movimiento
@@ -18,9 +19,13 @@ export interface InventoryMovementResponse {
   id: string;
   productId: string;
   productName: string;
+  itemCategory: 'PRODUCT' | 'DRINK' | 'ADDITION' | null;
   type: string;
   weight: number;
+  unitPrice: number;
+  totalCost: number;
   timeAt: string;
   userName: string;
   reason: string;
+  orderId: string | null;
 }

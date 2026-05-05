@@ -7,8 +7,12 @@
       </div>
       <div class="flex gap-6 items-center">
         <div class="text-right">
-          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Total</p>
-          <p class="font-headline text-lg text-primary">{{ additions.length }}</p>
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Simples</p>
+          <p class="font-headline text-lg text-blue-400">{{ simpleCount }}</p>
+        </div>
+        <div class="text-right">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Preparadas</p>
+          <p class="font-headline text-lg text-purple-400">{{ preparedCount }}</p>
         </div>
         <button (click)="openCreateModal()" class="btn-metallic text-on-primary font-label text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-sm flex items-center gap-2 hover:opacity-90 transition-all">
           <span class="material-symbols-outlined text-sm">add</span>Nueva Adición
@@ -31,7 +35,9 @@
         <thead class="sticky top-0 z-10">
           <tr class="bg-[#111111] text-[#998f81] uppercase text-[9px] tracking-[0.2em] border-b border-[#4d463a]/10">
             <th class="px-4 py-4 font-medium">Adición</th>
-            <th class="px-4 py-4 font-medium text-right">Precio</th>
+            <th class="px-4 py-4 font-medium text-center">Tipo</th>
+            <th class="px-4 py-4 font-medium text-center">Disponible</th>
+            <th class="px-4 py-4 font-medium text-right">Precio venta</th>
             <th class="px-4 py-4 font-medium text-right">Acciones</th>
           </tr>
         </thead>
@@ -50,12 +56,33 @@
                 </div>
                 <div>
                   <p class="font-headline text-sm font-semibold text-[#e5e2e1]">{{ addition.name }}</p>
-                  <p class="font-label text-[10px] text-[#998f81]">{{ addition.units }} uds</p>
+                  <p class="font-label text-[10px] text-[#998f81]">
+                    {{ addition.additionType === 'PREPARED' ? 'Por ingredientes' : addition.units + ' uds totales' }}
+                  </p>
                 </div>
               </div>
             </td>
+            <td class="px-4 py-4 text-center">
+              <span *ngIf="addition.additionType === 'PREPARED'"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-purple-900/30 text-purple-300">
+                Preparada
+              </span>
+              <span *ngIf="addition.additionType !== 'PREPARED'"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-blue-900/30 text-blue-300">
+                Simple
+              </span>
+            </td>
+            <td class="px-4 py-4 text-center">
+              <span *ngIf="addition.additionType === 'PREPARED'" class="font-body text-xs text-purple-300">—</span>
+              <span *ngIf="addition.additionType !== 'PREPARED'"
+                class="font-body text-sm font-semibold"
+                [class.text-emerald-400]="(addition.availableUnits ?? addition.units) > 0"
+                [class.text-red-400]="(addition.availableUnits ?? addition.units) <= 0">
+                {{ addition.availableUnits ?? addition.units }}
+              </span>
+            </td>
             <td class="px-4 py-4 text-right">
-              <span class="font-body text-sm text-primary">{{ addition.price | currency:'COP':'symbol':'1.0-0' }}</span>
+              <span class="font-body text-sm text-primary">{{ addition.salePrice | currency:'COP':'symbol':'1.0-0' }}</span>
             </td>
             <td class="px-4 py-4 text-right" (click)="$event.stopPropagation()">
               <div class="flex items-center justify-end gap-2">
@@ -69,7 +96,7 @@
             </td>
           </tr>
           <tr *ngIf="!loading && filteredAdditions.length === 0">
-            <td colspan="3" class="px-4 py-16 text-center text-[#998f81]/50">
+            <td colspan="5" class="px-4 py-16 text-center text-[#998f81]/50">
               <span class="material-symbols-outlined text-3xl block mb-2">add_circle</span>
               <p class="font-body text-sm">No se encontraron adiciones</p>
             </td>
@@ -120,61 +147,127 @@
       </div>
 
       <div class="p-6 flex flex-col gap-5 flex-1">
-        <!-- Name + price -->
+        <!-- Name + type badge + price -->
         <div>
-          <h3 class="font-headline text-lg text-[#e5e2e1]">{{ selectedDetail.name }}</h3>
-          <p class="font-body text-sm text-primary mt-0.5">
-            {{ selectedDetail.price | currency:'COP':'symbol':'1.0-0' }}
-          </p>
-          <p *ngIf="selectedDetail.description" class="font-body text-xs text-[#998f81] mt-2 leading-relaxed">
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <h3 class="font-headline text-lg text-[#e5e2e1]">{{ selectedDetail.name }}</h3>
+            <span *ngIf="selectedDetail.additionType === 'PREPARED'"
+                  class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-purple-900/30 text-purple-300">
+              Preparada
+            </span>
+            <span *ngIf="selectedDetail.additionType !== 'PREPARED'"
+                  class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-blue-900/30 text-blue-300">
+              Simple
+            </span>
+          </div>
+          <p *ngIf="selectedDetail.description" class="font-body text-xs text-[#998f81] mt-1 leading-relaxed">
             {{ selectedDetail.description }}
           </p>
         </div>
 
-        <!-- Stock info -->
+        <!-- Precio section -->
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
-            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock actual</p>
-            <p class="font-headline text-2xl"
-               [class.text-red-400]="selectedDetail.units <= selectedDetail.minimumStock"
-               [class.text-[#e5e2e1]]="selectedDetail.units > selectedDetail.minimumStock">
-              {{ selectedDetail.units }}
-            </p>
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Precio venta</p>
+            <p class="font-headline text-base text-primary">{{ selectedDetail.salePrice | currency:'COP':'symbol':'1.0-0' }}</p>
           </div>
-          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
-            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock mínimo</p>
-            <p class="font-headline text-2xl text-[#998f81]">{{ selectedDetail.minimumStock }}</p>
+          <div *ngIf="selectedDetail.additionType !== 'PREPARED' && selectedDetail.purchasePrice"
+               class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Precio compra</p>
+            <p class="font-headline text-base text-[#e5e2e1]">{{ selectedDetail.purchasePrice | currency:'COP':'symbol':'1.0-0' }}</p>
+          </div>
+          <div *ngIf="selectedDetail.estimatedCost"
+               class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Costo estimado</p>
+            <p class="font-headline text-base text-amber-400">{{ selectedDetail.estimatedCost | currency:'COP':'symbol':'1.0-0' }}</p>
+          </div>
+          <div *ngIf="selectedDetail.margin != null"
+               class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Margen</p>
+            <p class="font-headline text-base"
+               [class.text-emerald-400]="selectedDetail.margin > 0"
+               [class.text-red-400]="selectedDetail.margin <= 0">
+              {{ selectedDetail.margin | currency:'COP':'symbol':'1.0-0' }}
+            </p>
           </div>
         </div>
 
-        <!-- Stock adjustment -->
-        <div class="border border-[#4d463a]/20 p-4">
-          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Ajustar stock</p>
-          <div class="flex items-center gap-2 mb-3">
-            <button (click)="stockQty = stockQty > 1 ? stockQty - 1 : 1"
-              class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
-              <span class="material-symbols-outlined text-base">remove</span>
-            </button>
-            <input type="number" [(ngModel)]="stockQty" min="1"
-              class="flex-1 bg-[#1a1a1a] border border-[#4d463a]/30 text-center text-[#e5e2e1] text-sm py-1.5 focus:outline-none focus:border-primary/40">
-            <button (click)="stockQty = stockQty + 1"
-              class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
-              <span class="material-symbols-outlined text-base">add</span>
-            </button>
+        <!-- Stock info (SIMPLE only) -->
+        <ng-container *ngIf="selectedDetail.additionType !== 'PREPARED'">
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+              <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Stock</p>
+              <p class="font-headline text-xl"
+                 [class.text-red-400]="selectedDetail.units <= selectedDetail.minimumStock"
+                 [class.text-[#e5e2e1]]="selectedDetail.units > selectedDetail.minimumStock">
+                {{ selectedDetail.units }}
+              </p>
+            </div>
+            <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+              <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Dispon.</p>
+              <p class="font-headline text-xl"
+                 [class.text-emerald-400]="(selectedDetail.availableUnits ?? selectedDetail.units) > 0"
+                 [class.text-red-400]="(selectedDetail.availableUnits ?? selectedDetail.units) <= 0">
+                {{ selectedDetail.availableUnits ?? selectedDetail.units }}
+              </p>
+            </div>
+            <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-3">
+              <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Mínimo</p>
+              <p class="font-headline text-xl text-[#998f81]">{{ selectedDetail.minimumStock }}</p>
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <button (click)="addStock()" [disabled]="adjustingStock"
-              class="flex items-center justify-center gap-1.5 py-2 bg-emerald-900/20 border border-emerald-900/30 text-emerald-400 font-label text-[10px] uppercase tracking-wider hover:bg-emerald-900/30 transition-colors disabled:opacity-40">
+
+          <!-- Restock panel (SIMPLE only) -->
+          <div class="border border-[#4d463a]/20 p-4">
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Reabastecer stock</p>
+            <div class="mb-3">
+              <p class="font-label text-[9px] text-[#998f81] mb-1.5">Unidades a añadir</p>
+              <div class="flex items-center gap-2">
+                <button (click)="restockUnits = restockUnits > 1 ? restockUnits - 1 : 1"
+                  class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
+                  <span class="material-symbols-outlined text-base">remove</span>
+                </button>
+                <input type="number" [(ngModel)]="restockUnits" min="1"
+                  class="flex-1 bg-[#1a1a1a] border border-[#4d463a]/30 text-center text-[#e5e2e1] text-sm py-1.5 focus:outline-none focus:border-primary/40">
+                <button (click)="restockUnits = restockUnits + 1"
+                  class="w-8 h-8 flex items-center justify-center bg-[#1a1a1a] text-[#998f81] hover:text-[#e5e2e1] transition-colors border border-[#4d463a]/20">
+                  <span class="material-symbols-outlined text-base">add</span>
+                </button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <p class="font-label text-[9px] text-[#998f81] mb-1.5">Precio de compra (actualiza costo)</p>
+              <input type="number" [(ngModel)]="restockPrice" min="0.01" step="0.01"
+                placeholder="Precio por unidad"
+                class="w-full bg-[#1a1a1a] border border-[#4d463a]/30 text-[#e5e2e1] text-sm px-3 py-1.5 focus:outline-none focus:border-primary/40">
+            </div>
+            <button (click)="restock()" [disabled]="restocking || restockUnits < 1 || restockPrice <= 0"
+              class="w-full flex items-center justify-center gap-1.5 py-2 bg-emerald-900/20 border border-emerald-900/30 text-emerald-400 font-label text-[10px] uppercase tracking-wider hover:bg-emerald-900/30 transition-colors disabled:opacity-40">
               <span class="material-symbols-outlined text-sm">add</span>
-              Añadir
-            </button>
-            <button (click)="discountStock()" [disabled]="adjustingStock"
-              class="flex items-center justify-center gap-1.5 py-2 bg-red-900/20 border border-red-900/30 text-red-400 font-label text-[10px] uppercase tracking-wider hover:bg-red-900/30 transition-colors disabled:opacity-40">
-              <span class="material-symbols-outlined text-sm">remove</span>
-              Descontar
+              Reabastecer
             </button>
           </div>
-        </div>
+        </ng-container>
+
+        <!-- Recipe list (PREPARED only) -->
+        <ng-container *ngIf="selectedDetail.additionType === 'PREPARED'">
+          <div>
+            <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-3">Receta de preparación</p>
+            <div *ngIf="selectedDetail.recipes?.length; else noRecipes" class="flex flex-col gap-2">
+              <div *ngFor="let recipe of selectedDetail.recipes"
+                   class="flex items-center justify-between px-3 py-2 bg-[#1a1a1a] border border-[#4d463a]/15 rounded-sm">
+                <span class="font-body text-xs text-[#e5e2e1]">{{ recipe.productName }}</span>
+                <span class="font-label text-[10px] text-primary">{{ recipe.weight }} {{ recipe.unit }}</span>
+              </div>
+            </div>
+            <ng-template #noRecipes>
+              <div class="flex items-center gap-2 px-3 py-3 bg-red-900/10 border border-red-900/20 rounded-sm">
+                <span class="material-symbols-outlined text-red-400 text-base">warning</span>
+                <span class="font-body text-xs text-red-400">Sin ingredientes configurados</span>
+              </div>
+            </ng-template>
+          </div>
+        </ng-container>
 
         <!-- Edit button -->
         <button (click)="openEditModal(selectedDetail.id)"
@@ -192,9 +285,19 @@
           <h3 class="font-headline text-xl italic text-primary">Adiciones</h3>
           <p class="font-label text-[10px] text-[#998f81] uppercase tracking-[0.2em] mt-1">Extras del menú</p>
         </div>
-        <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-5">
-          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1">Total</p>
-          <p class="font-headline text-3xl text-[#e5e2e1]">{{ additions.length }}</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-4">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Total</p>
+            <p class="font-headline text-2xl text-[#e5e2e1]">{{ additions.length }}</p>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-4">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Simples</p>
+            <p class="font-headline text-2xl text-blue-400">{{ simpleCount }}</p>
+          </div>
+          <div class="bg-[#1a1a1a] border border-[#4d463a]/15 p-4 col-span-2">
+            <p class="font-label text-[9px] uppercase tracking-widest text-[#998f81] mb-1">Preparadas</p>
+            <p class="font-headline text-2xl text-purple-400">{{ preparedCount }}</p>
+          </div>
         </div>
         <p class="font-body text-xs text-[#4d463a] text-center mt-4">Haz clic en una adición para ver su detalle</p>
         <div class="mt-auto border-t border-[#4d463a]/15 pt-6">

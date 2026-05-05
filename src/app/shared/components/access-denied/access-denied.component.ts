@@ -27,6 +27,8 @@ export class AccessDeniedComponent implements OnInit {
   goToDashboard(): void {
     if (this.permissionService.isCustomer()) {
       this.router.navigate(['/customer/home']);
+    } else if (this.userRole === 'CASHIER') {
+      this.router.navigate(['/orders/cashier']);
     } else {
       this.router.navigate(['/inventory']);
     }
@@ -34,9 +36,10 @@ export class AccessDeniedComponent implements OnInit {
 
   getRoleDisplayName(): string {
     const roleNames: Record<string, string> = {
-      'ADMIN': 'Administrador',
-      'KITCHEN': 'Cocina',
-      'WAITER': 'Mesero',
+      'ADMIN':    'Administrador',
+      'KITCHEN':  'Cocina',
+      'WAITER':   'Mesero',
+      'CASHIER':  'Cajero',
       'CUSTOMER': 'Cliente'
     };
     return roleNames[this.userRole] || this.userRole;

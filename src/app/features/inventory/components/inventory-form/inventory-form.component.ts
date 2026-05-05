@@ -54,7 +54,8 @@ export class InventoryFormComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0.01)]],
       weight: [0, [Validators.required, Validators.min(0.01)]],
       photos: [[], [Validators.required, Validators.minLength(1)]],
-      minimumStock: [0, [Validators.required, Validators.min(0.01)]],
+      minimumStock: [0, [Validators.required, Validators.min(0)]],
+      criticalStock: [0, [Validators.required, Validators.min(0)]],
       suplierId: ['', [Validators.required]]
     });
   }
@@ -86,6 +87,7 @@ export class InventoryFormComponent implements OnInit {
             weight: product.weight,
             photos: product.photos,
             minimumStock: product.minimumStock,
+            criticalStock: product.criticalStock ?? 0,
             suplierId: product.suplier?.id || ''
           });
           this.uploadedPhotos = product.photos || [];
@@ -114,7 +116,9 @@ export class InventoryFormComponent implements OnInit {
           price: formData.price,
           weight: formData.weight,
           photos: photos,
-          minimumStock: formData.minimumStock
+          minimumStock: formData.minimumStock,
+          criticalStock: formData.criticalStock,
+          suplier_id: formData.suplierId
         }).subscribe({
           next: (response) => {
             this.loading = false;
@@ -138,7 +142,8 @@ export class InventoryFormComponent implements OnInit {
           price: formData.price,
           weight: formData.weight,
           photos: photos,
-          minimumStock: formData.minimumStock
+          minimumStock: formData.minimumStock,
+          criticalStock: formData.criticalStock
         }).subscribe({
           next: (response) => {
             this.loading = false;

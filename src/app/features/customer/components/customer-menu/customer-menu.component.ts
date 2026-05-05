@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { DishService } from '@features/inventory/services/dish.service';
 import { DrinkService } from '@features/inventory/services/drink.service';
 import { AdditionService } from '@features/inventory/services/addition.service';
+import { MenuPublicationService } from '@features/inventory/services/menu-publication.service';
 import { OrderService } from '@features/orders/services/order.service';
 import { NotificationService } from '@core/services/notification.service';
 import { StorageService } from '@core/services/storage.service';
@@ -13,9 +14,10 @@ import { CartItem } from '../../models/cart.model';
 import { DishResponse } from '@features/inventory/models/dish.model';
 import { DrinkResponse } from '@features/inventory/models/drink.model';
 import { AdditionResponse } from '@features/inventory/models/addition.model';
+import { ActiveMenuDTO, SectionOptionDTO } from '@features/inventory/models/menu.model';
 import { ProductType } from '@features/orders/models/order.model';
 
-type Tab = 'DISH' | 'DRINK' | 'ADDITION';
+type Tab = 'DAILY_MENU' | 'DISH' | 'DRINK' | 'ADDITION';
 
 @Component({
   selector: 'app-customer-menu',
@@ -24,11 +26,13 @@ type Tab = 'DISH' | 'DRINK' | 'ADDITION';
 })
 export class CustomerMenuComponent implements OnInit, OnDestroy {
 
-  activeTab: Tab = 'DISH';
+  activeTab: Tab = 'DAILY_MENU';
   dishes:    DishResponse[]     = [];
   drinks:    DrinkResponse[]    = [];
   additions: AdditionResponse[] = [];
+  activeMenu: ActiveMenuDTO | null = null;
   loading    = false;
+  loadingMenu = false;
 
   searchQuery = '';
   cartOpen    = false;
@@ -38,15 +42,17 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
   private cartSub?: Subscription;
 
   readonly tabs: { value: Tab; label: string; icon: string }[] = [
-    { value: 'DISH',     label: 'Platos',    icon: 'restaurant_menu' },
-    { value: 'DRINK',    label: 'Bebidas',   icon: 'local_bar'       },
-    { value: 'ADDITION', label: 'Adiciones', icon: 'add_circle'      },
+    { value: 'DAILY_MENU', label: 'Menú del Día', icon: 'restaurant_menu' },
+    { value: 'DISH',       label: 'Platos',       icon: 'dinner_dining'   },
+    { value: 'DRINK',      label: 'Bebidas',      icon: 'local_bar'       },
+    { value: 'ADDITION',   label: 'Adiciones',    icon: 'add_circle'      },
   ];
 
   constructor(
     private dishService: DishService,
     private drinkService: DrinkService,
     private additionService: AdditionService,
+    private menuPublicationService: MenuPublicationService,
     private orderService: OrderService,
     private notification: NotificationService,
     private storageService: StorageService,
@@ -56,11 +62,33 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.loadActiveMenu();
     this.loadAll();
     this.cartSub = this.cartService.items$.subscribe(items => { this.cartItems = items; });
   }
 
   ngOnDestroy(): void { this.cartSub?.unsubscribe(); }
+
+  // ─── Menu del Día ──────────────────────────────────────────────────────────
+
+  loadActiveMenu(): void {
+    this.loadingMenu = true;
+    this.menuPublicationService.getActive().subscribe({
+      next: res => { this.activeMenu = res.message; this.loadingMenu = false; },
+      error: () => { this.activeMenu = null; this.loadingMenu = false; }
+    });
+  }
+
+  addMenuOptionToCart(option: SectionOptionDTO): void {
+    this.cartService.add({
+      productId:   option.itemId,
+      productName: option.itemName,
+      productType: option.itemType,
+      unitPrice:   option.additionalCost,
+      photo:       option.itemPhoto || undefined
+    });
+    this.notification.showSuccess(`${option.itemName} agregado al carrito`);
+  }
 
   // ─── Products ──────────────────────────────────────────────────────────────
 
@@ -81,8 +109,13 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
   }
 
   get currentProducts(): any[] {
-    const map: Record<Tab, any[]> = { DISH: this.dishes, DRINK: this.drinks, ADDITION: this.additions };
-    const list = map[this.activeTab];
+    if (this.activeTab === 'DAILY_MENU') return [];
+    const map: Record<Exclude<Tab, 'DAILY_MENU'>, any[]> = { 
+      DISH: this.dishes, 
+      DRINK: this.drinks, 
+      ADDITION: this.additions 
+    };
+    const list = map[this.activeTab as Exclude<Tab, 'DAILY_MENU'>];
     if (!this.searchQuery.trim()) return list;
     const q = this.searchQuery.toLowerCase();
     return list.filter((p: any) => p.name?.toLowerCase().includes(q));
@@ -91,17 +124,19 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
   // ─── Cart ──────────────────────────────────────────────────────────────────
 
   addToCart(product: any): void {
+    const productType = this.activeTab as ProductType;
     this.cartService.add({
       productId:   product.id,
       productName: product.name,
-      productType: this.activeTab,
-      unitPrice:   parseFloat(product.price) || 0,
+      productType: productType,
+      unitPrice:   parseFloat(product.salePrice ?? product.price) || 0,
       photo:       product.photo
     });
   }
 
   getQty(product: any): number {
-    return this.cartService.getQty(product.id, this.activeTab);
+    if (this.activeTab === 'DAILY_MENU') return 0;
+    return this.cartService.getQty(product.id, this.activeTab as ProductType);
   }
 
   increment(item: CartItem): void { this.cartService.increment(item.productId, item.productType); }

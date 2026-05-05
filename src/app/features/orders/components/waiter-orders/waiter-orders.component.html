@@ -90,7 +90,8 @@
 
           <!-- Status dot -->
           <span class="w-2 h-2 rounded-full shrink-0"
-            [class.bg-amber-400]="order.status === 'PENDING'"
+            [class.bg-gray-400]="order.status === 'PENDING'"
+            [class.bg-sky-400]="order.status === 'SENT'"
             [class.bg-blue-400]="order.status === 'IN_PROGRESS'"
             [class.bg-[#e6c487]]="order.status === 'COMPLETED'"
             [class.bg-emerald-400]="order.status === 'DELIVERED'"
@@ -128,6 +129,13 @@
           <!-- Quick actions (visible on hover) -->
           <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" (click)="$event.stopPropagation()">
             <button
+              *ngIf="canSendToKitchen(order)"
+              (click)="sendToKitchen(order)"
+              title="Enviar a cocina"
+              class="p-1.5 text-sky-400 hover:bg-sky-400/10 transition-colors">
+              <span class="material-symbols-outlined text-base">send</span>
+            </button>
+            <button
               *ngIf="canDeliver(order)"
               (click)="deliverOrder(order)"
               title="Marcar como entregada"
@@ -140,6 +148,13 @@
               title="Registrar pago"
               class="p-1.5 text-[#e6c487] hover:bg-[#e6c487]/10 transition-colors">
               <span class="material-symbols-outlined text-base">payments</span>
+            </button>
+            <button
+              *ngIf="canClose(order)"
+              (click)="closeOrder(order)"
+              title="Cerrar pedido"
+              class="p-1.5 text-purple-400 hover:bg-purple-400/10 transition-colors">
+              <span class="material-symbols-outlined text-base">receipt_long</span>
             </button>
             <button
               *ngIf="canCancel(order)"
@@ -250,7 +265,7 @@
         </div>
 
         <!-- Editar notas -->
-        <div *ngIf="orderDetail.status === 'PENDING' || orderDetail.status === 'IN_PROGRESS'">
+        <div *ngIf="orderDetail.status === 'PENDING'">
           <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Notas de la orden</p>
           <div *ngIf="!editingNotes" class="flex items-start justify-between gap-2">
             <p class="font-body text-xs text-[#d0c5b5] italic flex-1">
@@ -393,6 +408,13 @@
       <!-- Panel actions -->
       <div *ngIf="!loadingDetail && selectedOrder" class="px-5 py-4 border-t border-[#4d463a]/20 space-y-2 shrink-0">
         <button
+          *ngIf="canSendToKitchen(selectedOrder)"
+          (click)="sendToKitchen(selectedOrder)"
+          class="w-full py-2 px-4 bg-sky-500/10 border border-sky-500/30 text-sky-400 font-label text-xs uppercase tracking-wider hover:bg-sky-500/20 transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">send</span>
+          Enviar a cocina
+        </button>
+        <button
           *ngIf="canDeliver(selectedOrder)"
           (click)="deliverOrder(selectedOrder)"
           class="w-full py-2 px-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-label text-xs uppercase tracking-wider hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2">
@@ -405,6 +427,13 @@
           class="w-full py-2 px-4 btn-metallic text-[#0e0e0e] font-label text-xs uppercase tracking-wider font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
           <span class="material-symbols-outlined text-sm">payments</span>
           Registrar pago
+        </button>
+        <button
+          *ngIf="canClose(selectedOrder)"
+          (click)="closeOrder(selectedOrder)"
+          class="w-full py-2 px-4 bg-purple-500/10 border border-purple-500/30 text-purple-400 font-label text-xs uppercase tracking-wider hover:bg-purple-500/20 transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">receipt_long</span>
+          Cerrar pedido
         </button>
         <button
           *ngIf="canCancel(selectedOrder)"

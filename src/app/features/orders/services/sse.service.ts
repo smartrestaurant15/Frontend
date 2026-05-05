@@ -23,6 +23,10 @@ export class SseService {
     return this.connect('/sse/waiter');
   }
 
+  subscribeCashier(): Observable<SseNotification> {
+    return this.connect('/sse/cashier');
+  }
+
   subscribeCustomer(): Observable<SseNotification> {
     return this.connect('/sse/customer');
   }

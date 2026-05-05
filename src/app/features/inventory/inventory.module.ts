@@ -25,6 +25,9 @@ import { AdditionFormModalComponent } from './components/addition-management/add
 import { DailyMenuComponent } from './components/daily-menu/daily-menu.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InventoryMovementsComponent } from './components/inventory-movements/inventory-movements.component';
+import { MenuTemplatesComponent } from './components/menu-templates/menu-templates.component';
+import { MenuPublicationDetailComponent } from './components/menu-publication-detail/menu-publication-detail.component';
+import { CountByStatusPipe } from './pipes/count-by-status.pipe';
 
 @NgModule({
   declarations: [
@@ -45,8 +48,11 @@ import { InventoryMovementsComponent } from './components/inventory-movements/in
     AdditionManagementComponent,
     AdditionFormModalComponent,
     DailyMenuComponent,
+    MenuTemplatesComponent,
+    MenuPublicationDetailComponent,
     DashboardComponent,
-    InventoryMovementsComponent
+    InventoryMovementsComponent,
+    CountByStatusPipe
   ],
   imports: [
     CommonModule,

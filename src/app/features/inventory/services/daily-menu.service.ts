@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClientService } from '@core/services/http-client.service';
-import { DailyMenuResponse } from '../models/daily-menu.model';
+import { DailyMenuDish, DailyMenuResponse } from '../models/daily-menu.model';
+import { ApiResponse } from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,18 +12,15 @@ export class DailyMenuService {
 
   constructor(private httpClient: HttpClientService) {}
 
-  // Obtener platos del menú diario (paginado)
-  getDailyMenuDishes(page: number): Observable<DailyMenuResponse> {
-    return this.httpClient.get<DailyMenuResponse>(`${this.API_URL}/${page}/page`);
+  getDailyMenuDishes(page: number): Observable<ApiResponse<DailyMenuDish[]>> {
+    return this.httpClient.get<ApiResponse<DailyMenuDish[]>>(`${this.API_URL}/${page}/page`);
   }
 
-  // Agregar plato al menú diario
-  addDishToMenu(dishId: string): Observable<DailyMenuResponse> {
-    return this.httpClient.post<DailyMenuResponse>(`${this.API_URL}/${dishId}/dishes`, {});
+  addDishToMenu(dishId: string): Observable<ApiResponse<string>> {
+    return this.httpClient.post<ApiResponse<string>>(`${this.API_URL}/${dishId}/dishes`, {});
   }
 
-  // Eliminar plato del menú diario
-  removeDishFromMenu(dishId: string): Observable<DailyMenuResponse> {
-    return this.httpClient.delete<DailyMenuResponse>(`${this.API_URL}/${dishId}/dishes`);
+  removeDishFromMenu(dishId: string): Observable<ApiResponse<string>> {
+    return this.httpClient.delete<ApiResponse<string>>(`${this.API_URL}/${dishId}/dishes`);
   }
 }
