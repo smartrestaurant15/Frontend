@@ -401,8 +401,10 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
         this.openDetail(orderRef);
         this.loadOrders();
       },
-      error: () => {
-        this.notification.showError('Error al actualizar los items');
+      error: (err) => {
+        if (err?.status !== 409) {
+          this.notification.showError('Error al actualizar los items');
+        }
         this.savingItems = false;
       }
     });

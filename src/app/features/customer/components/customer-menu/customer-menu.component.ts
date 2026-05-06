@@ -159,8 +159,10 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
           }
         });
       },
-      error: () => {
-        this.notification.showError('Error al crear la orden');
+      error: (err) => {
+        if (err?.status !== 409) {
+          this.notification.showError('Error al crear la orden');
+        }
         this.submitting = false;
       }
     });
