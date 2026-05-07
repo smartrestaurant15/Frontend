@@ -390,7 +390,7 @@ export class WaiterOrdersComponent implements OnInit, OnDestroy {
         productId:   product.id,
         productName: product.name,
         productType: type,
-        unitPrice:   product.price ?? 0,
+        unitPrice:   product.price ?? product.salePrice ?? 0,
         quantity:    1
       });
     }

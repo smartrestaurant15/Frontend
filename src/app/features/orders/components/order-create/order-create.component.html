@@ -112,7 +112,7 @@
           (click)="addToCart(product)"
           class="group text-left p-3 bg-[#1a1a1a] border border-[#4d463a]/20 hover:border-[#e6c487]/40 hover:bg-[#1f1f1f] transition-all">
           <p class="font-body text-[#e5e2e1] text-sm leading-tight line-clamp-2 mb-1">{{ product.name }}</p>
-          <p class="font-headline text-[#c9a96e] text-xs">${{ product.price | number:'1.0-0' }}</p>
+          <p class="font-headline text-[#c9a96e] text-xs">${{ getProductPrice(product) | number:'1.0-0' }}</p>
           <span class="material-symbols-outlined text-xs text-[#4d463a] group-hover:text-[#e6c487] mt-1 block transition-colors">add</span>
         </button>
       </div>
@@ -128,6 +128,144 @@
           placeholder="Ej: cliente alérgico al gluten, mesa de cumpleaños..."
           class="w-full bg-[#1a1a1a] border border-[#4d463a]/30 px-3 py-2 text-sm text-[#e5e2e1] placeholder-[#998f81]/50 focus:outline-none focus:border-[#e6c487]/50 resize-none transition-colors">
         </textarea>
+      </div>
+
+      <!-- ── Menú del Día ─────────────────────────────────────────────────── -->
+      <div class="border-t border-[#4d463a]/20 pt-4">
+
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-base text-orange-400">restaurant_menu</span>
+            <h3 class="font-label text-xs uppercase tracking-widest text-[#998f81]">Menú del Día</h3>
+            <span *ngIf="menuInstances.length > 0"
+                  class="bg-orange-400/10 text-orange-400 font-label text-[10px] px-2 py-0.5">
+              {{ menuInstances.length }}
+            </span>
+          </div>
+
+          <button
+            *ngIf="activeMenu"
+            (click)="addMenuInstance()"
+            class="flex items-center gap-1 font-label text-[10px] uppercase tracking-wider text-[#e6c487] hover:opacity-80 transition-opacity border border-[#e6c487]/30 px-2 py-1">
+            <span class="material-symbols-outlined text-sm leading-none">add</span>
+            Agregar menú
+          </button>
+        </div>
+
+        <!-- Sin menú activo -->
+        <p *ngIf="!loadingMenu && !activeMenu"
+           class="font-body text-xs text-[#4d463a] italic">
+          No hay menú del día disponible en este momento
+        </p>
+
+        <!-- Cargando menú -->
+        <div *ngIf="loadingMenu" class="flex items-center gap-2 text-[#4d463a]">
+          <div class="w-3 h-3 border border-[#4d463a] border-t-[#998f81] rounded-full animate-spin"></div>
+          <span class="font-body text-xs">Verificando menú...</span>
+        </div>
+
+        <!-- Disponible pero sin instancias aún -->
+        <p *ngIf="!loadingMenu && activeMenu && menuInstances.length === 0"
+           class="font-body text-xs text-[#4d463a] italic">
+          Menú disponible — ${{ activeMenu.basePrice | number:'1.0-0' }} base ·
+          {{ activeMenu.availablePortions }} porciones restantes
+        </p>
+
+        <!-- Instancias de menú -->
+        <div *ngFor="let inst of menuInstances; let i = index; trackBy: trackByIndex"
+             class="mb-3 border border-[#4d463a]/30 bg-[#131313] p-3">
+
+          <!-- Cabecera de la instancia -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="font-label text-[10px] uppercase tracking-widest text-orange-400">
+                Menú {{ i + 1 }}
+              </span>
+              <input
+                [(ngModel)]="inst.seatIdentifier"
+                placeholder="Puesto / Nombre..."
+                class="bg-transparent border-b border-[#4d463a]/40 focus:border-[#e6c487]/50 px-1 py-0.5 text-sm text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none w-36 transition-colors" />
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-headline text-sm text-[#c9a96e]">
+                ${{ instanceTotal(inst) | number:'1.0-0' }}
+              </span>
+              <button (click)="removeMenuInstance(i)"
+                      class="text-[#4d463a] hover:text-red-400 transition-colors">
+                <span class="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Secciones del menú activo -->
+          <div *ngFor="let section of activeMenu?.sections" class="mb-3">
+
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-label text-[10px] uppercase tracking-wider"
+                    [ngClass]="section.required ? 'text-[#d0c5b5]' : 'text-[#998f81]'">
+                {{ section.name }}
+                <span *ngIf="section.required" class="text-orange-400 ml-0.5">*</span>
+              </span>
+              <button
+                *ngIf="!section.required"
+                (click)="toggleExclusion(i, section)"
+                class="font-label text-[10px] uppercase tracking-wider transition-colors"
+                [ngClass]="inst.excludedSectionIds.has(section.id)
+                  ? 'text-red-400 hover:text-red-300'
+                  : 'text-[#4d463a] hover:text-[#998f81]'">
+                {{ inst.excludedSectionIds.has(section.id) ? '✕ Excluida' : 'Excluir sección' }}
+              </button>
+            </div>
+
+            <!-- Opciones (si la sección no está excluida) -->
+            <div *ngIf="!inst.excludedSectionIds.has(section.id)"
+                 class="flex flex-wrap gap-1.5">
+              <button
+                *ngFor="let option of section.options"
+                (click)="selectOption(i, section, option)"
+                [disabled]="!option.active || (option.availablePortions !== null && option.availablePortions <= 0)"
+                class="px-2.5 py-1 text-xs font-body border transition-all"
+                [ngClass]="getSelectionFor(inst, section.id)?.optionId === option.id
+                  ? 'border-[#e6c487]/60 bg-[#e6c487]/10 text-[#e6c487]'
+                  : (option.active && (option.availablePortions === null || option.availablePortions > 0))
+                    ? 'border-[#4d463a]/40 text-[#d0c5b5] hover:border-[#998f81]/40 hover:text-[#e5e2e1]'
+                    : 'border-[#4d463a]/20 text-[#4d463a] cursor-not-allowed'">
+                {{ option.itemName }}
+                <span *ngIf="option.additionalCost > 0" class="text-[10px] text-emerald-400 ml-1">
+                  +${{ option.additionalCost | number:'1.0-0' }}
+                </span>
+                <span *ngIf="!option.active || (option.availablePortions !== null && option.availablePortions <= 0)"
+                      class="text-[10px] text-[#4d463a] ml-1">(agotado)</span>
+              </button>
+            </div>
+
+            <!-- Exclusión activa -->
+            <div *ngIf="inst.excludedSectionIds.has(section.id)"
+                 class="text-xs font-body text-[#4d463a] italic px-1">
+              Sección excluida
+            </div>
+
+            <!-- Observación por selección -->
+            <div *ngIf="getSelectionFor(inst, section.id) as sel" class="mt-1.5">
+              <input
+                [ngModel]="sel.observation"
+                (ngModelChange)="sel.observation = $event"
+                placeholder="Observación (ej: sin cilantro)..."
+                class="w-full bg-[#1a1a1a] border border-[#4d463a]/20 px-2 py-1 text-xs text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/30 transition-colors" />
+            </div>
+          </div>
+
+          <!-- Observación general de la instancia -->
+          <div class="mt-2 border-t border-[#4d463a]/15 pt-2">
+            <textarea
+              [(ngModel)]="inst.observation"
+              rows="1"
+              placeholder="Observación general del menú (opcional)..."
+              class="w-full bg-[#1a1a1a] border border-[#4d463a]/20 px-2 py-1 text-xs text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/30 resize-none transition-colors">
+            </textarea>
+          </div>
+        </div>
+
       </div>
 
       <!-- Carrito -->

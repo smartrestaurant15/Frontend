@@ -10,7 +10,7 @@ import { AuthService } from '../../features/auth/services/auth.service';
 export class InactivityService {
     private inactivityTimer$: Observable<any>;
     private eventSubscription: Subscription | null = null;
-    private readonly INACTIVITY_TIME = 2 * 60 * 1000; // 2 minutos en milisegundos
+    private readonly INACTIVITY_TIME = 2 * 60 * 60 * 1000; // 2 horas en milisegundos
 
     constructor(
         private authService: AuthService,
