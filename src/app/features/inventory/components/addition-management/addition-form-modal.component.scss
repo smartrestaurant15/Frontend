@@ -216,3 +216,226 @@
 
   .material-symbols-outlined { font-size: 18px; }
 }
+
+/* ═══ Nuevo diseño de ingredientes (estilo platos) ═══ */
+.ingredients-section {
+  margin-top: 14px;
+}
+
+.selected-ingredients {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ingredient-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  transition: border-color 0.15s;
+
+  &:hover { border-color: #3a3a3a; }
+}
+
+.ingredient-name-section {
+  flex: 1;
+  min-width: 120px;
+  max-width: 300px;
+
+  .ingredient-name {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e0d6cc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.quantity-input {
+  width: 70px;
+  padding: 6px 8px;
+  background: #111;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  color: #e0d6cc;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: border-color 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: #c9b49a;
+  }
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button { -webkit-appearance: none; }
+}
+
+.unit-selector {
+  position: relative;
+}
+
+.unit-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #111;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  color: #c9b49a;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:hover { border-color: #c9b49a; }
+
+  svg { flex-shrink: 0; }
+}
+
+.unit-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  min-width: 160px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.unit-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: #e0d6cc;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #2a2a2a; }
+
+  .check-icon { color: #c9b49a; flex-shrink: 0; }
+  .check-placeholder { width: 12px; flex-shrink: 0; }
+}
+
+.remove-ingredient-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+  }
+
+  svg { display: block; }
+}
+
+.add-ingredient-container {
+  position: relative;
+  margin-top: 8px;
+}
+
+.add-ingredient-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: 1px dashed #3a3a3a;
+  border-radius: 6px;
+  color: #c9b49a;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #c9b49a;
+    background: rgba(201, 180, 154, 0.05);
+  }
+
+  svg { flex-shrink: 0; }
+}
+
+.ingredient-search-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.popover-search-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #2e2e2e;
+
+  svg { color: #666; flex-shrink: 0; }
+}
+
+.popover-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #e0d6cc;
+  font-size: 0.85rem;
+  outline: none;
+
+  &::placeholder { color: #666; }
+}
+
+.popover-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popover-option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: #e0d6cc;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #2a2a2a; }
+}
+
+.popover-empty {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 0.82rem;
+}

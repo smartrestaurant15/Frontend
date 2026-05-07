@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { DishService } from '../../services/dish.service';
 import { CategoryService } from '../../services/category.service';
@@ -28,10 +28,26 @@ export class DishFormModalComponent implements OnInit, OnChanges {
   uploadingImage = false;
   isEditMode = false;
 
+  // Estado del selector de ingredientes
+  ingredientDropdownOpen = false;
+  ingredientSearchQuery = '';
+  openUnitDropdowns: { [index: number]: boolean } = {};
+
   readonly availabilityOptions: { value: DishAvailability; label: string; description: string }[] = [
     { value: 'REGULAR',      label: 'Carta normal',       description: 'Visible siempre en el menú de platos' },
     { value: 'MENU_DEL_DIA', label: 'Solo menú del día',  description: 'Solo aparece al asignarlo a un menú del día' },
     { value: 'BOTH',         label: 'Ambos',              description: 'Visible en carta y disponible para el menú del día' },
+  ];
+
+  readonly units = [
+    { value: 'g',     label: 'Gramos (g)' },
+    { value: 'kg',    label: 'Kilogramos (kg)' },
+    { value: 'ml',    label: 'Mililitros (ml)' },
+    { value: 'l',     label: 'Litros (l)' },
+    { value: 'unidad', label: 'Unidades' },
+    { value: 'cda',   label: 'Cucharadas' },
+    { value: 'cdta',  label: 'Cucharaditas' },
+    { value: 'taza',  label: 'Tazas' },
   ];
 
   constructor(
@@ -40,7 +56,8 @@ export class DishFormModalComponent implements OnInit, OnChanges {
     private categoryService: CategoryService,
     private productService: ProductService,
     private imageService: ImageService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -78,9 +95,10 @@ export class DishFormModalComponent implements OnInit, OnChanges {
 
   createIngredientGroup(): FormGroup {
     return this.fb.group({
-      product_id: ['', [Validators.required]],
-      quantity: [0, [Validators.required, Validators.min(0.01)]],
-      unit: ['g', [Validators.required]]
+      product_id:   ['', [Validators.required]],
+      product_name: [''],   // solo display, no se envía al backend
+      quantity:     [0, [Validators.required, Validators.min(0.01)]],
+      unit:         ['g', [Validators.required]]
     });
   }
 
@@ -90,6 +108,14 @@ export class DishFormModalComponent implements OnInit, OnChanges {
 
   removeIngredient(index: number): void {
     this.ingredients.removeAt(index);
+    // Re-indexar dropdowns de unidad al eliminar una fila
+    const newDropdowns: { [index: number]: boolean } = {};
+    Object.keys(this.openUnitDropdowns).forEach(key => {
+      const k = parseInt(key, 10);
+      if (k < index) newDropdowns[k] = this.openUnitDropdowns[k];
+      else if (k > index) newDropdowns[k - 1] = this.openUnitDropdowns[k];
+    });
+    this.openUnitDropdowns = newDropdowns;
   }
 
   clearIngredients(): void {
@@ -112,17 +138,117 @@ export class DishFormModalComponent implements OnInit, OnChanges {
   }
 
   loadProducts(): void {
-    // Cargar todos los productos disponibles (sin paginación para el selector)
-    this.productService.getProducts(0).subscribe({
+    this.loadAllProducts(0, []);
+  }
+
+  private loadAllProducts(page: number, accumulated: ProductListResponse[]): void {
+    this.productService.getProducts(page).subscribe({
       next: (response) => {
         if (!response.error) {
-          this.products = response.message as ProductListResponse[];
+          const items = response.message as ProductListResponse[];
+          if (items && items.length > 0) {
+            this.loadAllProducts(page + 1, [...accumulated, ...items]);
+          } else {
+            this.products = accumulated;
+          }
+        } else {
+          this.products = accumulated;
         }
       },
       error: () => {
-        this.notificationService.showError('Error al cargar los productos');
+        if (accumulated.length > 0) {
+          this.products = accumulated;
+        } else {
+          this.notificationService.showError('Error al cargar los productos');
+        }
       }
     });
+  }
+
+  // ── Selector de ingredientes ──────────────────────────────────────────
+
+  getSelectedProductIds(): string[] {
+    return this.ingredients.controls.map(c => c.get('product_id')?.value).filter(Boolean);
+  }
+
+  getFilteredAvailableProducts(): ProductListResponse[] {
+    const selected = new Set(this.getSelectedProductIds());
+    const term = this.ingredientSearchQuery.toLowerCase().trim();
+    return this.products.filter(p =>
+      !selected.has(p.id) &&
+      (!term || p.name.toLowerCase().includes(term))
+    );
+  }
+
+  toggleIngredientDropdown(event: Event): void {
+    event.stopPropagation();
+    this.ingredientDropdownOpen = !this.ingredientDropdownOpen;
+    if (this.ingredientDropdownOpen) {
+      this.ingredientSearchQuery = '';
+      this.openUnitDropdowns = {};
+    }
+  }
+
+  closeIngredientDropdown(): void {
+    this.ingredientDropdownOpen = false;
+  }
+
+  selectIngredient(product: ProductListResponse): void {
+    console.log('=== SELECCIONANDO INGREDIENTE ===');
+    console.log('Producto:', product);
+    console.log('ID:', product.id);
+    console.log('Nombre:', product.name);
+    
+    const group = this.createIngredientGroup();
+    console.log('FormGroup creado:', group.value);
+    
+    group.setValue({
+      product_id: product.id,
+      product_name: product.name,
+      quantity: 0,
+      unit: 'g'
+    });
+    
+    console.log('FormGroup después de setValue:', group.value);
+    console.log('product_name control:', group.get('product_name')?.value);
+    
+    this.ingredients.push(group);
+    console.log('Total ingredientes:', this.ingredients.length);
+    console.log('Todos los ingredientes:', this.ingredients.value);
+    
+    // Forzar detección de cambios
+    this.cdr.detectChanges();
+    
+    this.ingredientDropdownOpen = false;
+    this.ingredientSearchQuery = '';
+  }
+
+  toggleUnitDropdown(index: number, event: Event): void {
+    event.stopPropagation();
+    const isOpen = this.openUnitDropdowns[index];
+    this.openUnitDropdowns = {};
+    this.ingredientDropdownOpen = false;
+    if (!isOpen) this.openUnitDropdowns[index] = true;
+  }
+
+  selectUnit(index: number, unit: string): void {
+    this.ingredients.at(index).get('unit')?.setValue(unit);
+    this.openUnitDropdowns[index] = false;
+  }
+
+  getUnitLabel(value: string): string {
+    return this.units.find(u => u.value === value)?.label ?? value;
+  }
+
+  getIngredientName(ingredient: any): string {
+    const name = ingredient.get('product_name')?.value;
+    console.log('getIngredientName llamado, valor:', name);
+    return name || 'Sin nombre';
+  }
+
+  closeAllDropdowns(): void {
+    this.ingredientDropdownOpen = false;
+    this.openUnitDropdowns = {};
   }
 
   loadDish(id: string): void {
@@ -145,11 +271,19 @@ export class DishFormModalComponent implements OnInit, OnChanges {
           this.clearIngredients();
           if (dish.ingredients && dish.ingredients.length > 0) {
             dish.ingredients.forEach((ingredient: any) => {
+              const productId = ingredient.productId || ingredient.product_id;
+              const productName =
+                ingredient.productName ||
+                ingredient.product_name ||
+                ingredient.name ||
+                this.products.find(p => String(p.id) === String(productId))?.name ||
+                productId;
               const ingredientGroup = this.createIngredientGroup();
               ingredientGroup.patchValue({
-                product_id: ingredient.productId || ingredient.product_id,
-                quantity: ingredient.quantity || ingredient.weight,
-                unit: ingredient.unit || 'g'
+                product_id:   productId,
+                product_name: productName,
+                quantity:     ingredient.quantity || ingredient.weight,
+                unit:         ingredient.unit || 'g'
               });
               this.ingredients.push(ingredientGroup);
             });
@@ -207,7 +341,11 @@ export class DishFormModalComponent implements OnInit, OnChanges {
         description: this.dishForm.value.description,
         price: this.dishForm.value.price,
         photos: this.uploadedPhotos,
-        ingredients: this.dishForm.value.ingredients,
+        ingredients: this.dishForm.value.ingredients.map((ing: any) => ({
+          product_id: ing.product_id,
+          quantity:   ing.quantity,
+          unit:       ing.unit
+        })),
         availability: this.dishForm.value.availability as DishAvailability
       };
 
@@ -265,6 +403,9 @@ export class DishFormModalComponent implements OnInit, OnChanges {
     this.dishForm.reset();
     this.uploadedPhotos = [];
     this.clearIngredients();
+    this.ingredientDropdownOpen = false;
+    this.ingredientSearchQuery = '';
+    this.openUnitDropdowns = {};
     this.closeModal.emit();
   }
 

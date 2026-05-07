@@ -105,40 +105,72 @@
           </div>
 
           <!-- Sección de Ingredientes -->
-          <div class="form-group">
+          <div class="form-group" (click)="closeAllDropdowns()">
             <label>Ingredientes <span class="required">*</span></label>
             <div class="ingredients-section">
-              <div class="ingredient-item" *ngFor="let ingredient of ingredients.controls; let i = index" [formGroup]="$any(ingredient)">
-                <div class="ingredient-fields">
-                  <div class="field">
-                    <select formControlName="product_id" [class.error]="ingredient.get('product_id')?.invalid && ingredient.get('product_id')?.touched">
-                      <option value="">Seleccionar producto</option>
-                      <option *ngFor="let product of products" [value]="product.id">
-                        {{ product.name }}
-                      </option>
-                    </select>
+
+              <!-- Cards de ingredientes seleccionados -->
+              <div class="selected-ingredients" *ngIf="ingredients.length > 0">
+                <div
+                  class="ingredient-card"
+                  *ngFor="let ingredient of ingredients.controls; let i = index"
+                  [formGroup]="$any(ingredient)"
+                >
+                  <!-- Nombre del ingrediente -->
+                  <div class="ingredient-name-section">
+                    <span class="ingredient-name">
+                      {{ getIngredientName(ingredient) }}
+                    </span>
                   </div>
-                  <div class="field">
-                    <input 
-                      type="number" 
-                      formControlName="quantity" 
-                      placeholder="Cantidad"
-                      min="0.01"
-                      step="0.01"
-                      [class.error]="ingredient.get('quantity')?.invalid && ingredient.get('quantity')?.touched"
-                    />
+
+                  <!-- Cantidad -->
+                  <input
+                    type="number"
+                    formControlName="quantity"
+                    class="quantity-input"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0"
+                    (click)="$event.stopPropagation()"
+                  />
+
+                  <!-- Selector de unidad personalizado -->
+                  <div class="unit-selector" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      class="unit-trigger"
+                      (click)="toggleUnitDropdown(i, $event)"
+                    >
+                      <span>{{ getUnitLabel(ingredient.get('unit')?.value) }}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                    <div class="unit-dropdown" *ngIf="openUnitDropdowns[i]">
+                      <button
+                        type="button"
+                        class="unit-option"
+                        *ngFor="let unit of units"
+                        [class.selected]="ingredient.get('unit')?.value === unit.value"
+                        (click)="selectUnit(i, unit.value)"
+                      >
+                        <svg *ngIf="ingredient.get('unit')?.value === unit.value" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="check-icon">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span *ngIf="ingredient.get('unit')?.value !== unit.value" class="check-placeholder"></span>
+                        {{ unit.label }}
+                      </button>
+                    </div>
                   </div>
-                  <div class="field">
-                    <select formControlName="unit" [class.error]="ingredient.get('unit')?.invalid && ingredient.get('unit')?.touched">
-                      <option value="g">Gramos (g)</option>
-                      <option value="kg">Kilogramos (kg)</option>
-                      <option value="ml">Mililitros (ml)</option>
-                      <option value="l">Litros (l)</option>
-                      <option value="unidad">Unidad</option>
-                    </select>
-                  </div>
-                  <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" title="Eliminar ingrediente">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                  <!-- Botón eliminar -->
+                  <button
+                    type="button"
+                    class="remove-ingredient-btn"
+                    (click)="removeIngredient(i); $event.stopPropagation()"
+                    title="Eliminar ingrediente"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
@@ -146,13 +178,50 @@
                 </div>
               </div>
 
-              <button type="button" class="add-ingredient-btn" (click)="addIngredient()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Agregar Ingrediente
-              </button>
+              <!-- Botón agregar + popover de búsqueda -->
+              <div class="add-ingredient-container">
+                <button
+                  type="button"
+                  class="add-ingredient-btn"
+                  (click)="toggleIngredientDropdown($event)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  Agregar ingrediente
+                </button>
+
+                <div class="ingredient-search-popover" *ngIf="ingredientDropdownOpen" (click)="$event.stopPropagation()">
+                  <div class="popover-search-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                      type="text"
+                      [(ngModel)]="ingredientSearchQuery"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="Buscar ingrediente..."
+                      class="popover-search-input"
+                      autofocus
+                    />
+                  </div>
+                  <div class="popover-list">
+                    <div class="popover-empty" *ngIf="getFilteredAvailableProducts().length === 0">
+                      No se encontraron ingredientes.
+                    </div>
+                    <button
+                      type="button"
+                      class="popover-option"
+                      *ngFor="let product of getFilteredAvailableProducts()"
+                      (click)="selectIngredient(product)"
+                    >
+                      {{ product.name }}
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               <div class="error-message" *ngIf="ingredients.length === 0 && dishForm.touched">
                 <span>Debe agregar al menos un ingrediente</span>

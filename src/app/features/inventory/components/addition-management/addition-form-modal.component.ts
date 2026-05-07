@@ -5,7 +5,8 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
-  Output
+  Output,
+  ChangeDetectorRef
 } from '@angular/core';
 import {
   FormBuilder,
@@ -39,14 +40,31 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
   uploadingImage = false;
   isEditMode = false;
 
+  // Estado del selector de ingredientes
+  ingredientDropdownOpen = false;
+  ingredientSearchQuery = '';
+  openUnitDropdowns: { [index: number]: boolean } = {};
+
   readonly UNITS_OPTIONS = ['g', 'ml', 'oz', 'kg', 'L', 'unidad'];
+
+  readonly unitOptions = [
+    { value: 'g',     label: 'Gramos (g)' },
+    { value: 'kg',    label: 'Kilogramos (kg)' },
+    { value: 'ml',    label: 'Mililitros (ml)' },
+    { value: 'l',     label: 'Litros (l)' },
+    { value: 'unidad', label: 'Unidades' },
+    { value: 'cda',   label: 'Cucharadas' },
+    { value: 'cdta',  label: 'Cucharaditas' },
+    { value: 'taza',  label: 'Tazas' },
+  ];
 
   constructor(
     private fb: FormBuilder,
     private additionService: AdditionService,
     private imageService: ImageService,
     private productService: ProductService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -142,7 +160,10 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
 
           if (addition.additionType === 'PREPARED' && addition.recipes?.length) {
             addition.recipes.forEach(r => {
-              this.recipes.push(this.createRecipeGroup(r.productId, r.weight, r.unit));
+              const productName = this.products.find(p => p.id === r.productId)?.name || r.productName || '';
+              const group = this.createRecipeGroup(r.productId, r.weight, r.unit);
+              group.patchValue({ product_name: productName });
+              this.recipes.push(group);
             });
           }
 
@@ -162,6 +183,7 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
   createRecipeGroup(productId = '', weight = 0, unit = 'g'): FormGroup {
     return this.fb.group({
       productId: [productId, Validators.required],
+      product_name: [''], // solo para display
       weight: [weight, [Validators.required, Validators.min(0.01)]],
       unit: [unit, Validators.required]
     });
@@ -173,10 +195,80 @@ export class AdditionFormModalComponent implements OnInit, OnChanges {
 
   removeRecipe(index: number): void {
     this.recipes.removeAt(index);
+    this.openUnitDropdowns = {};
   }
 
   getRecipeControl(index: number, field: string): AbstractControl {
     return this.recipes.at(index).get(field)!;
+  }
+
+  // ── Selector de ingredientes ──────────────────────────────────────────
+
+  getSelectedProductIds(): string[] {
+    return this.recipes.controls.map(c => c.get('productId')?.value).filter(Boolean);
+  }
+
+  getFilteredAvailableProducts(): ProductListResponse[] {
+    const selected = new Set(this.getSelectedProductIds());
+    const term = this.ingredientSearchQuery.toLowerCase().trim();
+    return this.products.filter(p =>
+      !selected.has(p.id) &&
+      (!term || p.name.toLowerCase().includes(term))
+    );
+  }
+
+  toggleIngredientDropdown(event: Event): void {
+    event.stopPropagation();
+    this.ingredientDropdownOpen = !this.ingredientDropdownOpen;
+    if (this.ingredientDropdownOpen) {
+      this.ingredientSearchQuery = '';
+      this.openUnitDropdowns = {};
+    }
+  }
+
+  closeIngredientDropdown(): void {
+    this.ingredientDropdownOpen = false;
+  }
+
+  selectIngredient(product: ProductListResponse): void {
+    const group = this.createRecipeGroup();
+    group.setValue({
+      productId: product.id,
+      product_name: product.name,
+      weight: 0,
+      unit: 'g'
+    });
+    this.recipes.push(group);
+    this.ingredientDropdownOpen = false;
+    this.ingredientSearchQuery = '';
+    this.cdr.detectChanges();
+  }
+
+  toggleUnitDropdown(index: number, event: Event): void {
+    event.stopPropagation();
+    const isOpen = this.openUnitDropdowns[index];
+    this.openUnitDropdowns = {};
+    this.ingredientDropdownOpen = false;
+    if (!isOpen) this.openUnitDropdowns[index] = true;
+  }
+
+  selectUnit(index: number, unit: string): void {
+    this.recipes.at(index).get('unit')?.setValue(unit);
+    this.openUnitDropdowns[index] = false;
+  }
+
+  getUnitLabel(value: string): string {
+    return this.unitOptions.find(u => u.value === value)?.label ?? value;
+  }
+
+  getIngredientName(ingredient: any): string {
+    const name = ingredient.get('product_name')?.value;
+    return name || 'Sin nombre';
+  }
+
+  closeAllDropdowns(): void {
+    this.ingredientDropdownOpen = false;
+    this.openUnitDropdowns = {};
   }
 
   // ——— Gestión de fotos ———

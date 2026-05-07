@@ -152,48 +152,120 @@
               <span>Los ingredientes se descontarán del inventario al procesar cada pedido.</span>
             </div>
 
-            <div formArrayName="recipes">
-              <div *ngFor="let recipe of recipes.controls; let i = index"
-                   [formGroupName]="i" class="recipe-row">
+            <div class="ingredients-section" (click)="closeAllDropdowns()">
+              <!-- Cards de ingredientes seleccionados -->
+              <div class="selected-ingredients" *ngIf="recipes.length > 0" formArrayName="recipes">
+                <div
+                  class="ingredient-card"
+                  *ngFor="let recipe of recipes.controls; let i = index"
+                  [formGroup]="$any(recipe)"
+                >
+                  <!-- Nombre del ingrediente -->
+                  <div class="ingredient-name-section">
+                    <span class="ingredient-name">
+                      {{ getIngredientName(recipe) }}
+                    </span>
+                  </div>
 
-                <div class="recipe-row-index">{{ i + 1 }}</div>
+                  <!-- Cantidad -->
+                  <input
+                    type="number"
+                    formControlName="weight"
+                    class="quantity-input"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0"
+                    (click)="$event.stopPropagation()"
+                  />
 
-                <div class="form-group recipe-ingredient">
-                  <label>Ingrediente <span class="required">*</span></label>
-                  <select formControlName="productId"
-                          [class.error]="getRecipeControl(i, 'productId').invalid && getRecipeControl(i, 'productId').touched">
-                    <option value="">Seleccionar...</option>
-                    <option *ngFor="let product of products" [value]="product.id">
-                      {{ product.name }}
-                    </option>
-                  </select>
+                  <!-- Selector de unidad personalizado -->
+                  <div class="unit-selector" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      class="unit-trigger"
+                      (click)="toggleUnitDropdown(i, $event)"
+                    >
+                      <span>{{ getUnitLabel(recipe.get('unit')?.value) }}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </button>
+                    <div class="unit-dropdown" *ngIf="openUnitDropdowns[i]">
+                      <button
+                        type="button"
+                        class="unit-option"
+                        *ngFor="let unit of unitOptions"
+                        (click)="selectUnit(i, unit.value)"
+                      >
+                        <svg *ngIf="recipe.get('unit')?.value === unit.value" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="check-icon">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span *ngIf="recipe.get('unit')?.value !== unit.value" class="check-placeholder"></span>
+                        {{ unit.label }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Botón eliminar -->
+                  <button
+                    type="button"
+                    class="remove-ingredient-btn"
+                    (click)="removeRecipe(i); $event.stopPropagation()"
+                    title="Eliminar ingrediente"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
                 </div>
+              </div>
 
-                <div class="form-group recipe-weight">
-                  <label>Cantidad <span class="required">*</span></label>
-                  <input type="number" formControlName="weight"
-                         placeholder="100" min="0.01" step="0.01"
-                         [class.error]="getRecipeControl(i, 'weight').invalid && getRecipeControl(i, 'weight').touched" />
-                </div>
-
-                <div class="form-group recipe-unit">
-                  <label>Unidad <span class="required">*</span></label>
-                  <select formControlName="unit">
-                    <option *ngFor="let u of UNITS_OPTIONS" [value]="u">{{ u }}</option>
-                  </select>
-                </div>
-
-                <button type="button" class="recipe-remove-btn" (click)="removeRecipe(i)"
-                        title="Eliminar ingrediente">
-                  <span class="material-symbols-outlined">delete</span>
+              <!-- Botón agregar + popover de búsqueda -->
+              <div class="add-ingredient-container">
+                <button
+                  type="button"
+                  class="add-ingredient-btn"
+                  (click)="toggleIngredientDropdown($event)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  Agregar ingrediente
                 </button>
+
+                <div class="ingredient-search-popover" *ngIf="ingredientDropdownOpen" (click)="$event.stopPropagation()">
+                  <div class="popover-search-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                      type="text"
+                      [(ngModel)]="ingredientSearchQuery"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="Buscar ingrediente..."
+                      class="popover-search-input"
+                      autofocus
+                    />
+                  </div>
+                  <div class="popover-list">
+                    <div class="popover-empty" *ngIf="getFilteredAvailableProducts().length === 0">
+                      No se encontraron ingredientes.
+                    </div>
+                    <button
+                      type="button"
+                      class="popover-option"
+                      *ngFor="let product of getFilteredAvailableProducts()"
+                      (click)="selectIngredient(product)"
+                    >
+                      {{ product.name }}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <button type="button" class="add-recipe-btn" (click)="addRecipe()">
-              <span class="material-symbols-outlined">add_circle</span>
-              Agregar ingrediente
-            </button>
 
             <div class="error-message" *ngIf="isPrepared && recipes.length === 0">
               Las adiciones preparadas requieren al menos un ingrediente
