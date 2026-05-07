@@ -353,6 +353,19 @@
         </div>
       </div>
 
+      <!-- Filtro por categoría (solo visible para platos) -->
+      <div *ngIf="optionForm.value.itemType === 'DISH'">
+        <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">
+          Categoría <span class="text-[#4d463a] normal-case tracking-normal">(opcional)</span>
+        </label>
+        <select [(ngModel)]="selectedCategoryId" [ngModelOptions]="{standalone: true}"
+                (change)="onCategoryChange()"
+                class="w-full bg-[#111111] border border-[#4d463a]/30 focus:border-primary/40 px-3 py-2 text-sm text-[#e5e2e1] rounded-sm focus:outline-none">
+          <option [ngValue]="null">Todas las categorías</option>
+          <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+        </select>
+      </div>
+
       <!-- Buscador de catálogo -->
       <div>
         <label class="block font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-1.5">

@@ -14,8 +14,8 @@ import { CartItem } from '../../models/cart.model';
 import { DishResponse } from '@features/inventory/models/dish.model';
 import { DrinkResponse } from '@features/inventory/models/drink.model';
 import { AdditionResponse } from '@features/inventory/models/addition.model';
-import { ActiveMenuDTO, SectionOptionDTO } from '@features/inventory/models/menu.model';
-import { ProductType } from '@features/orders/models/order.model';
+import { ActiveMenuDTO, PublicationSectionDTO, SectionOptionDTO } from '@features/inventory/models/menu.model';
+import { ProductType, MenuInstanceDraft, MenuSelectionDraft } from '@features/orders/models/order.model';
 
 type Tab = 'DAILY_MENU' | 'DISH' | 'DRINK' | 'ADDITION';
 
@@ -40,6 +40,9 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
 
   cartItems: CartItem[] = [];
   private cartSub?: Subscription;
+
+  // ─── Menú del Día ──────────────────────────────────────────────────────────
+  menuInstances: MenuInstanceDraft[] = [];
 
   readonly tabs: { value: Tab; label: string; icon: string }[] = [
     { value: 'DAILY_MENU', label: 'Menú del Día', icon: 'restaurant_menu' },
@@ -79,16 +82,68 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
     });
   }
 
-  addMenuOptionToCart(option: SectionOptionDTO): void {
-    this.cartService.add({
-      productId:   option.itemId,
-      productName: option.itemName,
-      productType: option.itemType,
-      unitPrice:   option.additionalCost,
-      photo:       option.itemPhoto || undefined
-    });
-    this.notification.showSuccess(`${option.itemName} agregado al carrito`);
+  addMenuInstance(): void {
+    this.menuInstances = [
+      ...this.menuInstances,
+      {
+        seatIdentifier: '',
+        observation:    '',
+        selections:     new Map<string, MenuSelectionDraft>(),
+        excludedSectionIds: new Set<string>()
+      }
+    ];
   }
+
+  removeMenuInstance(index: number): void {
+    this.menuInstances = this.menuInstances.filter((_, i) => i !== index);
+  }
+
+  selectOption(instanceIndex: number, section: PublicationSectionDTO, option: SectionOptionDTO): void {
+    if (!option.active || (option.availablePortions !== null && option.availablePortions <= 0)) return;
+    const inst = this.menuInstances[instanceIndex];
+    inst.excludedSectionIds.delete(section.id);
+    inst.selections.set(section.id, {
+      sectionId:      section.id,
+      sectionName:    section.name,
+      optionId:       option.id,
+      optionName:     option.itemName,
+      additionalCost: option.additionalCost,
+      observation:    ''
+    });
+    this.menuInstances = [...this.menuInstances];
+  }
+
+  toggleExclusion(instanceIndex: number, section: PublicationSectionDTO): void {
+    const inst = this.menuInstances[instanceIndex];
+    if (inst.excludedSectionIds.has(section.id)) {
+      inst.excludedSectionIds.delete(section.id);
+    } else {
+      inst.excludedSectionIds.add(section.id);
+      inst.selections.delete(section.id);
+    }
+    this.menuInstances = [...this.menuInstances];
+  }
+
+  getSelectionFor(inst: MenuInstanceDraft, sectionId: string): MenuSelectionDraft | null {
+    return inst.selections.get(sectionId) ?? null;
+  }
+
+  instanceTotal(inst: MenuInstanceDraft): number {
+    if (!this.activeMenu) return 0;
+    const extras = Array.from(inst.selections.values()).reduce((s, sel) => s + sel.additionalCost, 0);
+    return this.activeMenu.basePrice + extras;
+  }
+
+  get allMenuInstancesValid(): boolean {
+    if (!this.activeMenu) return false;
+    return this.menuInstances.every(inst =>
+      this.activeMenu!.sections
+        .filter(s => s.required)
+        .every(s => inst.selections.has(s.id) || inst.excludedSectionIds.has(s.id))
+    );
+  }
+
+  trackByIndex(index: number): number { return index; }
 
   // ─── Products ──────────────────────────────────────────────────────────────
 
@@ -143,26 +198,58 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
   decrement(item: CartItem): void { this.cartService.decrement(item.productId, item.productType); }
   removeItem(item: CartItem): void { this.cartService.remove(item.productId, item.productType); }
 
-  get cartTotal(): number { return this.cartService.total; }
-  get cartCount(): number { return this.cartService.count; }
+  get cartTotal(): number {
+    const itemsTotal = this.cartService.total;
+    const menuTotal  = this.menuInstances.reduce((s, inst) => s + this.instanceTotal(inst), 0);
+    return itemsTotal + menuTotal;
+  }
+
+  get cartCount(): number {
+    return this.cartService.count + this.menuInstances.length;
+  }
+
+  get canPlaceOrder(): boolean {
+    const hasItems    = this.cartItems.length > 0;
+    const hasValidMenus = this.menuInstances.length > 0 && this.allMenuInstancesValid;
+    return (hasItems || hasValidMenus) && !this.submitting;
+  }
 
   // ─── Checkout ──────────────────────────────────────────────────────────────
 
   placeOrder(): void {
-    if (this.cartItems.length === 0 || this.submitting) return;
+    if (!this.canPlaceOrder) return;
     this.submitting = true;
     const user = this.storageService.getUser();
 
-    this.orderService.createOrder({
+    const dto: any = {
       channel:    'ONLINE',
       customerId: user?.id ?? undefined,
-      items: this.cartItems.map(i => ({
+    };
+
+    if (this.cartItems.length > 0) {
+      dto.items = this.cartItems.map(i => ({
         productId:   i.productId,
         productType: i.productType as ProductType,
         quantity:    i.quantity,
         notes:       i.notes || undefined
-      }))
-    }).subscribe({
+      }));
+    }
+
+    if (this.menuInstances.length > 0 && this.activeMenu) {
+      dto.menuInstances = this.menuInstances.map(inst => ({
+        publicationId:      this.activeMenu!.id,
+        seatIdentifier:     inst.seatIdentifier.trim() || undefined,
+        observation:        inst.observation.trim() || undefined,
+        selections: Array.from(inst.selections.values()).map(s => ({
+          sectionId:   s.sectionId,
+          optionId:    s.optionId,
+          observation: s.observation.trim() || undefined
+        })),
+        excludedSectionIds: Array.from(inst.excludedSectionIds)
+      }));
+    }
+
+    this.orderService.createOrder(dto).subscribe({
       next: (res) => {
         const orderId = res.data;
         if (!orderId) {
@@ -170,7 +257,6 @@ export class CustomerMenuComponent implements OnInit, OnDestroy {
           this.submitting = false;
           return;
         }
-        // Obtener firma de integridad y redirigir a Wompi
         const amountCents = Math.max(Math.round(this.cartTotal * 100), 100);
         this.wompiService.getCheckoutParams(orderId, amountCents).subscribe({
           next: (sigRes) => {

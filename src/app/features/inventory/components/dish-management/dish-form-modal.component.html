@@ -83,6 +83,27 @@
             </div>
           </div>
 
+          <!-- Disponibilidad del plato -->
+          <div class="form-group">
+            <label>Disponibilidad <span class="required">*</span></label>
+            <div class="availability-options">
+              <label
+                *ngFor="let opt of availabilityOptions"
+                class="availability-option"
+                [class.selected]="dishForm.get('availability')?.value === opt.value"
+              >
+                <input
+                  type="radio"
+                  formControlName="availability"
+                  [value]="opt.value"
+                  style="display:none"
+                />
+                <span class="availability-label">{{ opt.label }}</span>
+                <span class="availability-desc">{{ opt.description }}</span>
+              </label>
+            </div>
+          </div>
+
           <!-- Sección de Ingredientes -->
           <div class="form-group">
             <label>Ingredientes <span class="required">*</span></label>

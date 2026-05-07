@@ -31,6 +31,9 @@
 
         <div class="order-card-center">
           <div class="order-items">{{ order.itemCount }} producto(s)</div>
+          <div *ngIf="order.menuInstanceCount > 0" class="order-items" style="color: #fb923c; font-size: 0.75rem;">
+            🍽 {{ order.menuInstanceCount }} menú{{ order.menuInstanceCount > 1 ? 's' : '' }}
+          </div>
           <div class="order-total">${{ order.totalAmount | number:'1.0-0' }}</div>
         </div>
 
@@ -97,6 +100,27 @@
             <span class="item-name">{{ item.productName }}</span>
             <span class="item-qty">× {{ item.quantity }}</span>
             <span class="item-price">${{ item.totalPrice | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <!-- Instancias de menú del día -->
+        <div *ngIf="(selectedOrder.menuInstances?.length ?? 0) > 0" class="detail-items">
+          <h3>🍽 Menú del Día ({{ selectedOrder.menuInstances.length }})</h3>
+          <div *ngFor="let inst of selectedOrder.menuInstances"
+               style="border: 1px solid rgba(251,146,60,0.2); background: rgba(251,146,60,0.05); border-radius: 4px; padding: 10px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <strong style="font-size: 0.85rem;">{{ inst.seatIdentifier || 'Sin puesto' }}</strong>
+              <span style="color: #e6c487; font-size: 0.85rem;">${{ inst.basePrice | number:'1.0-0' }}</span>
+            </div>
+            <p *ngIf="inst.observation" style="font-size: 0.75rem; color: #998f81; font-style: italic; margin-bottom: 6px;">"{{ inst.observation }}"</p>
+            <div *ngFor="let sel of inst.selections" class="item-row" style="font-size: 0.8rem;">
+              <span class="item-name" style="color: #998f81;">{{ sel.sectionName }}:</span>
+              <span class="item-qty">{{ sel.optionName }}</span>
+              <span *ngIf="sel.additionalCost > 0" class="item-price" style="color: #34d399;">+${{ sel.additionalCost | number:'1.0-0' }}</span>
+            </div>
+            <div *ngFor="let excl of inst.exclusions" style="font-size: 0.8rem; color: #f87171; text-decoration: line-through;">
+              {{ excl.sectionName }}
+            </div>
           </div>
         </div>
 

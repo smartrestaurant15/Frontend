@@ -1,0 +1,19 @@
+version: '3.8'
+
+# Uso standalone: apunta a un backend ya desplegado
+#
+#   docker compose up --build
+#   BACKEND_URL=https://api.smart-restaurant.online docker compose up --build
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart_restaurant_frontend
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      # URL del backend. Puede ser local o el desplegado en AWS/Render/etc.
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:8080}

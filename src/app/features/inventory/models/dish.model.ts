@@ -1,3 +1,5 @@
+export type DishAvailability = 'REGULAR' | 'MENU_DEL_DIA' | 'BOTH';
+
 // Modelo de Plato según especificación del backend
 export interface Dish {
   id: string;
@@ -6,6 +8,7 @@ export interface Dish {
   price: string;
   photos: string[];
   state: 'ACTIVE' | 'INACTIVE';
+  availability: DishAvailability;
   categoryId?: string;
   categoryName?: string;
   ingredients?: Recipe[];
@@ -18,6 +21,7 @@ export interface CreateDishDTO {
   price: number;
   photos: string[];
   ingredients: CreateRecipeDTO[];
+  availability: DishAvailability;
 }
 
 // DTO para actualizar plato
@@ -28,6 +32,7 @@ export interface UpdateDishDTO {
   photos: string[];
   ingredients: CreateRecipeDTO[];
   categoryId: string;
+  availability: DishAvailability;
 }
 
 // Ingrediente de receta (GetRecipeDTO del backend)
@@ -52,6 +57,7 @@ export interface DishResponse {
   name: string;
   price: string;
   photo: string;
+  availability: DishAvailability;
 }
 
 // Detalle de plato
@@ -66,4 +72,5 @@ export interface DishDetailResponse {
   categoryName: string;
   estimatedCost: number;
   margin: number;
+  availability: DishAvailability;
 }

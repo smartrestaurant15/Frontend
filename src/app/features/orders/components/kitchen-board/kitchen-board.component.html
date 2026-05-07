@@ -203,6 +203,12 @@
     <span class="font-body text-[#d0c5b5] text-xs">
       {{ order.itemCount }} ítem{{ order.itemCount !== 1 ? 's' : '' }}
     </span>
+    <!-- Badge menú del día -->
+    <span *ngIf="order.menuInstanceCount > 0"
+          class="flex items-center gap-1 px-1.5 py-0.5 bg-orange-400/10 text-orange-400 font-label text-[10px]">
+      <span class="material-symbols-outlined text-[11px]">restaurant_menu</span>
+      {{ order.menuInstanceCount }} menú{{ order.menuInstanceCount > 1 ? 's' : '' }}
+    </span>
     <!-- Expand toggle -->
     <button
       (click)="toggleDetail(order)"
@@ -248,6 +254,58 @@
           <p *ngIf="item.notes" class="font-body text-[#998f81] text-xs mt-0.5 italic">
             "{{ item.notes }}"
           </p>
+        </div>
+      </div>
+
+      <!-- ── Instancias de menú del día ── -->
+      <div *ngIf="(detail.menuInstances?.length ?? 0) > 0" class="mt-2 border-t border-[#4d463a]/20 pt-2">
+        <p class="font-label text-[10px] uppercase tracking-widest text-orange-400 mb-2">
+          Menú del día · {{ detail.menuInstances.length }} instancia{{ detail.menuInstances.length > 1 ? 's' : '' }}
+        </p>
+        <div *ngFor="let inst of detail.menuInstances"
+             class="mb-2 bg-[#1a1a1a] border border-orange-400/15 p-2 text-xs">
+          <p class="font-label text-[10px] text-[#d0c5b5] uppercase tracking-wider mb-1">
+            {{ inst.seatIdentifier || 'Sin puesto' }}
+            <em *ngIf="inst.observation" class="normal-case font-body text-[#998f81] ml-1">— {{ inst.observation }}</em>
+          </p>
+          <ul class="space-y-0.5">
+            <li *ngFor="let sel of inst.selections" class="flex items-baseline gap-1 font-body text-[#d0c5b5]">
+              <span class="text-[#998f81] shrink-0">{{ sel.sectionName }}:</span>
+              <span>{{ sel.optionName }}</span>
+              <em *ngIf="sel.observation" class="text-[#998f81]">({{ sel.observation }})</em>
+              <span *ngIf="sel.additionalCost > 0" class="text-emerald-400 ml-auto shrink-0">+${{ sel.additionalCost | number:'1.0-0' }}</span>
+            </li>
+            <li *ngFor="let excl of inst.exclusions" class="font-body text-red-400 line-through">
+              {{ excl.sectionName }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú inline (sin expandir detalle completo, viene del SSE) -->
+    <div *ngIf="!expandedDetails[order.id] && !loadingDetail[order.id] && order.menuInstanceCount > 0 && order.menuInstances">
+      <div *ngIf="order.menuInstances.length > 0" class="border-t border-[#4d463a]/20 pt-2 mt-1">
+        <p class="font-label text-[10px] uppercase tracking-widest text-orange-400 mb-2">
+          Menú del día · {{ order.menuInstances.length }} instancia{{ order.menuInstances.length > 1 ? 's' : '' }}
+        </p>
+        <div *ngFor="let inst of order.menuInstances"
+             class="mb-2 bg-[#1a1a1a] border border-orange-400/15 p-2 text-xs">
+          <p class="font-label text-[10px] text-[#d0c5b5] uppercase tracking-wider mb-1">
+            {{ inst.seatIdentifier || 'Sin puesto' }}
+            <em *ngIf="inst.observation" class="normal-case font-body text-[#998f81] ml-1">— {{ inst.observation }}</em>
+          </p>
+          <ul class="space-y-0.5">
+            <li *ngFor="let sel of inst.selections" class="flex items-baseline gap-1 font-body text-[#d0c5b5]">
+              <span class="text-[#998f81] shrink-0">{{ sel.sectionName }}:</span>
+              <span>{{ sel.optionName }}</span>
+              <em *ngIf="sel.observation" class="text-[#998f81]">({{ sel.observation }})</em>
+              <span *ngIf="sel.additionalCost > 0" class="text-emerald-400 ml-auto shrink-0">+${{ sel.additionalCost | number:'1.0-0' }}</span>
+            </li>
+            <li *ngFor="let excl of inst.exclusions" class="font-body text-red-400 line-through">
+              {{ excl.sectionName }}
+            </li>
+          </ul>
         </div>
       </div>
     </div>

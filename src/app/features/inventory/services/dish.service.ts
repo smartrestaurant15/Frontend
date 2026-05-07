@@ -21,8 +21,13 @@ export class DishService {
    * Listar platos paginados
    * GET /api/dishes/{page}/page
    */
-  getDishes(page: number = 0): Observable<ApiResponse<DishResponse[]>> {
-    return this.httpClient.get<ApiResponse<DishResponse[]>>(`/dishes/${page}/page`);
+  getDishes(page: number = 0, categoryId?: string, menuEligible = false): Observable<ApiResponse<DishResponse[]>> {
+    const params = new URLSearchParams();
+    if (categoryId) params.set('categoryId', categoryId);
+    if (menuEligible) params.set('menuEligible', 'true');
+    const query = params.toString();
+    const url = `/dishes/${page}/page${query ? '?' + query : ''}`;
+    return this.httpClient.get<ApiResponse<DishResponse[]>>(url);
   }
 
   /**

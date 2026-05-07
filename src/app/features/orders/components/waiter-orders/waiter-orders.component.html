@@ -118,6 +118,11 @@
               {{ order.itemCount }} ítem{{ order.itemCount !== 1 ? 's' : '' }}
               · ${{ order.totalAmount | number:'1.0-0' }}
             </p>
+            <span *ngIf="order.menuInstanceCount > 0"
+                  class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 bg-orange-400/10 text-orange-400 font-label text-[10px]">
+              <span class="material-symbols-outlined text-[11px]">restaurant_menu</span>
+              {{ order.menuInstanceCount }} menú{{ order.menuInstanceCount > 1 ? 's' : '' }}
+            </span>
           </div>
 
           <!-- Status badge -->
@@ -264,9 +269,44 @@
           </div>
         </div>
 
+        <!-- Instancias de menú del día -->
+        <div *ngIf="(orderDetail.menuInstances?.length ?? 0) > 0">
+          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">
+            Menú del Día ({{ orderDetail.menuInstances.length }})
+          </p>
+          <div *ngFor="let inst of orderDetail.menuInstances"
+               class="mb-3 border border-orange-400/20 bg-[#131313] p-3">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="font-label text-xs text-[#d0c5b5] uppercase tracking-wider">
+                  {{ inst.seatIdentifier || 'Sin puesto asignado' }}
+                </span>
+                <span class="font-body text-[10px] text-[#998f81] ml-2">
+                  {{ inst.publicationDate }} · {{ inst.timeSlot }}
+                </span>
+                <p *ngIf="inst.observation" class="font-body text-xs italic text-[#998f81] mt-0.5">"{{ inst.observation }}"</p>
+              </div>
+              <span class="font-headline text-sm text-[#e6c487] shrink-0">${{ inst.basePrice | number:'1.0-0' }}</span>
+            </div>
+            <ul class="space-y-1">
+              <li *ngFor="let sel of inst.selections"
+                  class="flex items-baseline justify-between gap-2 text-xs font-body">
+                <span>
+                  <span class="text-[#998f81]">{{ sel.sectionName }}: </span>
+                  <span class="text-[#d0c5b5]">{{ sel.optionName }}</span>
+                  <em *ngIf="sel.observation" class="text-[#998f81]"> ({{ sel.observation }})</em>
+                </span>
+                <span *ngIf="sel.additionalCost > 0" class="text-emerald-400 shrink-0">+${{ sel.additionalCost | number:'1.0-0' }}</span>
+              </li>
+              <li *ngFor="let excl of inst.exclusions" class="text-xs font-body text-red-400">
+                Sin {{ excl.sectionName }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <!-- Editar notas -->
-        <div *ngIf="orderDetail.status === 'PENDING'">
-          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Notas de la orden</p>
+        <div *ngIf="orderDetail.status === 'PENDING'">          <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">Notas de la orden</p>
           <div *ngIf="!editingNotes" class="flex items-start justify-between gap-2">
             <p class="font-body text-xs text-[#d0c5b5] italic flex-1">
               {{ orderDetail.notes || 'Sin notas' }}

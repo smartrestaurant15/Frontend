@@ -54,12 +54,150 @@
 
       <!-- Daily Menu Tab -->
       <div *ngIf="!loadingMenu && activeTab === 'DAILY_MENU'" class="px-6 md:px-10 pb-10">
-        <app-active-menu-display 
-          [menu]="activeMenu" 
-          [loading]="loadingMenu"
-          [showAddToCart]="true"
-          (addToCart)="addMenuOptionToCart($event)">
-        </app-active-menu-display>
+
+        <!-- Sin menú activo -->
+        <div *ngIf="!activeMenu" class="flex flex-col items-center py-20 gap-3">
+          <span class="material-symbols-outlined text-4xl text-[#4d463a]">restaurant_menu</span>
+          <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider">No hay menú del día disponible</p>
+        </div>
+
+        <!-- Menú disponible -->
+        <div *ngIf="activeMenu">
+
+          <!-- Info del menú -->
+          <div class="flex items-center justify-between py-4 border-b border-[#4d463a]/20 mb-4">
+            <div>
+              <p class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">
+                {{ activeMenu.date }} · {{ activeMenu.timeSlot }}
+              </p>
+              <p class="font-headline text-lg text-[#e6c487] mt-0.5">
+                ${{ activeMenu.basePrice | number:'1.0-0' }} <span class="font-body text-sm text-[#998f81]">por persona</span>
+              </p>
+              <p class="font-body text-xs text-[#4d463a] mt-0.5">
+                {{ activeMenu.availablePortions }} porciones disponibles
+              </p>
+            </div>
+            <button
+              (click)="addMenuInstance()"
+              class="flex items-center gap-2 px-4 py-2 bg-orange-400/10 border border-orange-400/30 text-orange-400 font-label text-xs uppercase tracking-wider hover:bg-orange-400/20 transition-colors">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Agregar menú
+            </button>
+          </div>
+
+          <!-- Sin instancias aún -->
+          <div *ngIf="menuInstances.length === 0" class="flex flex-col items-center py-12 gap-3">
+            <span class="material-symbols-outlined text-3xl text-[#4d463a]">person_add</span>
+            <p class="font-body text-sm text-[#998f81] text-center">
+              Haz clic en "Agregar menú" para configurar tu pedido
+            </p>
+            <p class="font-body text-xs text-[#4d463a] text-center">
+              Puedes agregar un menú por persona
+            </p>
+          </div>
+
+          <!-- Instancias configurables -->
+          <div *ngFor="let inst of menuInstances; let i = index; trackBy: trackByIndex"
+               class="mb-4 border border-[#4d463a]/30 bg-[#131313]">
+
+            <!-- Cabecera de instancia -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[#4d463a]/20">
+              <div class="flex items-center gap-3">
+                <span class="font-label text-[10px] uppercase tracking-widest text-orange-400">
+                  Menú {{ i + 1 }}
+                </span>
+                <input
+                  [(ngModel)]="inst.seatIdentifier"
+                  placeholder="Tu nombre (opcional)..."
+                  class="bg-transparent border-b border-[#4d463a]/40 focus:border-[#e6c487]/50 px-1 py-0.5 text-sm text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none w-44 transition-colors" />
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-headline text-sm text-[#e6c487]">
+                  ${{ instanceTotal(inst) | number:'1.0-0' }}
+                </span>
+                <button (click)="removeMenuInstance(i)" class="text-[#4d463a] hover:text-red-400 transition-colors">
+                  <span class="material-symbols-outlined text-base">close</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Secciones -->
+            <div class="px-4 py-3 space-y-4">
+              <div *ngFor="let section of activeMenu.sections">
+
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-label text-[10px] uppercase tracking-wider"
+                        [ngClass]="section.required ? 'text-[#d0c5b5]' : 'text-[#998f81]'">
+                    {{ section.name }}
+                    <span *ngIf="section.required" class="text-orange-400 ml-0.5">*</span>
+                  </span>
+                  <button
+                    *ngIf="!section.required"
+                    (click)="toggleExclusion(i, section)"
+                    class="font-label text-[10px] uppercase tracking-wider transition-colors"
+                    [ngClass]="inst.excludedSectionIds.has(section.id)
+                      ? 'text-red-400 hover:text-red-300'
+                      : 'text-[#4d463a] hover:text-[#998f81]'">
+                    {{ inst.excludedSectionIds.has(section.id) ? '✕ Excluida' : 'No quiero esta sección' }}
+                  </button>
+                </div>
+
+                <!-- Opciones -->
+                <div *ngIf="!inst.excludedSectionIds.has(section.id)" class="flex flex-wrap gap-2">
+                  <button
+                    *ngFor="let option of section.options"
+                    (click)="selectOption(i, section, option)"
+                    [disabled]="!option.active || (option.availablePortions !== null && option.availablePortions <= 0)"
+                    class="px-3 py-1.5 text-xs font-body border transition-all"
+                    [ngClass]="getSelectionFor(inst, section.id)?.optionId === option.id
+                      ? 'border-[#e6c487]/60 bg-[#e6c487]/10 text-[#e6c487]'
+                      : (option.active && (option.availablePortions === null || option.availablePortions > 0))
+                        ? 'border-[#4d463a]/40 text-[#d0c5b5] hover:border-[#998f81]/40 hover:text-[#e5e2e1]'
+                        : 'border-[#4d463a]/20 text-[#4d463a] cursor-not-allowed'">
+                    {{ option.itemName }}
+                    <span *ngIf="option.additionalCost > 0" class="text-[10px] text-emerald-400 ml-1">
+                      +${{ option.additionalCost | number:'1.0-0' }}
+                    </span>
+                    <span *ngIf="!option.active || (option.availablePortions !== null && option.availablePortions <= 0)"
+                          class="text-[10px] text-[#4d463a] ml-1">(agotado)</span>
+                  </button>
+                </div>
+
+                <!-- Sección excluida -->
+                <p *ngIf="inst.excludedSectionIds.has(section.id)"
+                   class="text-xs font-body text-[#4d463a] italic">Sección excluida</p>
+
+                <!-- Observación por selección -->
+                <div *ngIf="getSelectionFor(inst, section.id) as sel" class="mt-2">
+                  <input
+                    [ngModel]="sel.observation"
+                    (ngModelChange)="sel.observation = $event"
+                    placeholder="Observación (ej: sin cilantro)..."
+                    class="w-full bg-[#1a1a1a] border border-[#4d463a]/20 px-2 py-1 text-xs text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/30 transition-colors" />
+                </div>
+              </div>
+
+              <!-- Observación general -->
+              <div class="border-t border-[#4d463a]/15 pt-3">
+                <textarea
+                  [(ngModel)]="inst.observation"
+                  rows="1"
+                  placeholder="Observación general (opcional)..."
+                  class="w-full bg-[#1a1a1a] border border-[#4d463a]/20 px-2 py-1 text-xs text-[#e5e2e1] placeholder-[#4d463a] focus:outline-none focus:border-[#e6c487]/30 resize-none transition-colors">
+                </textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón agregar otro -->
+          <button
+            *ngIf="menuInstances.length > 0"
+            (click)="addMenuInstance()"
+            class="w-full py-2.5 border border-dashed border-[#4d463a]/40 text-[#998f81] hover:text-[#e6c487] hover:border-[#e6c487]/30 font-label text-[10px] uppercase tracking-wider transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Agregar otra persona
+          </button>
+        </div>
       </div>
 
       <!-- Products grid -->
@@ -137,50 +275,94 @@
   </div>
 
   <!-- Empty cart -->
-  <div *ngIf="cartItems.length === 0" class="flex-1 flex flex-col items-center justify-center gap-3 px-5">
+  <div *ngIf="cartItems.length === 0 && menuInstances.length === 0" class="flex-1 flex flex-col items-center justify-center gap-3 px-5">
     <span class="material-symbols-outlined text-4xl text-[#4d463a]">shopping_bag</span>
     <p class="font-label text-xs text-[#998f81]/60 uppercase tracking-wider text-center">Tu carrito está vacío</p>
     <p class="font-body text-xs text-[#4d463a] text-center">Agrega productos del menú para comenzar</p>
   </div>
 
   <!-- Items -->
-  <div *ngIf="cartItems.length > 0" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-    <div *ngFor="let item of cartItems; trackBy: trackById"
-      class="flex gap-3 items-start bg-[#131313] border border-[#4d463a]/10 p-3">
-      <!-- Photo -->
-      <div class="w-12 h-12 shrink-0 bg-[#1a1a1a] overflow-hidden">
-        <img *ngIf="item.photo" [src]="item.photo" [alt]="item.productName" class="w-full h-full object-cover opacity-80" />
-        <div *ngIf="!item.photo" class="w-full h-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-sm text-[#4d463a]">fastfood</span>
+  <div *ngIf="cartItems.length > 0 || menuInstances.length > 0" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+
+    <!-- Instancias de menú del día -->
+    <div *ngIf="menuInstances.length > 0">
+      <p class="font-label text-[10px] uppercase tracking-widest text-orange-400 mb-2">
+        Menú del Día ({{ menuInstances.length }})
+      </p>
+      <div *ngFor="let inst of menuInstances; let i = index; trackBy: trackByIndex"
+           class="bg-[#131313] border border-orange-400/15 p-3 mb-2">
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <div>
+            <p class="font-body text-[#e5e2e1] text-xs">
+              {{ inst.seatIdentifier || ('Menú ' + (i + 1)) }}
+            </p>
+            <p class="font-label text-[10px] text-[#998f81] mt-0.5">
+              {{ inst.selections.size }} sección{{ inst.selections.size !== 1 ? 'es' : '' }} seleccionada{{ inst.selections.size !== 1 ? 's' : '' }}
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="font-headline text-[#e6c487] text-xs">${{ instanceTotal(inst) | number:'1.0-0' }}</span>
+            <button (click)="removeMenuInstance(i)" class="text-[#4d463a] hover:text-red-400 transition-colors">
+              <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
         </div>
+        <!-- Selecciones resumidas -->
+        <ul *ngIf="inst.selections.size > 0" class="space-y-0.5 mt-1">
+          <li *ngFor="let sel of inst.selections | keyvalue" class="font-body text-[10px] text-[#998f81]">
+            <span class="text-[#4d463a]">{{ sel.value.sectionName }}:</span> {{ sel.value.optionName }}
+          </li>
+        </ul>
       </div>
-      <!-- Info -->
-      <div class="flex-1 min-w-0">
-        <p class="font-body text-[#e5e2e1] text-xs leading-tight truncate">{{ item.productName }}</p>
-        <p class="font-headline text-[#c9a96e] text-xs mt-0.5">${{ item.unitPrice * item.quantity | number:'1.0-0' }}</p>
-        <!-- Qty controls -->
-        <div class="flex items-center gap-2 mt-2">
-          <button (click)="decrement(item)" class="w-5 h-5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] text-xs flex items-center justify-center">−</button>
-          <span class="font-headline text-[#e5e2e1] text-xs w-4 text-center">{{ item.quantity }}</span>
-          <button (click)="increment(item)" class="w-5 h-5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] text-xs flex items-center justify-center">+</button>
+    </div>
+
+    <!-- Productos regulares -->
+    <div *ngIf="cartItems.length > 0">
+      <p *ngIf="menuInstances.length > 0" class="font-label text-[10px] uppercase tracking-widest text-[#998f81] mb-2">
+        Productos
+      </p>
+      <div *ngFor="let item of cartItems; trackBy: trackById"
+        class="flex gap-3 items-start bg-[#131313] border border-[#4d463a]/10 p-3">
+        <!-- Photo -->
+        <div class="w-12 h-12 shrink-0 bg-[#1a1a1a] overflow-hidden">
+          <img *ngIf="item.photo" [src]="item.photo" [alt]="item.productName" class="w-full h-full object-cover opacity-80" />
+          <div *ngIf="!item.photo" class="w-full h-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm text-[#4d463a]">fastfood</span>
+          </div>
         </div>
+        <!-- Info -->
+        <div class="flex-1 min-w-0">
+          <p class="font-body text-[#e5e2e1] text-xs leading-tight truncate">{{ item.productName }}</p>
+          <p class="font-headline text-[#c9a96e] text-xs mt-0.5">${{ item.unitPrice * item.quantity | number:'1.0-0' }}</p>
+          <!-- Qty controls -->
+          <div class="flex items-center gap-2 mt-2">
+            <button (click)="decrement(item)" class="w-5 h-5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] text-xs flex items-center justify-center">−</button>
+            <span class="font-headline text-[#e5e2e1] text-xs w-4 text-center">{{ item.quantity }}</span>
+            <button (click)="increment(item)" class="w-5 h-5 border border-[#4d463a]/40 text-[#998f81] hover:text-[#e5e2e1] text-xs flex items-center justify-center">+</button>
+          </div>
+        </div>
+        <!-- Remove -->
+        <button (click)="removeItem(item)" class="text-[#4d463a] hover:text-red-400 transition-colors shrink-0">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
       </div>
-      <!-- Remove -->
-      <button (click)="removeItem(item)" class="text-[#4d463a] hover:text-red-400 transition-colors shrink-0">
-        <span class="material-symbols-outlined text-sm">close</span>
-      </button>
     </div>
   </div>
 
   <!-- Footer -->
-  <div *ngIf="cartItems.length > 0" class="px-5 py-4 border-t border-[#4d463a]/20 shrink-0 space-y-3">
+  <div *ngIf="cartItems.length > 0 || menuInstances.length > 0" class="px-5 py-4 border-t border-[#4d463a]/20 shrink-0 space-y-3">
     <div class="flex items-baseline justify-between">
       <span class="font-label text-[10px] uppercase tracking-widest text-[#998f81]">Total</span>
       <span class="font-headline text-xl text-[#e6c487]">${{ cartTotal | number:'1.0-0' }}</span>
     </div>
+    <!-- Aviso de validación si hay menús incompletos -->
+    <p *ngIf="menuInstances.length > 0 && !allMenuInstancesValid"
+       class="font-body text-[10px] text-orange-400 text-center">
+      Completa las secciones obligatorias (*) del menú
+    </p>
     <button
       (click)="placeOrder()"
-      [disabled]="submitting"
+      [disabled]="!canPlaceOrder"
       class="w-full py-3 btn-metallic font-label text-xs uppercase tracking-widest text-[#0e0e0e] font-semibold disabled:opacity-40 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
       <span *ngIf="submitting" class="w-3 h-3 border border-[#0e0e0e]/40 border-t-[#0e0e0e] rounded-full animate-spin"></span>
       <span class="material-symbols-outlined text-sm" *ngIf="!submitting">check_circle</span>

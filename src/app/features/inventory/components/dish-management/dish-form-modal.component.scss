@@ -1,1 +1,41 @@
 :host { display: block; }
+
+.availability-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.availability-option {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border: 1.5px solid #3a3a3a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: #998f81;
+  }
+
+  &.selected {
+    border-color: #c9b49a;
+    background: rgba(201, 180, 154, 0.08);
+  }
+
+  .availability-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #e0d6cc;
+  }
+
+  .availability-desc {
+    font-size: 0.75rem;
+    color: #998f81;
+    line-height: 1.3;
+  }
+}

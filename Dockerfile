@@ -4,15 +4,23 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build -- --configuration production
+RUN npm run build -- --configuration docker
 
 # Run stage
 FROM nginx:alpine
-# Copy the build output to replace the default nginx contents.
-# Note: Check angular.json for the correct output path. It's dist/smart-restaurante
+
+# Install envsubst (comes with gettext)
+RUN apk add --no-cache gettext
+
+# Copy Angular build output
 COPY --from=build /app/dist/smart-restaurante /usr/share/nginx/html
-# Copy custom nginx config for SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy nginx template (BACKEND_URL gets substituted at container start)
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+
+# Startup script: substitute env vars then launch nginx
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

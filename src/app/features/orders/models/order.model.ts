@@ -56,6 +56,7 @@ export interface Order {
   itemCount: number;
   totalAmount: number;
   paymentStatus: OrderPaymentStatus;
+  menuInstanceCount: number;
 }
 
 export interface OrderTable {
@@ -84,6 +85,7 @@ export interface OrderDetail {
   updatedAt: string | null;
   items: OrderItem[];
   paymentStatus: OrderPaymentStatus;
+  menuInstances: GetMenuInstanceDTO[];
   notes?: string;
   // alias de compatibilidad (legacy)
   customerName?: string;
@@ -102,9 +104,10 @@ export interface CreateOrderDTO {
   channel: OrderChannel;
   customerId?: number;
   waiterId?: number;
-  tableId?: string;       // ID real de RestaurantTable (presencial)
+  tableId?: string;                        // ID real de RestaurantTable (presencial)
   notes?: string;
-  items: CreateOrderItemDTO[];
+  items?: CreateOrderItemDTO[];            // Opcional: puede haber solo menú del día
+  menuInstances?: CreateMenuInstanceDTO[]; // Opcional: instancias del menú del día
 }
 
 export interface UpdateOrderDTO {
@@ -121,4 +124,78 @@ export interface CartItem {
   unitPrice: number;
   quantity: number;
   notes?: string;
+}
+
+// ─── Menú del Día — Respuesta del backend ────────────────────────────────────
+
+/** Instancia de menú del día dentro del detalle de una orden */
+export interface GetMenuInstanceDTO {
+  id: string;
+  publicationId: string;
+  publicationDate: string;    // 'YYYY-MM-DD'
+  timeSlot: string;           // 'LUNCH' | 'DINNER' | 'ALL_DAY'
+  basePrice: number;
+  seatIdentifier: string | null;
+  observation: string | null;
+  selections: GetMenuSectionSelectionDTO[];
+  exclusions: GetMenuSectionExclusionDTO[];
+}
+
+/** Sección seleccionada dentro de una instancia de menú */
+export interface GetMenuSectionSelectionDTO {
+  sectionId: string;
+  sectionName: string;
+  optionId: string;
+  optionName: string;
+  additionalCost: number;
+  observation: string | null;
+}
+
+/** Sección excluida dentro de una instancia de menú */
+export interface GetMenuSectionExclusionDTO {
+  sectionId: string;
+  sectionName: string;
+}
+
+// ─── Menú del Día — Envío al backend ─────────────────────────────────────────
+
+/** DTO para crear una instancia de menú del día en un pedido */
+export interface CreateMenuInstanceDTO {
+  publicationId: string;
+  seatIdentifier?: string;
+  observation?: string;
+  selections: CreateMenuSectionSelectionDTO[];
+  excludedSectionIds: string[];
+}
+
+/** DTO para una selección de opción dentro de una sección */
+export interface CreateMenuSectionSelectionDTO {
+  sectionId: string;
+  optionId: string;
+  observation?: string;
+}
+
+// ─── Menú del Día — Modelo local (borrador en memoria) ───────────────────────
+
+/**
+ * Borrador de instancia de menú mientras el usuario configura el pedido.
+ * Usa Map y Set para validaciones y lookups O(1).
+ * Se serializa a CreateMenuInstanceDTO al enviar.
+ */
+export interface MenuInstanceDraft {
+  seatIdentifier: string;
+  observation: string;
+  /** key = sectionId */
+  selections: Map<string, MenuSelectionDraft>;
+  excludedSectionIds: Set<string>;
+}
+
+/** Selección individual dentro de un MenuInstanceDraft */
+export interface MenuSelectionDraft {
+  sectionId: string;
+  sectionName: string;
+  optionId: string;
+  optionName: string;
+  additionalCost: number;
+  observation: string;
 }

@@ -5,11 +5,13 @@ import { MenuPublicationService } from '../../services/menu-publication.service'
 import { DishService } from '../../services/dish.service';
 import { DrinkService } from '../../services/drink.service';
 import { AdditionService } from '../../services/addition.service';
+import { CategoryService } from '../../services/category.service';
 import { NotificationService } from '@core/services/notification.service';
 import {
   MenuPublicationDTO, MenuStatus, MenuTimeSlot, MenuItemType,
   CatalogItem, AddPublicationSectionRequest, AddSectionOptionRequest, AdjustPortionsRequest
 } from '../../models/menu.model';
+import { CategoryResponse } from '../../models/category.model';
 
 @Component({
   selector: 'app-menu-publication-detail',
@@ -33,6 +35,8 @@ export class MenuPublicationDetailComponent implements OnInit {
   loadingCatalog = false;
   catalogSearch = '';
   selectedItem: CatalogItem | null = null;
+  categories: CategoryResponse[] = [];
+  selectedCategoryId: string | null = null;
 
   // ── Portions modal ──────────────────────────────────────────────────────────
   isAdjustPortionsOpen = false;
@@ -46,6 +50,7 @@ export class MenuPublicationDetailComponent implements OnInit {
     private dishService: DishService,
     private drinkService: DrinkService,
     private additionService: AdditionService,
+    private categoryService: CategoryService,
     private notificationService: NotificationService
   ) {}
 
@@ -175,10 +180,15 @@ export class MenuPublicationDetailComponent implements OnInit {
     this.activeSectionId = sectionId;
     this.selectedItem = null;
     this.catalogSearch = '';
+    this.selectedCategoryId = null;
     this.optionForm = this.fb.group({
       itemType:      ['DISH', Validators.required],
       maxPortions:   [null],
       additionalCost:[0, [Validators.required, Validators.min(0)]]
+    });
+    this.categoryService.getAllCategories().subscribe({
+      next: (res: any) => { this.categories = Array.isArray(res.message) ? res.message : []; },
+      error: () => { this.categories = []; }
     });
     this.loadCatalog('DISH');
     this.isAddOptionOpen = true;
@@ -187,15 +197,22 @@ export class MenuPublicationDetailComponent implements OnInit {
   onItemTypeChange(): void {
     this.selectedItem = null;
     this.catalogSearch = '';
+    this.selectedCategoryId = null;
+    this.loadCatalog(this.optionForm.value.itemType as MenuItemType);
+  }
+
+  onCategoryChange(): void {
+    this.selectedItem = null;
+    this.catalogSearch = '';
     this.loadCatalog(this.optionForm.value.itemType as MenuItemType);
   }
 
   loadCatalog(itemType: MenuItemType): void {
     this.loadingCatalog = true;
     this.catalogItems = [];
-    
+
     if (itemType === 'DISH') {
-      this.dishService.getDishes(0).subscribe({
+      this.dishService.getDishes(0, this.selectedCategoryId ?? undefined, true).subscribe({
         next: (res: any) => {
           const raw = Array.isArray(res.message) ? res.message : [];
           this.catalogItems = raw.map((d: any) => ({

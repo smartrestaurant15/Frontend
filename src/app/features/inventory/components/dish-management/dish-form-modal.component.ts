@@ -5,7 +5,7 @@ import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
 import { ImageService } from '../../services/image.service';
 import { NotificationService } from '@core/services/notification.service';
-import { DishDetailResponse } from '../../models/dish.model';
+import { DishDetailResponse, DishAvailability } from '../../models/dish.model';
 import { CategoryResponse } from '../../models/category.model';
 import { ProductListResponse } from '../../models/product.model';
 
@@ -27,6 +27,12 @@ export class DishFormModalComponent implements OnInit, OnChanges {
   loading = false;
   uploadingImage = false;
   isEditMode = false;
+
+  readonly availabilityOptions: { value: DishAvailability; label: string; description: string }[] = [
+    { value: 'REGULAR',      label: 'Carta normal',       description: 'Visible siempre en el menú de platos' },
+    { value: 'MENU_DEL_DIA', label: 'Solo menú del día',  description: 'Solo aparece al asignarlo a un menú del día' },
+    { value: 'BOTH',         label: 'Ambos',              description: 'Visible en carta y disponible para el menú del día' },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -61,6 +67,7 @@ export class DishFormModalComponent implements OnInit, OnChanges {
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       price: [0, [Validators.required, Validators.min(0.01)]],
       categoryId: ['', [Validators.required]],
+      availability: ['REGULAR', [Validators.required]],
       ingredients: this.fb.array([], [Validators.required, Validators.minLength(1)])
     });
   }
@@ -129,7 +136,8 @@ export class DishFormModalComponent implements OnInit, OnChanges {
             name: dish.name,
             description: dish.description,
             price: dish.price,
-            categoryId: dish.categoryId || ''
+            categoryId: dish.categoryId || '',
+            availability: dish.availability || 'REGULAR'
           });
           this.uploadedPhotos = dish.photos || [];
           
@@ -199,7 +207,8 @@ export class DishFormModalComponent implements OnInit, OnChanges {
         description: this.dishForm.value.description,
         price: this.dishForm.value.price,
         photos: this.uploadedPhotos,
-        ingredients: this.dishForm.value.ingredients
+        ingredients: this.dishForm.value.ingredients,
+        availability: this.dishForm.value.availability as DishAvailability
       };
 
       const categoryId = this.dishForm.value.categoryId;

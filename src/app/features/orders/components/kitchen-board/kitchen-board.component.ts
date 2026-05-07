@@ -5,7 +5,12 @@ import { OrderService } from '../../services/order.service';
 import { SseService } from '../../services/sse.service';
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@features/auth/services/auth.service';
-import { Order, OrderDetail, ORDER_STATUS_LABEL } from '../../models/order.model';
+import { Order, OrderDetail, GetMenuInstanceDTO, ORDER_STATUS_LABEL } from '../../models/order.model';
+
+/** Extiende Order con las instancias de menú que puede traer el SSE o el detalle */
+interface KitchenOrder extends Order {
+  menuInstances?: GetMenuInstanceDTO[];
+}
 
 @Component({
   selector: 'app-kitchen-board',
@@ -14,9 +19,9 @@ import { Order, OrderDetail, ORDER_STATUS_LABEL } from '../../models/order.model
 })
 export class KitchenBoardComponent implements OnInit, OnDestroy {
 
-  pendingOrders:    Order[] = [];
-  inProgressOrders: Order[] = [];
-  completedOrders:  Order[] = [];
+  pendingOrders:    KitchenOrder[] = [];
+  inProgressOrders: KitchenOrder[] = [];
+  completedOrders:  KitchenOrder[] = [];
 
   expandedDetails: Record<string, OrderDetail | null> = {};
   loadingDetail:   Record<string, boolean> = {};
@@ -147,7 +152,19 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
             if (notif.type === 'NEW_ORDER') {
               this.playNewOrderSound();
               this.notification.showSuccess('Nuevo pedido recibido');
-              this.loadOrders();
+              const payload = notif.data as any;
+              if (Array.isArray(payload?.menuInstances)) {
+                // Payload enriquecido (GetOrderDetailDTO) — tiene todo
+                const ko = this.normalizeDetailToKitchen(payload);
+                this.insertOrUpdateOrder(ko);
+              } else {
+                // Payload resumen (GetOrdersDTO)
+                const ko: KitchenOrder = { ...payload };
+                this.insertOrUpdateOrder(ko);
+                if ((payload.menuInstanceCount ?? 0) > 0) {
+                  this.loadMenuDetailForOrder(payload.id);
+                }
+              }
             }
           });
         },
@@ -211,6 +228,50 @@ export class KitchenBoardComponent implements OnInit, OnDestroy {
     } catch {
       // Silenciar si el navegador bloquea AudioContext (política autoplay)
     }
+  }
+
+  // ─── SSE helpers ──────────────────────────────────────────────────────────
+
+  private normalizeDetailToKitchen(detail: any): KitchenOrder {
+    return {
+      id:               detail.id,
+      status:           detail.status,
+      channel:          detail.channel,
+      customerName:     detail.customerName ?? 'Presencial',
+      createdAt:        detail.createdAt,
+      itemCount:        detail.items?.length ?? 0,
+      totalAmount:      detail.totalAmount ?? 0,
+      paymentStatus:    detail.paymentStatus,
+      menuInstanceCount: detail.menuInstances?.length ?? 0,
+      menuInstances:    detail.menuInstances ?? []
+    };
+  }
+
+  private insertOrUpdateOrder(ko: KitchenOrder): void {
+    // Las nuevas órdenes llegan en estado SENT → columna pendingOrders
+    const idx = this.pendingOrders.findIndex(o => o.id === ko.id);
+    if (idx >= 0) {
+      this.pendingOrders[idx] = { ...this.pendingOrders[idx], ...ko };
+    } else {
+      this.pendingOrders = [ko, ...this.pendingOrders];
+    }
+  }
+
+  private loadMenuDetailForOrder(id: string): void {
+    this.orderService.getOrderById(id).subscribe({
+      next: res => {
+        const detail = (res as any).data;
+        if (!detail?.menuInstances) return;
+        const patch = (list: KitchenOrder[]) => {
+          const i = list.findIndex(o => o.id === id);
+          if (i >= 0) list[i] = { ...list[i], menuInstances: detail.menuInstances };
+          return [...list];
+        };
+        this.pendingOrders    = patch(this.pendingOrders);
+        this.inProgressOrders = patch(this.inProgressOrders);
+        this.completedOrders  = patch(this.completedOrders);
+      }
+    });
   }
 
   // ─── Actions ───────────────────────────────────────────────────────────────
